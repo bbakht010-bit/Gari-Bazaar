@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Your Dealership — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: var(--gray-50);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 70px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700;
+    color: var(--green-mid);
+    text-decoration: none;
+  }
+
+  .logo-dot { color: var(--gold); }
+
+  .nav-back {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--gray-600); font-size: 14px; font-weight: 500;
+    text-decoration: none; transition: color 0.2s;
+  }
+
+  .nav-back:hover { color: var(--green-main); }
+
+  /* HERO STRIP */
+  .page-header {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    padding: 110px 5% 48px;
+    text-align: center;
+  }
+
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 46px);
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .page-header p {
+    color: rgba(255,255,255,0.75);
+    font-size: 17px;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* STEPS INDICATOR */
+  .steps-bar {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%;
+    display: flex; justify-content: center;
+  }
+
+  .steps {
+    display: flex; align-items: center;
+    gap: 0; max-width: 600px; width: 100%;
+    padding: 20px 0;
+  }
+
+  .step-item {
+    display: flex; align-items: center; gap: 10px;
+    flex: 1;
+  }
+
+  .step-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .step-circle.active {
+    background: var(--green-main);
+    color: white;
+  }
+
+  .step-circle.inactive {
+    background: var(--gray-100);
+    color: var(--gray-400);
+    border: 1.5px solid var(--gray-200);
+  }
+
+  .step-circle.done {
+    background: var(--green-pale);
+    color: var(--green-main);
+    border: 1.5px solid var(--green-light);
+  }
+
+  .step-label {
+    font-size: 13px; font-weight: 500;
+    color: var(--gray-600);
+  }
+
+  .step-label.active { color: var(--green-main); }
+
+  .step-line {
+    flex: 1; height: 1px;
+    background: var(--gray-200);
+    margin: 0 8px;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 860px;
+    margin: 40px auto;
+    padding: 0 5% 80px;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* FORM */
+  .form-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .form-section {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .form-section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 16px; font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .section-num {
+    width: 24px; height: 24px;
+    background: var(--green-pale);
+    color: var(--green-mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .section-sub {
+    font-size: 13px; color: var(--gray-400);
+    margin-bottom: 20px;
+    margin-left: 34px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-left: 34px;
+  }
+
+  .form-grid.full { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .field.span2 { grid-column: span 2; }
+
+  label {
+    font-size: 13px; font-weight: 500;
+    color: var(--gray-700);
+  }
+
+  label span { color: #dc2626; margin-left: 2px; }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: white;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.08);
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: var(--gray-300);
+  }
+
+  textarea { resize: vertical; min-height: 90px; }
+
+  select { cursor: pointer; color: var(--gray-600); }
+
+  /* UPLOAD AREA */
+  .upload-area {
+    border: 2px dashed var(--gray-200);
+    border-radius: 10px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 34px;
+    background: var(--gray-50);
+  }
+
+  .upload-area:hover {
+    border-color: var(--green-main);
+    background: var(--green-faint);
+  }
+
+  .upload-icon {
+    width: 44px; height: 44px;
+    background: var(--green-pale);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+  }
+
+  .upload-area h4 {
+    font-size: 14px; font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+  }
+
+  .upload-area p {
+    font-size: 12px; color: var(--gray-400);
+  }
+
+  .upload-area input[type="file"] { display: none; }
+
+  /* PLAN SELECTOR */
+  .plan-options {
+    display: flex; flex-direction: column; gap: 12px;
+    margin-left: 34px;
+  }
+
+  .plan-option {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .plan-option:hover { border-color: var(--green-main); }
+
+  .plan-option.selected {
+    border-color: var(--green-main);
+    background: var(--green-faint);
+  }
+
+  .plan-option input[type="radio"] { accent-color: var(--green-main); width: 16px; height: 16px; }
+
+  .plan-info { flex: 1; }
+
+  .plan-info h4 { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+  .plan-info p { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  .plan-price {
+    font-size: 15px; font-weight: 700;
+    color: var(--green-mid);
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* AGREEMENT */
+  .agreement {
+    margin-left: 34px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.7;
+    max-height: 120px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+
+  .checkbox-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-left: 34px;
+    margin-bottom: 12px;
+  }
+
+  .checkbox-row input[type="checkbox"] {
+    width: 16px; height: 16px; margin-top: 2px;
+    accent-color: var(--green-main);
+    flex-shrink: 0;
+  }
+
+  .checkbox-row label {
+    font-size: 13px; color: var(--gray-600);
+    font-weight: 400; cursor: pointer;
+  }
+
+  .checkbox-row label a { color: var(--green-main); }
+
+  /* SUBMIT */
+  .form-footer {
+    padding: 24px 32px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-100);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+
+  .form-footer p {
+    font-size: 13px; color: var(--gray-400);
+  }
+
+  .submit-btn {
+    padding: 14px 36px;
+    background: var(--green-main);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .submit-btn:hover {
+    background: var(--green-mid);
+    transform: translateY(-1px);
+  }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  .sidebar-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 22px;
+  }
+
+  .sidebar-card h3 {
+    font-size: 15px; font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .benefit {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .benefit:last-child { margin-bottom: 0; }
+
+  .benefit-icon {
+    width: 32px; height: 32px;
+    background: var(--green-pale);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .benefit-text h4 { font-size: 13px; font-weight: 600; color: var(--gray-800); }
+  .benefit-text p { font-size: 12px; color: var(--gray-400); margin-top: 2px; line-height: 1.5; }
+
+  .contact-info {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .contact-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: var(--gray-600);
+  }
+
+  .contact-item strong { color: var(--gray-900); font-weight: 600; }
+
+  .contact-dot {
+    width: 8px; height: 8px;
+    background: var(--green-main);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .verified-badge {
+    background: var(--green-pale);
+    border: 1px solid var(--green-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .verified-badge svg { flex-shrink: 0; }
+  .verified-badge p { font-size: 12px; color: var(--green-mid); line-height: 1.5; font-weight: 500; }
+
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field.span2 { grid-column: span 1; }
+    .sidebar { order: -1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
+  <a href="index.html" class="nav-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- HEADER -->
+<div class="page-header">
+  <h1>Register Your Dealership</h1>
+  <p>Join Pakistan's most trusted dealer-only platform. Verification takes 24–48 hours.</p>
+</div>
+
+<!-- STEPS -->
+<div class="steps-bar">
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-circle active">1</div>
+      <span class="step-label active">Dealership Info</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-circle inactive">2</div>
+      <span class="step-label">Verification</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-circle inactive">3</div>
+      <span class="step-label">Choose Plan</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-item">
+      <div class="step-circle inactive">4</div>
+      <span class="step-label">Go Live</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- FORM -->
+  <div class="form-card">
+
+    <!-- SECTION 1: DEALERSHIP DETAILS -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">1</div>
+        Dealership Details
+      </div>
+      <div class="section-sub">Basic information about your dealership</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Dealership Name <span>*</span></label>
+          <input type="text" placeholder="e.g. Al-Haram Motors">
+        </div>
+        <div class="field">
+          <label>City <span>*</span></label>
+          <select>
+            <option value="">Select city</option>
+            <option>Islamabad</option>
+            <option>Rawalpindi</option>
+            <option>Lahore</option>
+            <option>Faisalabad</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Area / Sector <span>*</span></label>
+          <input type="text" placeholder="e.g. G-11, Bahria Town">
+        </div>
+        <div class="field span2">
+          <label>Full Address <span>*</span></label>
+          <input type="text" placeholder="Street address of your dealership">
+        </div>
+        <div class="field span2">
+          <label>Dealership Description</label>
+          <textarea placeholder="Tell buyers about your dealership — what makes you different, how long you've been in business, specialties etc."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: OWNER DETAILS -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">2</div>
+        Owner Information
+      </div>
+      <div class="section-sub">Details of the dealership owner or manager</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Owner Full Name <span>*</span></label>
+          <input type="text" placeholder="Full name">
+        </div>
+        <div class="field">
+          <label>CNIC Number <span>*</span></label>
+          <input type="text" placeholder="00000-0000000-0">
+        </div>
+        <div class="field">
+          <label>Phone Number <span>*</span></label>
+          <input type="tel" placeholder="03XX-XXXXXXX">
+        </div>
+        <div class="field">
+          <label>WhatsApp Number</label>
+          <input type="tel" placeholder="03XX-XXXXXXX">
+        </div>
+        <div class="field span2">
+          <label>Email Address <span>*</span></label>
+          <input type="email" placeholder="owner@yourdealership.com">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: VERIFICATION DOCUMENTS -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">3</div>
+        Verification Documents
+      </div>
+      <div class="section-sub">Required to verify your dealership is legitimate</div>
+
+      <label for="reg-upload" style="margin-left:34px; display:block; margin-bottom:8px; font-size:13px; font-weight:500; color:var(--gray-700);">
+        Government Registration Certificate <span style="color:#dc2626">*</span>
+      </label>
+      <label class="upload-area" for="reg-upload" style="margin-bottom:16px;">
+        <div class="upload-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h4>Upload Registration Document</h4>
+        <p>PDF, JPG or PNG — max 10MB</p>
+        <input type="file" id="reg-upload" accept=".pdf,.jpg,.png">
+      </label>
+
+      <label for="photos-upload" style="margin-left:34px; display:block; margin-bottom:8px; font-size:13px; font-weight:500; color:var(--gray-700);">
+        Dealership Photos <span style="color:#dc2626">*</span>
+      </label>
+      <label class="upload-area" for="photos-upload">
+        <div class="upload-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <h4>Upload Dealership Photos</h4>
+        <p>Upload 3–6 photos of your showroom — JPG or PNG, max 5MB each</p>
+        <input type="file" id="photos-upload" accept=".jpg,.png" multiple>
+      </label>
+    </div>
+
+    <!-- SECTION 4: PLAN -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">4</div>
+        Choose Your Plan
+      </div>
+      <div class="section-sub">You can upgrade anytime after registration</div>
+      <div class="plan-options">
+
+        <label class="plan-option selected">
+          <input type="radio" name="plan" value="free" checked>
+          <div class="plan-info">
+            <h4>Starter — Free</h4>
+            <p>2 car listings, 1 employee account</p>
+          </div>
+          <div class="plan-price">Free</div>
+        </label>
+
+        <label class="plan-option">
+          <input type="radio" name="plan" value="growth">
+          <div class="plan-info">
+            <h4>Growth</h4>
+            <p>5 car listings, 3 employee accounts, in-app chat</p>
+          </div>
+          <div class="plan-price">2,500 PKR/mo</div>
+        </label>
+
+        <label class="plan-option">
+          <input type="radio" name="plan" value="pro">
+          <div class="plan-info">
+            <h4>Professional</h4>
+            <p>10 car listings, unlimited employees, priority listing</p>
+          </div>
+          <div class="plan-price">5,000 PKR/mo</div>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- SECTION 5: AGREEMENT -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">5</div>
+        Terms & Agreement
+      </div>
+      <div class="section-sub">Please read and accept before submitting</div>
+
+      <div class="agreement">
+        <strong>GariBazaar Dealer Agreement</strong><br><br>
+        By registering on GariBazaar, you confirm that your dealership is a legitimate, government-registered business operating in Pakistan. You agree to provide accurate information about all vehicles listed on the platform, respond to buyer inquiries promptly and professionally, maintain a minimum rating standard on the platform, and not engage in any fraudulent or misleading practices. GariBazaar reserves the right to remove any listing or suspend any dealership account that violates these terms. All car listings must include accurate pricing, mileage, and condition information. You agree that GariBazaar may display your dealership information, photos, and ratings publicly on the platform.
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="agree1">
+        <label for="agree1">I confirm that my dealership is government-registered and all information provided is accurate <span style="color:#dc2626">*</span></label>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="agree2">
+        <label for="agree2">I agree to the <a href="#">GariBazaar Dealer Terms</a> and <a href="#">Privacy Policy</a> <span style="color:#dc2626">*</span></label>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="agree3">
+        <label for="agree3">I understand that my application will be reviewed within 24–48 hours before going live</label>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="form-footer">
+      <p>All fields marked with <span style="color:#dc2626">*</span> are required</p>
+      <button class="submit-btn">Submit Application</button>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="verified-badge">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <polyline points="9 12 11 14 15 10"/>
+      </svg>
+      <p>Your dealership will display a Verified badge once approved by our team</p>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Why Join GariBazaar?</h3>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="benefit-text">
+          <h4>Dealer-Only Platform</h4>
+          <p>No competition from private sellers. Every listing is from a verified dealership.</p>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="benefit-text">
+          <h4>Serious Buyers Only</h4>
+          <p>Buyers on GariBazaar are looking for dealership-quality cars — not bargain hunting.</p>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="benefit-text">
+          <h4>Dealer Dashboard</h4>
+          <p>Manage cars, assign employees, track performance — all in one place.</p>
+        </div>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.87a16 16 0 0 0 8.22 8.22l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div class="benefit-text">
+          <h4>Direct Contact</h4>
+          <p>Buyers contact your assigned employee directly via chat, WhatsApp or phone.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Need Help?</h3>
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-dot"></div>
+          <div><strong>WhatsApp</strong><br>0300-0000000</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-dot"></div>
+          <div><strong>Email</strong><br>dealers@garibazaarpk.com</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-dot"></div>
+          <div><strong>Hours</strong><br>Mon–Sat, 9am to 6pm</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Plan selection highlight
+  document.querySelectorAll('.plan-option').forEach(option => {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  // Upload area feedback
+  document.querySelectorAll('input[type="file"]').forEach(input => {
+    input.addEventListener('change', function() {
+      const label = this.closest('.upload-area');
+      const files = this.files;
+      if (files.length > 0) {
+        label.querySelector('h4').textContent = files.length === 1 ? files[0].name : `${files.length} files selected`;
+        label.style.borderColor = '#15803d';
+        label.style.background = '#f0fdf4';
+      }
+    });
+  });
+
+  // Submit button
+  document.querySelector('.submit-btn').addEventListener('click', function() {
+    const agree1 = document.getElementById('agree1').checked;
+    const agree2 = document.getElementById('agree2').checked;
+    if (!agree1 || !agree2) {
+      alert('Please accept the required terms before submitting.');
+      return;
+    }
+    this.textContent = 'Application Submitted!';
+    this.style.background = '#166534';
+    this.disabled = true;
+  });
+</script>
+
+</body>
+</html>

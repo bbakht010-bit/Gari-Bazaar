@@ -514,6 +514,12 @@
     color: var(--gray-700);
     font-size: 14px;
     font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .contact-meta {
+    color: var(--gray-600);
+    font-size: 13px;
     margin-bottom: 10px;
   }
 
@@ -541,6 +547,41 @@
   }
 
   .contact-btn:hover { background: var(--green-mid); }
+
+  .contact-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .contact-link {
+    text-decoration: none;
+    text-align: center;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 10px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .contact-link.wa {
+    background: #25d366;
+    color: white;
+  }
+
+  .contact-link.wa:hover { background: #1fb458; }
+
+  .contact-link.call {
+    background: var(--green-faint);
+    color: var(--green-mid);
+    border: 1px solid #bbf7d0;
+  }
+
+  .contact-link.call:hover {
+    background: #dcfce7;
+    border-color: var(--green-light);
+  }
 
   .car-card:focus-visible,
   .contact-btn:focus-visible,
@@ -679,9 +720,6 @@
           <option>All Cities</option>
           <option>Islamabad</option>
           <option>Rawalpindi</option>
-          <option>Lahore</option>
-          <option>Faisalabad</option>
-          <option>Karachi</option>
         </select>
       </div>
       <div class="field">
@@ -781,10 +819,8 @@
     <div class="filter-group">
       <h4>City</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox"> Islamabad</span><span class="count">4</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Rawalpindi</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Lahore</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Faisalabad</span><span class="count">2</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Islamabad</span><span class="count">6</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Rawalpindi</span><span class="count">6</span></label></li>
       </ul>
     </div>
 
@@ -828,11 +864,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">Al-Haram Motors — Islamabad</p>
+          <p class="contact-meta">Contact: Ali (Sales Executive)</p>
           <div class="mini-specs">
             <span>21,000 km</span><span>Automatic</span>
             <span>Used</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923111111111?text=Assalamualaikum%20Ali%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20Altis%202022." target="_blank" rel="noopener noreferrer">WhatsApp Ali</a>
+            <a class="contact-link call" href="tel:+923111111111">Call Ali</a>
+          </div>
         </div>
       </article>
 
@@ -847,11 +887,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">City Motors — Rawalpindi</p>
+          <p class="contact-meta">Contact: Saad (Sales Executive)</p>
           <div class="mini-specs">
             <span>0 km</span><span>Automatic</span>
             <span>New</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923122222222?text=Assalamualaikum%20Saad%2C%20I%20am%20interested%20in%20Honda%20Civic%20Oriel%202024." target="_blank" rel="noopener noreferrer">WhatsApp Saad</a>
+            <a class="contact-link call" href="tel:+923122222222">Call Saad</a>
+          </div>
         </div>
       </article>
 
@@ -865,12 +909,16 @@
           <div class="car-price">23 Lakh <span>PKR</span></div>
         </div>
         <div class="car-expanded">
-          <p class="dealer-line">Prime Autos — Lahore</p>
+          <p class="dealer-line">Prime Autos — Rawalpindi</p>
+          <p class="contact-meta">Contact: Usman (Owner - Default)</p>
           <div class="mini-specs">
             <span>13,200 km</span><span>Manual</span>
-            <span>Used</span><span>Lahore</span>
+            <span>Used</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923133333333?text=Assalamualaikum%20Usman%2C%20I%20am%20interested%20in%20Suzuki%20Alto%20VXR%202023." target="_blank" rel="noopener noreferrer">WhatsApp Usman</a>
+            <a class="contact-link call" href="tel:+923133333333">Call Usman</a>
+          </div>
         </div>
       </article>
 
@@ -885,11 +933,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">Skyline Motors — Islamabad</p>
+          <p class="contact-meta">Contact: Hamza (Owner - Default)</p>
           <div class="mini-specs">
             <span>0 km</span><span>Automatic</span>
             <span>New</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923144444444?text=Assalamualaikum%20Hamza%2C%20I%20am%20interested%20in%20Hyundai%20Tucson%20AWD%202024." target="_blank" rel="noopener noreferrer">WhatsApp Hamza</a>
+            <a class="contact-link call" href="tel:+923144444444">Call Hamza</a>
+          </div>
         </div>
       </article>
 
@@ -904,11 +956,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">Capital Wheels — Islamabad</p>
+          <p class="contact-meta">Contact: Daniyal (Sales Executive)</p>
           <div class="mini-specs">
             <span>8,900 km</span><span>Automatic</span>
             <span>Used</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923155555555?text=Assalamualaikum%20Daniyal%2C%20I%20am%20interested%20in%20Kia%20Sportage%20Alpha%202023." target="_blank" rel="noopener noreferrer">WhatsApp Daniyal</a>
+            <a class="contact-link call" href="tel:+923155555555">Call Daniyal</a>
+          </div>
         </div>
       </article>
 
@@ -923,11 +979,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">Metro Motors — Rawalpindi</p>
+          <p class="contact-meta">Contact: Ahsan (Sales Executive)</p>
           <div class="mini-specs">
             <span>25,400 km</span><span>Automatic</span>
             <span>Used</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923166666666?text=Assalamualaikum%20Ahsan%2C%20I%20am%20interested%20in%20Toyota%20Yaris%20ATIV%202022." target="_blank" rel="noopener noreferrer">WhatsApp Ahsan</a>
+            <a class="contact-link call" href="tel:+923166666666">Call Ahsan</a>
+          </div>
         </div>
       </article>
 
@@ -941,12 +1001,16 @@
           <div class="car-price">41 Lakh <span>PKR</span></div>
         </div>
         <div class="car-expanded">
-          <p class="dealer-line">Green Auto Mall — Lahore</p>
+          <p class="dealer-line">Green Auto Mall — Islamabad</p>
+          <p class="contact-meta">Contact: Bilal (Sales Executive)</p>
           <div class="mini-specs">
             <span>36,000 km</span><span>Manual</span>
-            <span>Used</span><span>Lahore</span>
+            <span>Used</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923177777777?text=Assalamualaikum%20Bilal%2C%20I%20am%20interested%20in%20Honda%20City%201.2L%202021." target="_blank" rel="noopener noreferrer">WhatsApp Bilal</a>
+            <a class="contact-link call" href="tel:+923177777777">Call Bilal</a>
+          </div>
         </div>
       </article>
 
@@ -960,12 +1024,16 @@
           <div class="car-price">49 Lakh <span>PKR</span></div>
         </div>
         <div class="car-expanded">
-          <p class="dealer-line">BlueLine Cars — Faisalabad</p>
+          <p class="dealer-line">BlueLine Cars — Rawalpindi</p>
+          <p class="contact-meta">Contact: Ahmed (Owner - Default)</p>
           <div class="mini-specs">
             <span>0 km</span><span>Automatic</span>
-            <span>New</span><span>Faisalabad</span>
+            <span>New</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923188888888?text=Assalamualaikum%20Ahmed%2C%20I%20am%20interested%20in%20Suzuki%20Swift%20GLX%202024." target="_blank" rel="noopener noreferrer">WhatsApp Ahmed</a>
+            <a class="contact-link call" href="tel:+923188888888">Call Ahmed</a>
+          </div>
         </div>
       </article>
 
@@ -979,12 +1047,16 @@
           <div class="car-price">145 Lakh <span>PKR</span></div>
         </div>
         <div class="car-expanded">
-          <p class="dealer-line">Titan Auto House — Lahore</p>
+          <p class="dealer-line">Titan Auto House — Islamabad</p>
+          <p class="contact-meta">Contact: Zain (Sales Executive)</p>
           <div class="mini-specs">
             <span>42,500 km</span><span>Automatic</span>
-            <span>Used</span><span>Lahore</span>
+            <span>Used</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923199999999?text=Assalamualaikum%20Zain%2C%20I%20am%20interested%20in%20Toyota%20Fortuner%20Sigma%202021." target="_blank" rel="noopener noreferrer">WhatsApp Zain</a>
+            <a class="contact-link call" href="tel:+923199999999">Call Zain</a>
+          </div>
         </div>
       </article>
 
@@ -999,11 +1071,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">Royal Drive — Islamabad</p>
+          <p class="contact-meta">Contact: Salman (Sales Executive)</p>
           <div class="mini-specs">
             <span>14,300 km</span><span>Automatic</span>
             <span>Used</span><span>Islamabad</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923211111111?text=Assalamualaikum%20Salman%2C%20I%20am%20interested%20in%20MG%20HS%20Essence%202023." target="_blank" rel="noopener noreferrer">WhatsApp Salman</a>
+            <a class="contact-link call" href="tel:+923211111111">Call Salman</a>
+          </div>
         </div>
       </article>
 
@@ -1018,11 +1094,15 @@
         </div>
         <div class="car-expanded">
           <p class="dealer-line">North Star Motors — Rawalpindi</p>
+          <p class="contact-meta">Contact: Farhan (Sales Executive)</p>
           <div class="mini-specs">
             <span>0 km</span><span>Automatic</span>
             <span>New</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923222222222?text=Assalamualaikum%20Farhan%2C%20I%20am%20interested%20in%20Hyundai%20Elantra%20GLS%202024." target="_blank" rel="noopener noreferrer">WhatsApp Farhan</a>
+            <a class="contact-link call" href="tel:+923222222222">Call Farhan</a>
+          </div>
         </div>
       </article>
 
@@ -1036,12 +1116,16 @@
           <div class="car-price">61 Lakh <span>PKR</span></div>
         </div>
         <div class="car-expanded">
-          <p class="dealer-line">Primeway Autos — Faisalabad</p>
+          <p class="dealer-line">Primeway Autos — Rawalpindi</p>
+          <p class="contact-meta">Contact: Rehan (Sales Executive)</p>
           <div class="mini-specs">
             <span>27,600 km</span><span>Automatic</span>
-            <span>Used</span><span>Faisalabad</span>
+            <span>Used</span><span>Rawalpindi</span>
           </div>
-          <button class="contact-btn">Contact Dealer</button>
+          <div class="contact-actions">
+            <a class="contact-link wa" href="https://wa.me/923233333333?text=Assalamualaikum%20Rehan%2C%20I%20am%20interested%20in%20Honda%20BR-V%20i-VTEC%202022." target="_blank" rel="noopener noreferrer">WhatsApp Rehan</a>
+            <a class="contact-link call" href="tel:+923233333333">Call Rehan</a>
+          </div>
         </div>
       </article>
     </div>
@@ -1085,7 +1169,7 @@
   </div>
   <div class="footer-bottom">
     <p>© 2025 GariBazaar. All rights reserved. Made in Pakistan</p>
-    <p>Islamabad · Rawalpindi · Lahore · Faisalabad</p>
+    <p>Islamabad · Rawalpindi</p>
   </div>
 </footer>
 

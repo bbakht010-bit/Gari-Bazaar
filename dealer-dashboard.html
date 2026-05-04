@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer Dashboard — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: var(--gray-50); }
+
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 20;
+    background: rgba(255,255,255,0.96); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--gray-200); height: 70px;
+    padding: 0 5%; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--green-mid); text-decoration: none; font-weight: 700; }
+  .logo span { color: var(--gold); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .pill { font-size: 12px; font-weight: 600; color: var(--gray-600); background: white; border: 1px solid var(--gray-200); border-radius: 100px; padding: 6px 10px; }
+
+  .btn {
+    border: none; border-radius: 9px; cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; padding: 9px 13px; text-decoration: none;
+  }
+  .btn-outline { background: white; border: 1.5px solid var(--green-main); color: var(--green-main); }
+  .btn-outline:hover { background: var(--green-faint); }
+  .btn-primary { background: var(--green-main); color: white; }
+  .btn-primary:hover { background: var(--green-mid); }
+  .btn-danger { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+  .btn-danger:hover { background: #ffe4e6; }
+
+  .hero {
+    margin-top: 70px; padding: 34px 5% 22px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+  }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4.3vw, 44px); line-height: 1.15; }
+  .hero p { margin-top: 8px; color: rgba(255,255,255,0.8); font-size: 15px; max-width: 760px; line-height: 1.65; }
+
+  .wrap { max-width: 1300px; margin: 0 auto; padding: 18px 5% 60px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .kpi { background: white; border: 1px solid var(--gray-200); border-radius: 13px; padding: 14px; }
+  .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); font-weight: 700; }
+  .kpi .value { margin-top: 6px; font-family: var(--font-numbers); font-size: 28px; line-height: 1; }
+  .kpi .meta { margin-top: 6px; font-size: 12px; color: var(--gray-600); }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: white; border: 1px solid var(--gray-200); border-radius: 14px; padding: 15px; }
+  .section-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .section-title h2 { font-size: 18px; font-weight: 700; }
+  .section-title p { font-size: 12px; color: var(--gray-500); margin-top: 3px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--gray-700); font-weight: 600; }
+  .field input, .field select {
+    border: 1.5px solid var(--gray-200); border-radius: 9px; padding: 10px 11px; font-size: 13px;
+    outline: none; font-family: inherit; color: var(--gray-900); background: white;
+  }
+  .field input:focus, .field select:focus { border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(21,128,61,0.1); }
+  .field.full { grid-column: 1 / -1; }
+  .actions { margin-top: 11px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .list { display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
+  .item {
+    border: 1px solid var(--gray-200); border-radius: 11px; padding: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .item-main h4 { font-size: 14px; margin-bottom: 2px; }
+  .item-main p { font-size: 12px; color: var(--gray-600); }
+  .item-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .mini-btn { font-size: 12px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--gray-200); background: white; cursor: pointer; font-weight: 600; }
+  .mini-btn:hover { border-color: var(--green-light); color: var(--green-mid); }
+
+  .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .preview-card { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; background: white; }
+  .preview-top { height: 110px; background: linear-gradient(140deg, #f8fafc, #e5e7eb); position: relative; }
+  .badge {
+    position: absolute; top: 8px; border-radius: 100px; font-size: 10px; font-weight: 700;
+    padding: 4px 8px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge.verify { left: 8px; background: var(--green-pale); color: var(--green-mid); border: 1px solid #bbf7d0; }
+  .badge.owner { right: 8px; background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .badge.emp { right: 8px; background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .preview-body { padding: 10px; }
+  .preview-body h4 { font-size: 14px; margin-bottom: 5px; }
+  .price { font-family: var(--font-numbers); font-size: 19px; color: var(--green-mid); margin-bottom: 6px; }
+  .meta { font-size: 12px; color: var(--gray-600); margin-bottom: 2px; }
+  .contact-row { margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .contact-link { text-align: center; text-decoration: none; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 7px 8px; }
+  .contact-link.wa { background: #25d366; color: white; }
+  .contact-link.call { background: var(--green-faint); color: var(--green-mid); border: 1px solid #bbf7d0; }
+
+  .note { margin-top: 8px; font-size: 12px; color: var(--gray-600); line-height: 1.6; }
+  .error {
+    margin-top: 8px; padding: 8px 10px; border-radius: 8px; border: 1px solid #fecdd3; background: #fff1f2;
+    color: #9f1239; font-size: 12px; display: none;
+  }
+  .error.show { display: block; }
+
+  @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .layout { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: 1fr; } .pill { display: none; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <div class="nav-right">
+    <span class="pill">Skyline Motors · Owner Dashboard</span>
+    <a class="btn btn-outline" href="listings.html">View Listings Page</a>
+    <a class="btn btn-primary" href="admin.html">Open Admin</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Dealer Owner Dashboard</h1>
+  <p>Add cars, add employees, and assign who handles each listing. If a car has no assigned employee, it automatically uses owner contact and shows "Managed by Owner".</p>
+</section>
+
+<main class="wrap">
+  <section class="kpi-grid">
+    <article class="kpi"><div class="label">Active Cars</div><div class="value" id="kpi-cars">0</div><div class="meta">Free plan limit: 2</div></article>
+    <article class="kpi"><div class="label">Employees</div><div class="value" id="kpi-employees">0</div><div class="meta">Manage assignment quality</div></article>
+    <article class="kpi"><div class="label">Owner-managed Cars</div><div class="value" id="kpi-owner">0</div><div class="meta">Fallback rule applied</div></article>
+    <article class="kpi"><div class="label">Employee-managed Cars</div><div class="value" id="kpi-employee">0</div><div class="meta">Direct sales routing</div></article>
+  </section>
+
+  <section class="layout">
+    <article class="card">
+      <div class="section-title">
+        <div><h2>Add Car</h2><p>Create listing and assign contact</p></div>
+      </div>
+      <form id="car-form">
+        <div class="grid-2">
+          <div class="field"><label>Car Name *</label><input id="car-name" type="text" placeholder="Toyota Corolla Altis 2022"></div>
+          <div class="field"><label>Price (PKR Lakh) *</label><input id="car-price" type="number" placeholder="52"></div>
+          <div class="field"><label>Mileage *</label><input id="car-mileage" type="text" placeholder="21,000 km"></div>
+          <div class="field"><label>Transmission *</label><select id="car-trans"><option value="">Select</option><option>Automatic</option><option>Manual</option></select></div>
+          <div class="field"><label>Condition *</label><select id="car-condition"><option value="">Select</option><option>New</option><option>Used</option></select></div>
+          <div class="field"><label>City *</label><select id="car-city"><option value="">Select</option><option>Islamabad</option><option>Rawalpindi</option></select></div>
+          <div class="field full"><label>Assign Employee (Optional)</label><select id="car-assignee"><option value="">No employee selected (owner default)</option></select></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Add Car</button>
+        </div>
+        <div class="error" id="car-error"></div>
+      </form>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div><h2>Add Employee</h2><p>Employees can handle assigned cars</p></div>
+      </div>
+      <form id="employee-form">
+        <div class="grid-2">
+          <div class="field"><label>Name *</label><input id="emp-name" type="text" placeholder="Ali Raza"></div>
+          <div class="field"><label>Role *</label><input id="emp-role" type="text" placeholder="Sales Executive"></div>
+          <div class="field"><label>Phone *</label><input id="emp-phone" type="tel" placeholder="03XX-XXXXXXX"></div>
+          <div class="field"><label>WhatsApp *</label><input id="emp-wa" type="tel" placeholder="03XX-XXXXXXX"></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Add Employee</button>
+        </div>
+        <div class="error" id="emp-error"></div>
+      </form>
+      <p class="note">Owner fallback contact (used when no employee assigned): <strong>Hamza (03XX-XXXXXXX)</strong>.</p>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div><h2>Employees</h2><p>Edit assignment source</p></div>
+      </div>
+      <div class="list" id="employee-list"></div>
+    </article>
+
+    <article class="card">
+      <div class="section-title">
+        <div><h2>Cars</h2><p>Reassign or remove listings</p></div>
+      </div>
+      <div class="list" id="car-list"></div>
+    </article>
+  </section>
+
+  <section class="card" style="margin-top:14px;">
+    <div class="section-title">
+      <div><h2>Buyer-facing Preview</h2><p>How listings appear with owner fallback / employee assignment</p></div>
+    </div>
+    <div class="preview-grid" id="preview-grid"></div>
+  </section>
+</main>
+
+<script>
+  const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1';
+  const ownerContact = { name: 'Hamza', role: 'Owner', phone: '923000000001', whatsapp: '923000000001' };
+
+  const state = {
+    employees: [],
+    cars: []
+  };
+
+  function seedData() {
+    if (state.employees.length || state.cars.length) return;
+    state.employees = [
+      { id: crypto.randomUUID(), name: 'Ali', role: 'Sales Executive', phone: '923111111111', whatsapp: '923111111111' },
+      { id: crypto.randomUUID(), name: 'Saad', role: 'Sales Executive', phone: '923122222222', whatsapp: '923122222222' }
+    ];
+    state.cars = [
+      { id: crypto.randomUUID(), name: 'Toyota Corolla Altis 2022', price: '52', mileage: '21,000 km', transmission: 'Automatic', condition: 'Used', city: 'Islamabad', assigneeId: state.employees[0].id },
+      { id: crypto.randomUUID(), name: 'Hyundai Tucson AWD 2024', price: '114', mileage: '0 km', transmission: 'Automatic', condition: 'New', city: 'Rawalpindi', assigneeId: '' }
+    ];
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return seedData();
+      const parsed = JSON.parse(raw);
+      state.employees = Array.isArray(parsed.employees) ? parsed.employees : [];
+      state.cars = Array.isArray(parsed.cars) ? parsed.cars : [];
+      if (!state.employees.length && !state.cars.length) seedData();
+    } catch {
+      seedData();
+    }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function byId(list, id) {
+    return list.find((x) => x.id === id);
+  }
+
+  function contactForCar(car) {
+    const employee = car.assigneeId ? byId(state.employees, car.assigneeId) : null;
+    return employee || ownerContact;
+  }
+
+  function setError(el, text) {
+    el.textContent = text;
+    el.classList.add('show');
+  }
+  function clearError(el) {
+    el.textContent = '';
+    el.classList.remove('show');
+  }
+
+  function renderAssigneeOptions() {
+    const select = document.getElementById('car-assignee');
+    const current = select.value;
+    select.innerHTML = '<option value="">No employee selected (owner default)</option>';
+    state.employees.forEach((emp) => {
+      const option = document.createElement('option');
+      option.value = emp.id;
+      option.textContent = emp.name + ' (' + emp.role + ')';
+      select.appendChild(option);
+    });
+    if ([...select.options].some(o => o.value === current)) select.value = current;
+  }
+
+  function renderEmployees() {
+    const root = document.getElementById('employee-list');
+    root.innerHTML = '';
+    if (!state.employees.length) {
+      root.innerHTML = '<p class="note">No employees added yet. Cars without assignment will automatically use owner contact.</p>';
+      return;
+    }
+    state.employees.forEach((emp) => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML =
+        '<div class="item-main"><h4>' + emp.name + ' · ' + emp.role + '</h4><p>Phone: ' + emp.phone + ' · WhatsApp: ' + emp.whatsapp + '</p></div>' +
+        '<div class="item-actions"><button class="mini-btn" data-delete-emp="' + emp.id + '">Remove</button></div>';
+      root.appendChild(item);
+    });
+  }
+
+  function renderCars() {
+    const root = document.getElementById('car-list');
+    root.innerHTML = '';
+    if (!state.cars.length) {
+      root.innerHTML = '<p class="note">No cars added yet.</p>';
+      return;
+    }
+    state.cars.forEach((car) => {
+      const contact = contactForCar(car);
+      const managedByOwner = !car.assigneeId || !byId(state.employees, car.assigneeId);
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML =
+        '<div class="item-main"><h4>' + car.name + ' · ' + car.price + ' Lakh</h4>' +
+        '<p>' + car.city + ' · ' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
+        '<p>Contact: ' + contact.name + ' (' + contact.role + ')' + (managedByOwner ? ' · Owner default' : '') + '</p></div>' +
+        '<div class="item-actions">' +
+        '<select class="mini-btn" data-assign="' + car.id + '"><option value="">Owner default</option>' +
+        state.employees.map((e) => '<option value="' + e.id + '"' + (e.id === car.assigneeId ? ' selected' : '') + '>' + e.name + '</option>').join('') +
+        '</select>' +
+        '<button class="mini-btn" data-delete-car="' + car.id + '">Remove</button></div>';
+      root.appendChild(item);
+    });
+  }
+
+  function renderPreview() {
+    const root = document.getElementById('preview-grid');
+    root.innerHTML = '';
+    state.cars.forEach((car) => {
+      const contact = contactForCar(car);
+      const managedByOwner = !car.assigneeId || !byId(state.employees, car.assigneeId);
+      const card = document.createElement('article');
+      card.className = 'preview-card';
+      card.innerHTML =
+        '<div class="preview-top">' +
+        '<span class="badge verify">Verified Dealer</span>' +
+        '<span class="badge ' + (managedByOwner ? 'owner">Managed by Owner' : 'emp">Assigned to Advisor') + '</span></div>' +
+        '<div class="preview-body"><h4>' + car.name + '</h4><div class="price">' + car.price + ' Lakh PKR</div>' +
+        '<p class="meta">' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
+        '<p class="meta">' + car.city + ' · Contact: ' + contact.name + ' (' + contact.role + ')</p>' +
+        '<div class="contact-row">' +
+        '<a class="contact-link wa" target="_blank" rel="noopener noreferrer" href="https://wa.me/' + contact.whatsapp + '?text=Assalamualaikum%20' + encodeURIComponent(contact.name) + '%2C%20I%20am%20interested%20in%20' + encodeURIComponent(car.name) + '.">WhatsApp</a>' +
+        '<a class="contact-link call" href="tel:+' + contact.phone + '">Call</a></div></div>';
+      root.appendChild(card);
+    });
+  }
+
+  function renderKpis() {
+    const ownerManaged = state.cars.filter((car) => !car.assigneeId || !byId(state.employees, car.assigneeId)).length;
+    document.getElementById('kpi-cars').textContent = state.cars.length;
+    document.getElementById('kpi-employees').textContent = state.employees.length;
+    document.getElementById('kpi-owner').textContent = ownerManaged;
+    document.getElementById('kpi-employee').textContent = state.cars.length - ownerManaged;
+  }
+
+  function renderAll() {
+    renderAssigneeOptions();
+    renderEmployees();
+    renderCars();
+    renderPreview();
+    renderKpis();
+    saveState();
+  }
+
+  document.getElementById('employee-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = document.getElementById('emp-error');
+    clearError(err);
+
+    const name = document.getElementById('emp-name').value.trim();
+    const role = document.getElementById('emp-role').value.trim();
+    const phone = document.getElementById('emp-phone').value.trim();
+    const wa = document.getElementById('emp-wa').value.trim();
+    if (!name || !role || !phone || !wa) return setError(err, 'Please fill all employee fields.');
+
+    state.employees.push({ id: crypto.randomUUID(), name, role, phone: phone.replace(/\D/g, ''), whatsapp: wa.replace(/\D/g, '') });
+    e.target.reset();
+    renderAll();
+  });
+
+  document.getElementById('car-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = document.getElementById('car-error');
+    clearError(err);
+
+    const name = document.getElementById('car-name').value.trim();
+    const price = document.getElementById('car-price').value.trim();
+    const mileage = document.getElementById('car-mileage').value.trim();
+    const transmission = document.getElementById('car-trans').value;
+    const condition = document.getElementById('car-condition').value;
+    const city = document.getElementById('car-city').value;
+    const assigneeId = document.getElementById('car-assignee').value;
+
+    if (!name || !price || !mileage || !transmission || !condition || !city) {
+      return setError(err, 'Please complete all required car fields.');
+    }
+    state.cars.push({ id: crypto.randomUUID(), name, price, mileage, transmission, condition, city, assigneeId });
+    e.target.reset();
+    renderAll();
+  });
+
+  document.getElementById('employee-list').addEventListener('click', (e) => {
+    const id = e.target.getAttribute('data-delete-emp');
+    if (!id) return;
+    state.employees = state.employees.filter((x) => x.id !== id);
+    state.cars = state.cars.map((car) => ({ ...car, assigneeId: car.assigneeId === id ? '' : car.assigneeId }));
+    renderAll();
+  });
+
+  document.getElementById('car-list').addEventListener('click', (e) => {
+    const id = e.target.getAttribute('data-delete-car');
+    if (!id) return;
+    state.cars = state.cars.filter((x) => x.id !== id);
+    renderAll();
+  });
+
+  document.getElementById('car-list').addEventListener('change', (e) => {
+    const id = e.target.getAttribute('data-assign');
+    if (!id) return;
+    const car = byId(state.cars, id);
+    if (!car) return;
+    car.assigneeId = e.target.value;
+    renderAll();
+  });
+
+  loadState();
+  renderAll();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GariBazaar — Pakistan's Trusted Dealer Network</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --green-dark: #0a4a2a;
@@ -23,6 +23,7 @@
     --gray-600: #4b5563;
     --gray-800: #1f2937;
     --gray-900: #111827;
+    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -220,9 +221,11 @@
   }
 
   .stat-number {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-numbers);
     font-size: 36px; font-weight: 700;
     color: white;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .stat-label {
@@ -425,9 +428,11 @@
   }
 
   .car-price {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-numbers);
     font-size: 22px; font-weight: 700;
     color: var(--green-mid);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .car-price span {
@@ -566,7 +571,9 @@
   .d-stat-num {
     font-size: 20px; font-weight: 700;
     color: var(--green-mid);
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-numbers);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .d-stat-label {
@@ -636,10 +643,12 @@
   }
 
   .plan-price {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-numbers);
     font-size: 36px; font-weight: 700;
     color: var(--gray-900);
     margin-bottom: 4px;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .plan-price small {

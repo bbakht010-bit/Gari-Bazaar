@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Browse Cars — GariBazaar</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --green-dark: #0a4a2a;
@@ -25,6 +25,7 @@
     --gray-700: #374151;
     --gray-800: #1f2937;
     --gray-900: #111827;
+    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -478,9 +479,11 @@
   }
 
   .car-price {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-numbers);
     font-size: 24px;
     color: var(--green-mid);
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
   }
 
   .car-price span {

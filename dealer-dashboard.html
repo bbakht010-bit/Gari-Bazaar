@@ -157,7 +157,7 @@
       <form id="car-form">
         <div class="grid-2">
           <div class="field"><label>Car Name *</label><input id="car-name" type="text" placeholder="Toyota Corolla Altis 2022"></div>
-          <div class="field"><label>Price (PKR Lakh) *</label><input id="car-price" type="number" placeholder="52"></div>
+          <div class="field"><label>Price (PKR Lakh) *</label><input id="car-price" type="number" min="1" step="0.1" placeholder="52"></div>
           <div class="field"><label>Mileage *</label><input id="car-mileage" type="text" placeholder="21,000 km"></div>
           <div class="field"><label>Transmission *</label><select id="car-trans"><option value="">Select</option><option>Automatic</option><option>Manual</option></select></div>
           <div class="field"><label>Condition *</label><select id="car-condition"><option value="">Select</option><option>New</option><option>Used</option></select></div>
@@ -399,7 +399,11 @@
     if (!name || !price || !mileage || !transmission || !condition || !city) {
       return setError(err, 'Please complete all required car fields.');
     }
-    state.cars.push({ id: crypto.randomUUID(), name, price, mileage, transmission, condition, city, assigneeId });
+    const numericPrice = Number(price);
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) {
+      return setError(err, 'Price must be a positive value.');
+    }
+    state.cars.push({ id: crypto.randomUUID(), name, price: String(numericPrice), mileage, transmission, condition, city, assigneeId });
     e.target.reset();
     renderAll();
   });

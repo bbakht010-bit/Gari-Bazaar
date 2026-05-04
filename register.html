@@ -191,6 +191,18 @@
     margin-left: 34px;
   }
 
+  .rule-note {
+    margin-left: 34px;
+    background: var(--green-faint);
+    border: 1px solid #bbf7d0;
+    color: var(--green-mid);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -205,6 +217,26 @@
   }
 
   .field.span2 { grid-column: span 2; }
+
+  .employee-toggle {
+    margin-left: 34px;
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-700);
+    font-weight: 500;
+  }
+
+  .employee-toggle input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green-main);
+  }
+
+  .employee-fields { display: none; }
+  .employee-fields.show { display: grid; }
 
   label {
     font-size: 13px; font-weight: 500;
@@ -514,8 +546,6 @@
             <option value="">Select city</option>
             <option>Islamabad</option>
             <option>Rawalpindi</option>
-            <option>Lahore</option>
-            <option>Faisalabad</option>
           </select>
         </div>
         <div class="field">
@@ -540,6 +570,9 @@
         Owner Information
       </div>
       <div class="section-sub">Details of the dealership owner or manager</div>
+      <div class="rule-note">
+        Default contact rule: all car inquiries are routed to the owner unless you assign an employee per car in dashboard.
+      </div>
       <div class="form-grid">
         <div class="field">
           <label>Owner Full Name <span>*</span></label>
@@ -560,6 +593,37 @@
         <div class="field span2">
           <label>Email Address <span>*</span></label>
           <input type="email" placeholder="owner@yourdealership.com">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2B: OPTIONAL EMPLOYEE CONTACT -->
+    <div class="form-section">
+      <div class="section-title">
+        <div class="section-num">2B</div>
+        Optional Employee Contact
+      </div>
+      <div class="section-sub">Add one employee now (optional). You can add or change assignments later in dashboard.</div>
+      <label class="employee-toggle" for="add-employee-now">
+        <input type="checkbox" id="add-employee-now">
+        I want to add an employee contact now
+      </label>
+      <div class="form-grid employee-fields" id="employee-fields">
+        <div class="field">
+          <label>Employee Name</label>
+          <input type="text" id="employee-name" placeholder="e.g. Ali Raza">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <input type="text" id="employee-role" placeholder="e.g. Sales Executive">
+        </div>
+        <div class="field">
+          <label>Employee Phone</label>
+          <input type="tel" id="employee-phone" placeholder="03XX-XXXXXXX">
+        </div>
+        <div class="field">
+          <label>Employee WhatsApp</label>
+          <input type="tel" id="employee-whatsapp" placeholder="03XX-XXXXXXX">
         </div>
       </div>
     </div>
@@ -610,7 +674,7 @@
           <input type="radio" name="plan" value="free" checked>
           <div class="plan-info">
             <h4>Starter — Free</h4>
-            <p>2 car listings, 1 employee account</p>
+            <p>2 active listings, owner default contact</p>
           </div>
           <div class="plan-price">Free</div>
         </label>
@@ -619,7 +683,7 @@
           <input type="radio" name="plan" value="growth">
           <div class="plan-info">
             <h4>Growth</h4>
-            <p>5 car listings, 3 employee accounts, in-app chat</p>
+            <p>5 active listings, 3 employee accounts</p>
           </div>
           <div class="plan-price">2,500 PKR/mo</div>
         </label>
@@ -628,7 +692,7 @@
           <input type="radio" name="plan" value="pro">
           <div class="plan-info">
             <h4>Professional</h4>
-            <p>10 car listings, unlimited employees, priority listing</p>
+            <p>10 active listings, unlimited employees, priority listing</p>
           </div>
           <div class="plan-price">5,000 PKR/mo</div>
         </label>
@@ -681,7 +745,7 @@
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         <polyline points="9 12 11 14 15 10"/>
       </svg>
-      <p>Your dealership will display a Verified badge once approved by our team</p>
+      <p>Your dealership will display a Verified badge once approved by you (manual admin review)</p>
     </div>
 
     <div class="sidebar-card">
@@ -754,6 +818,15 @@
     });
   });
 
+  // Toggle optional employee section
+  const addEmployeeCheckbox = document.getElementById('add-employee-now');
+  const employeeFields = document.getElementById('employee-fields');
+  if (addEmployeeCheckbox && employeeFields) {
+    addEmployeeCheckbox.addEventListener('change', function() {
+      employeeFields.classList.toggle('show', this.checked);
+    });
+  }
+
   // Upload area feedback
   document.querySelectorAll('input[type="file"]').forEach(input => {
     input.addEventListener('change', function() {
@@ -774,6 +847,14 @@
     if (!agree1 || !agree2) {
       alert('Please accept the required terms before submitting.');
       return;
+    }
+    if (addEmployeeCheckbox && addEmployeeCheckbox.checked) {
+      const employeeName = document.getElementById('employee-name').value.trim();
+      const employeePhone = document.getElementById('employee-phone').value.trim();
+      if (!employeeName || !employeePhone) {
+        alert('If adding an employee, please provide at least employee name and phone.');
+        return;
+      }
     }
     this.textContent = 'Application Submitted!';
     this.style.background = '#166534';

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Cars — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --gold-light: #fef08a;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-mid);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .logo-dot { color: var(--gold); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gray-600);
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active { color: var(--green-mid); }
+
+  .nav-cta {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-outline {
+    padding: 9px 20px;
+    border: 1.5px solid var(--green-main);
+    color: var(--green-main);
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+  }
+
+  .btn-outline:hover { background: var(--green-faint); }
+
+  .btn-primary {
+    padding: 9px 20px;
+    background: var(--green-main);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+  }
+
+  .btn-primary:hover { background: var(--green-mid); }
+
+  .page-hero {
+    margin-top: 70px;
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 55%, var(--green-main) 100%);
+    color: white;
+    padding: 72px 5% 56px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1), transparent 40%),
+      radial-gradient(circle at 80% 40%, rgba(254,240,138,0.08), transparent 45%);
+  }
+
+  .hero-inner {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.14);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green-light);
+    box-shadow: 0 0 0 4px rgba(34,197,94,0.2);
+  }
+
+  .hero-inner h1 {
+    margin-top: 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: 1.15;
+    max-width: 760px;
+  }
+
+  .hero-inner p {
+    margin-top: 16px;
+    color: rgba(255,255,255,0.82);
+    max-width: 620px;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .top-filter-area {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 30px 5%;
+  }
+
+  .top-filter-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .top-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .top-filter-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    color: var(--gray-900);
+  }
+
+  .top-filter-header p {
+    color: var(--gray-600);
+    font-size: 14px;
+  }
+
+  .top-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field label {
+    color: var(--gray-700);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .field input,
+  .field select {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 12px 12px;
+    font-size: 14px;
+    color: var(--gray-800);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.12);
+  }
+
+  .filter-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn-filter-primary,
+  .btn-filter-reset {
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-filter-primary {
+    border: none;
+    background: var(--green-main);
+    color: white;
+  }
+
+  .btn-filter-primary:hover { background: var(--green-mid); }
+
+  .btn-filter-reset {
+    border: 1.5px solid var(--gray-300);
+    background: white;
+    color: var(--gray-700);
+  }
+
+  .btn-filter-reset:hover {
+    border-color: var(--green-main);
+    color: var(--green-main);
+    background: var(--green-faint);
+  }
+
+  .mobile-filter-toggle {
+    display: none;
+    margin-top: 14px;
+    border: 1.5px solid var(--green-main);
+    color: var(--green-main);
+    background: white;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .content-wrap {
+    max-width: 1200px;
+    margin: 26px auto 0;
+    padding: 0 5% 72px;
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 24px;
+  }
+
+  .sidebar {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px;
+    position: sticky;
+    top: 88px;
+    height: fit-content;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  }
+
+  .sidebar h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: var(--gray-900);
+  }
+
+  .filter-group {
+    border-top: 1px solid var(--gray-100);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+
+  .filter-group:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  .filter-group h4 {
+    color: var(--gray-800);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+
+  .option-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .option-list label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--gray-700);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .option-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 20px;
+    border-radius: 100px;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 8px;
+  }
+
+  .results-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .results-top h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    color: var(--gray-900);
+  }
+
+  .results-top p {
+    color: var(--gray-600);
+    font-size: 14px;
+  }
+
+  .sort-control {
+    min-width: 200px;
+  }
+
+  .car-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+
+  .car-card {
+    position: relative;
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+    transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+    cursor: pointer;
+  }
+
+  .car-card:hover,
+  .car-card:focus-within,
+  .car-card.expanded {
+    transform: translateY(-4px) scale(1.01);
+    border-color: var(--green-light);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.11);
+  }
+
+  .car-photo {
+    height: 188px;
+    background: linear-gradient(145deg, #f8fafc, #e5e7eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .car-photo svg {
+    width: 88px;
+    height: auto;
+    opacity: 0.72;
+  }
+
+  .verified-pill {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--green-pale);
+    color: var(--green-mid);
+    border: 1px solid #bbf7d0;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .car-main {
+    padding: 14px 14px 12px;
+  }
+
+  .car-main h4 {
+    font-size: 17px;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .car-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: var(--green-mid);
+  }
+
+  .car-price span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-left: 5px;
+  }
+
+  .car-expanded {
+    border-top: 1px solid var(--gray-100);
+    max-height: 0;
+    opacity: 0;
+    padding: 0 14px;
+    transition: max-height 0.26s ease, opacity 0.22s ease, padding 0.2s ease;
+    overflow: hidden;
+  }
+
+  .car-card:hover .car-expanded,
+  .car-card:focus-within .car-expanded,
+  .car-card.expanded .car-expanded {
+    max-height: 190px;
+    opacity: 1;
+    padding: 12px 14px 14px;
+  }
+
+  .dealer-line {
+    color: var(--gray-700);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .mini-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+  }
+
+  .contact-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: var(--green-main);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+
+  .contact-btn:hover { background: var(--green-mid); }
+
+  .car-card:focus-visible,
+  .contact-btn:focus-visible,
+  .mobile-filter-toggle:focus-visible,
+  .btn-filter-primary:focus-visible,
+  .btn-filter-reset:focus-visible {
+    outline: 3px solid rgba(21,128,61,0.28);
+    outline-offset: 2px;
+  }
+
+  footer {
+    background: var(--gray-900);
+    padding: 48px 5% 28px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+  }
+
+  .footer-brand .logo { color: white; font-size: 22px; }
+
+  .footer-brand p {
+    color: var(--gray-400);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-top: 12px;
+    max-width: 250px;
+  }
+
+  .footer-col h4 {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-col ul li a {
+    color: var(--gray-400);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-col ul li a:hover { color: var(--green-light); }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-bottom p {
+    color: var(--gray-400);
+    font-size: 13px;
+  }
+
+  @media (max-width: 1080px) {
+    .top-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .content-wrap { grid-template-columns: 250px 1fr; }
+  }
+
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .top-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .content-wrap { grid-template-columns: 1fr; }
+    .sidebar { position: static; display: none; }
+    .sidebar.open { display: block; }
+    .mobile-filter-toggle { display: inline-block; }
+  }
+
+  @media (max-width: 768px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .car-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .top-filter-grid { grid-template-columns: 1fr; }
+    .car-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
+  <ul class="nav-links">
+    <li><a href="listings.html" class="active">Browse Cars</a></li>
+    <li><a href="#filterSidebar">Filters</a></li>
+    <li><a href="#results">Verified Listings</a></li>
+    <li><a href="index.html#dealers">Top Dealers</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn-outline">Dealer Login</a>
+    <a href="register.html" class="btn-primary">List Your Dealership</a>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="badge-dot"></span>Verified Dealer Listings Across Pakistan</div>
+    <h1>Find Your Next Car From Trusted Dealerships</h1>
+    <p>Browse verified inventory with transparent pricing, quick filters, and direct contact options for real dealerships only.</p>
+  </div>
+</section>
+
+<section class="top-filter-area">
+  <div class="top-filter-inner">
+    <div class="top-filter-header">
+      <div>
+        <h2>Search and Refine</h2>
+        <p>Use detailed filters to narrow down exactly what you want.</p>
+      </div>
+    </div>
+
+    <div class="top-filter-grid">
+      <div class="field">
+        <label for="city">City</label>
+        <select id="city">
+          <option>All Cities</option>
+          <option>Islamabad</option>
+          <option>Rawalpindi</option>
+          <option>Lahore</option>
+          <option>Faisalabad</option>
+          <option>Karachi</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="make">Make</label>
+        <select id="make">
+          <option>Any Make</option>
+          <option>Toyota</option>
+          <option>Honda</option>
+          <option>Suzuki</option>
+          <option>Hyundai</option>
+          <option>Kia</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="model">Model</label>
+        <input id="model" type="text" placeholder="e.g., Civic, Alto">
+      </div>
+      <div class="field">
+        <label for="condition">Condition</label>
+        <select id="condition">
+          <option>Any Condition</option>
+          <option>New</option>
+          <option>Used</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="priceMin">Price Min (PKR)</label>
+        <input id="priceMin" type="number" placeholder="e.g., 1500000">
+      </div>
+      <div class="field">
+        <label for="priceMax">Price Max (PKR)</label>
+        <input id="priceMax" type="number" placeholder="e.g., 12000000">
+      </div>
+      <div class="field">
+        <label for="year">Year</label>
+        <select id="year">
+          <option>Any Year</option>
+          <option>2025</option>
+          <option>2024</option>
+          <option>2023</option>
+          <option>2022</option>
+          <option>2021</option>
+          <option>2020</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="mileage">Mileage</label>
+        <select id="mileage">
+          <option>Any Mileage</option>
+          <option>0 - 10,000 km</option>
+          <option>10,000 - 30,000 km</option>
+          <option>30,000 - 60,000 km</option>
+          <option>60,000+ km</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="transmission">Transmission</label>
+        <select id="transmission">
+          <option>Any Transmission</option>
+          <option>Automatic</option>
+          <option>Manual</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-filter-reset" type="button">Reset</button>
+      <button class="btn-filter-primary" type="button">Apply Filters</button>
+    </div>
+
+    <button class="mobile-filter-toggle" id="toggleFilters" type="button" aria-expanded="false" aria-controls="filterSidebar">
+      Show Sidebar Filters
+    </button>
+  </div>
+</section>
+
+<main class="content-wrap" id="results">
+  <aside class="sidebar" id="filterSidebar">
+    <h3>Quick Filters</h3>
+
+    <div class="filter-group">
+      <h4>Condition</h4>
+      <ul class="option-list">
+        <li><label><span class="option-left"><input type="checkbox"> New</span><span class="count">5</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Used</span><span class="count">7</span></label></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <h4>Transmission</h4>
+      <ul class="option-list">
+        <li><label><span class="option-left"><input type="checkbox"> Automatic</span><span class="count">8</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Manual</span><span class="count">4</span></label></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <h4>City</h4>
+      <ul class="option-list">
+        <li><label><span class="option-left"><input type="checkbox"> Islamabad</span><span class="count">4</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Rawalpindi</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Lahore</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> Faisalabad</span><span class="count">2</span></label></li>
+      </ul>
+    </div>
+
+    <div class="filter-group">
+      <h4>Price Range</h4>
+      <ul class="option-list">
+        <li><label><span class="option-left"><input type="checkbox"> Under 30 Lakh</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> 30 - 60 Lakh</span><span class="count">4</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> 60 - 100 Lakh</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox"> 100+ Lakh</span><span class="count">2</span></label></li>
+      </ul>
+    </div>
+  </aside>
+
+  <section>
+    <div class="results-top">
+      <div>
+        <h3>12 Verified Cars</h3>
+        <p>Showing trusted dealer listings with direct contact options.</p>
+      </div>
+      <div class="field sort-control">
+        <label for="sort">Sort By</label>
+        <select id="sort">
+          <option>Newest Listings</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Lowest Mileage</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="car-grid">
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Toyota Corolla Altis 2022</h4>
+          <div class="car-price">52 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Al-Haram Motors — Islamabad</p>
+          <div class="mini-specs">
+            <span>21,000 km</span><span>Automatic</span>
+            <span>Used</span><span>Islamabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Honda Civic Oriel 2024</h4>
+          <div class="car-price">79 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">City Motors — Rawalpindi</p>
+          <div class="mini-specs">
+            <span>0 km</span><span>Automatic</span>
+            <span>New</span><span>Rawalpindi</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Suzuki Alto VXR 2023</h4>
+          <div class="car-price">23 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Prime Autos — Lahore</p>
+          <div class="mini-specs">
+            <span>13,200 km</span><span>Manual</span>
+            <span>Used</span><span>Lahore</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Hyundai Tucson AWD 2024</h4>
+          <div class="car-price">114 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Skyline Motors — Islamabad</p>
+          <div class="mini-specs">
+            <span>0 km</span><span>Automatic</span>
+            <span>New</span><span>Islamabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Kia Sportage Alpha 2023</h4>
+          <div class="car-price">88 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Capital Wheels — Islamabad</p>
+          <div class="mini-specs">
+            <span>8,900 km</span><span>Automatic</span>
+            <span>Used</span><span>Islamabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Toyota Yaris ATIV 2022</h4>
+          <div class="car-price">43 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Metro Motors — Rawalpindi</p>
+          <div class="mini-specs">
+            <span>25,400 km</span><span>Automatic</span>
+            <span>Used</span><span>Rawalpindi</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Honda City 1.2L 2021</h4>
+          <div class="car-price">41 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Green Auto Mall — Lahore</p>
+          <div class="mini-specs">
+            <span>36,000 km</span><span>Manual</span>
+            <span>Used</span><span>Lahore</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Suzuki Swift GLX 2024</h4>
+          <div class="car-price">49 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">BlueLine Cars — Faisalabad</p>
+          <div class="mini-specs">
+            <span>0 km</span><span>Automatic</span>
+            <span>New</span><span>Faisalabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Toyota Fortuner Sigma 2021</h4>
+          <div class="car-price">145 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Titan Auto House — Lahore</p>
+          <div class="mini-specs">
+            <span>42,500 km</span><span>Automatic</span>
+            <span>Used</span><span>Lahore</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>MG HS Essence 2023</h4>
+          <div class="car-price">102 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Royal Drive — Islamabad</p>
+          <div class="mini-specs">
+            <span>14,300 km</span><span>Automatic</span>
+            <span>Used</span><span>Islamabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Hyundai Elantra GLS 2024</h4>
+          <div class="car-price">74 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">North Star Motors — Rawalpindi</p>
+          <div class="mini-specs">
+            <span>0 km</span><span>Automatic</span>
+            <span>New</span><span>Rawalpindi</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+
+      <article class="car-card" tabindex="0">
+        <div class="car-photo">
+          <span class="verified-pill">Verified Dealer</span>
+          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+        </div>
+        <div class="car-main">
+          <h4>Honda BR-V i-VTEC 2022</h4>
+          <div class="car-price">61 Lakh <span>PKR</span></div>
+        </div>
+        <div class="car-expanded">
+          <p class="dealer-line">Primeway Autos — Faisalabad</p>
+          <div class="mini-specs">
+            <span>27,600 km</span><span>Automatic</span>
+            <span>Used</span><span>Faisalabad</span>
+          </div>
+          <button class="contact-btn">Contact Dealer</button>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
+      <p>Pakistan's only verified dealer-only car platform. Connecting trusted dealerships with genuine buyers.</p>
+    </div>
+    <div class="footer-col">
+      <h4>For Buyers</h4>
+      <ul>
+        <li><a href="listings.html">Browse Cars</a></li>
+        <li><a href="index.html#dealers">Find Dealers</a></li>
+        <li><a href="listings.html">Search by City</a></li>
+        <li><a href="listings.html">New Cars</a></li>
+        <li><a href="listings.html">Used Cars</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>For Dealers</h4>
+      <ul>
+        <li><a href="register.html">Register Dealership</a></li>
+        <li><a href="index.html#pricing">Pricing Plans</a></li>
+        <li><a href="#">Dealer Login</a></li>
+        <li><a href="index.html#how">How It Works</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 GariBazaar. All rights reserved. Made in Pakistan</p>
+    <p>Islamabad · Rawalpindi · Lahore · Faisalabad</p>
+  </div>
+</footer>
+
+<script>
+  const cards = document.querySelectorAll('.car-card');
+  cards.forEach((card) => {
+    card.addEventListener('click', () => {
+      if (window.matchMedia('(hover: none)').matches) {
+        card.classList.toggle('expanded');
+      }
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.classList.toggle('expanded');
+      }
+    });
+  });
+
+  const toggleFilters = document.getElementById('toggleFilters');
+  const filterSidebar = document.getElementById('filterSidebar');
+  if (toggleFilters && filterSidebar) {
+    toggleFilters.addEventListener('click', () => {
+      const isOpen = filterSidebar.classList.toggle('open');
+      toggleFilters.setAttribute('aria-expanded', String(isOpen));
+      toggleFilters.textContent = isOpen ? 'Hide Sidebar Filters' : 'Show Sidebar Filters';
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer Login — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    min-height: 100vh;
+  }
+
+  nav {
+    height: 70px;
+    border-bottom: 1px solid var(--gray-200);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-mid);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+
+  .back-link {
+    text-decoration: none;
+    color: var(--gray-600);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .back-link:hover { color: var(--green-mid); }
+
+  .wrap {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 430px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .card-head {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 24px;
+  }
+  .card-head h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    line-height: 1.1;
+  }
+  .card-head p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+  }
+
+  .card-body { padding: 22px; }
+  .field { margin-bottom: 13px; }
+  .field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--gray-800);
+    font-weight: 600;
+  }
+  .field input {
+    width: 100%;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 14px;
+    outline: none;
+  }
+  .field input:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+
+  .btn-login {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: var(--green-main);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+  }
+  .btn-login:hover { background: var(--green-mid); }
+
+  .error {
+    margin-top: 10px;
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #9f1239;
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    display: none;
+  }
+  .error.show { display: block; }
+
+  .dummy-note {
+    margin-top: 14px;
+    border: 1px solid #bbf7d0;
+    background: var(--green-faint);
+    color: var(--green-mid);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+  <a class="back-link" href="index.html">Back to Home</a>
+</nav>
+
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h1>Dealer Login</h1>
+      <p>Sign in to manage your cars, employees, and listing assignments.</p>
+    </div>
+    <div class="card-body">
+      <form id="login-form">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" placeholder="Enter username">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Enter password">
+        </div>
+        <button class="btn-login" type="submit">Login to Dashboard</button>
+        <div id="login-error" class="error"></div>
+      </form>
+      <div class="dummy-note">
+        Demo credentials for this prototype: <strong>username: admin</strong> and <strong>password: admin</strong>.
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  document.getElementById('login-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const errorBox = document.getElementById('login-error');
+    errorBox.classList.remove('show');
+
+    if (username === 'admin' && password === 'admin') {
+      sessionStorage.setItem('garibazaar_dealer_session', 'active');
+      window.location.href = 'dealer-dashboard.html';
+      return;
+    }
+
+    errorBox.textContent = 'Invalid credentials. Use admin / admin for this demo.';
+    errorBox.classList.add('show');
+  });
+</script>
+</body>
+</html>

@@ -214,6 +214,10 @@
 </main>
 
 <script>
+  if (sessionStorage.getItem('garibazaar_dealer_session') !== 'active') {
+    window.location.href = 'dealer-login.html';
+  }
+
   const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1';
   const ownerContact = { name: 'Hamza', role: 'Owner', phone: '923000000001', whatsapp: '923000000001' };
 

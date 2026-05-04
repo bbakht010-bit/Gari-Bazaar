@@ -472,6 +472,26 @@
   .verified-badge svg { flex-shrink: 0; }
   .verified-badge p { font-size: 12px; color: var(--green-mid); line-height: 1.5; font-weight: 500; }
 
+  .form-error {
+    position: fixed;
+    right: 20px;
+    top: 86px;
+    max-width: 360px;
+    background: #fff1f2;
+    color: #9f1239;
+    border: 1px solid #fecdd3;
+    border-left: 5px solid #e11d48;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    font-size: 13px;
+    line-height: 1.5;
+    z-index: 300;
+    display: none;
+  }
+
+  .form-error.show { display: block; }
+
   @media (max-width: 768px) {
     .main { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
@@ -809,6 +829,8 @@
   </div>
 </div>
 
+<div class="form-error" id="form-error"></div>
+
 <script>
   // Plan selection highlight
   document.querySelectorAll('.plan-option').forEach(option => {
@@ -821,6 +843,18 @@
   // Toggle optional employee section
   const addEmployeeCheckbox = document.getElementById('add-employee-now');
   const employeeFields = document.getElementById('employee-fields');
+  const formError = document.getElementById('form-error');
+
+  function showFormError(message) {
+    if (!formError) return;
+    formError.textContent = message;
+    formError.classList.add('show');
+    window.clearTimeout(showFormError._timer);
+    showFormError._timer = window.setTimeout(() => {
+      formError.classList.remove('show');
+    }, 3500);
+  }
+
   if (addEmployeeCheckbox && employeeFields) {
     addEmployeeCheckbox.addEventListener('change', function() {
       employeeFields.classList.toggle('show', this.checked);
@@ -845,14 +879,14 @@
     const agree1 = document.getElementById('agree1').checked;
     const agree2 = document.getElementById('agree2').checked;
     if (!agree1 || !agree2) {
-      alert('Please accept the required terms before submitting.');
+      showFormError('Please accept the required terms before submitting.');
       return;
     }
     if (addEmployeeCheckbox && addEmployeeCheckbox.checked) {
       const employeeName = document.getElementById('employee-name').value.trim();
       const employeePhone = document.getElementById('employee-phone').value.trim();
       if (!employeeName || !employeePhone) {
-        alert('If adding an employee, please provide at least employee name and phone.');
+        showFormError('If adding an employee, please provide at least employee name and phone.');
         return;
       }
     }

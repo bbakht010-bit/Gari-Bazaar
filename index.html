@@ -104,6 +104,22 @@
 
   .btn-primary:hover { background: var(--green-mid); }
 
+  .btn-whatsapp {
+    padding: 9px 18px;
+    background: #25d366;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+  }
+
+  .btn-whatsapp:hover { background: #1fb458; }
+
   /* HERO */
   .hero {
     min-height: 100vh;
@@ -207,6 +223,13 @@
   .btn-hero-secondary:hover {
     background: rgba(255,255,255,0.1);
     border-color: white;
+  }
+
+  .hero-note {
+    margin-top: 14px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    animation: fadeUp 0.6s 0.35s ease both;
   }
 
   .hero-stats {
@@ -768,6 +791,7 @@
 
   @media (max-width: 768px) {
     .nav-links { display: none; }
+    .nav-cta .btn-whatsapp { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .search-bar { flex-direction: column; }
     .search-bar select { border-right: none; border-bottom: 1px solid var(--gray-200); }
@@ -787,6 +811,7 @@
   </ul>
   <div class="nav-cta">
     <a href="#" class="btn-outline">Dealer Login</a>
+    <a href="https://wa.me/923000000000?text=Assalamualaikum%20GariBazaar%20team%2C%20I%20need%20help%20with%20buying%20or%20listing%20a%20car." class="btn-whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp Help</a>
     <a href="register.html" class="btn-primary">List Your Dealership</a>
   </div>
 </nav>
@@ -800,9 +825,10 @@
   <h1>Buy Cars From <span>Trusted</span> Dealerships Only</h1>
   <p>GariBazaar connects you with verified, government-registered car dealerships across Pakistan. No middlemen, no fake listings — just real dealers.</p>
   <div class="hero-buttons">
-    <a href="listings.html" class="btn-hero-primary">Browse Cars</a>
-    <a href="#how" class="btn-hero-secondary">How It Works</a>
+    <a href="listings.html" class="btn-hero-primary">Browse Verified Cars</a>
+    <a href="register.html" class="btn-hero-secondary">Post Your Cars in 5 Minutes</a>
   </div>
+  <p class="hero-note">Need quick help? Use WhatsApp support for direct assistance.</p>
   <div class="hero-stats">
     <div class="stat">
       <div class="stat-number">120+</div>

@@ -598,16 +598,39 @@
     border-color: var(--green-light);
   }
 
-  .inline-link {
+  .action-link {
     display: inline-block;
     margin-top: 10px;
-    color: var(--green-main);
-    font-size: 13px;
-    font-weight: 700;
     text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: all 0.2s;
   }
 
-  .inline-link:hover { color: var(--green-mid); text-decoration: underline; }
+  .action-link.detail-btn {
+    border: 1.5px solid var(--green-main);
+    color: var(--green-main);
+  }
+
+  .action-link.detail-btn:hover {
+    background: var(--green-faint);
+    color: var(--green-mid);
+  }
+
+  .action-link.dealer-btn {
+    margin-top: 0;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    padding: 6px 10px;
+  }
+
+  .action-link.dealer-btn:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
 
   .car-card:focus-visible,
   .contact-btn:focus-visible,
@@ -1229,11 +1252,11 @@
   }
 
   document.querySelectorAll('.car-expanded').forEach((expanded) => {
-    if (!expanded.querySelector('.inline-link')) {
+    if (!expanded.querySelector('.detail-btn')) {
       const detailLink = document.createElement('a');
       detailLink.href = 'car-detail.html';
-      detailLink.className = 'inline-link';
-      detailLink.textContent = 'View full car details';
+      detailLink.className = 'action-link detail-btn';
+      detailLink.textContent = 'Show Car Details';
       expanded.appendChild(detailLink);
     }
   });
@@ -1243,7 +1266,7 @@
     const dealerParts = line.textContent.split('—');
     const dealerName = dealerParts[0] ? dealerParts[0].trim() : 'Dealer Profile';
     const dealerCity = dealerParts[1] ? dealerParts[1].trim() : '';
-    line.innerHTML = '<a class="inline-link" href="dealer-profile.html" style="margin-top:0;">' + dealerName + '</a>' + (dealerCity ? ' — ' + dealerCity : '');
+    line.innerHTML = '<a class="action-link dealer-btn" href="dealer-profile.html">' + dealerName + '</a>' + (dealerCity ? ' — ' + dealerCity : '');
   });
 </script>
 

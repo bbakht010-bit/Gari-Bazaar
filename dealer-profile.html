@@ -39,6 +39,18 @@
     margin-top: 70px; padding: 48px 5% 38px; background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); color: #fff;
   }
   .hero-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  .hero-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.32);
+  }
   h1 { font-family: 'Playfair Display', serif; font-size: clamp(30px, 5vw, 48px); }
   .hero p { margin-top: 8px; color: rgba(255,255,255,0.8); }
   .verified { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.32); border-radius: 100px; padding: 7px 14px; font-size: 13px; }
@@ -57,19 +69,6 @@
   .action { text-align: center; text-decoration: none; border-radius: 9px; font-size: 14px; font-weight: 700; padding: 10px 12px; }
   .wa { background: #25d366; color: #fff; }
   .call { border: 1.5px solid var(--green-main); color: var(--green-main); }
-  .dealer-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .dealer-brand img {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    object-fit: cover;
-    border: 1px solid var(--gray-200);
-  }
   .dealer-gallery {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px;
   }
@@ -174,7 +173,10 @@
 <section class="hero">
   <div class="hero-inner">
     <div>
-      <h1>Al-Haram Motors</h1>
+      <div class="hero-title">
+        <img class="hero-logo" src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Dealer logo">
+        <h1>Al-Haram Motors</h1>
+      </div>
       <p>Trusted dealership in Islamabad with verified inventory and transparent buyer support.</p>
     </div>
     <div class="verified">Verified Dealer</div>
@@ -205,10 +207,6 @@
 
   <aside class="card">
     <h2>Contact Dealer</h2>
-    <div class="dealer-brand">
-      <img id="dealerProfileLogo" src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Dealer logo">
-      <p class="line">Al-Haram Motors</p>
-    </div>
     <p class="line">Primary Contact: Ali (Sales Executive)<br>Phone: +92 311 1111111<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM</p>
     <div class="actions">
       <a class="action wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20want%20to%20inquire%20about%20your%20cars." target="_blank" rel="noopener noreferrer">WhatsApp</a>

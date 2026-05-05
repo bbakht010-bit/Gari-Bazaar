@@ -1271,7 +1271,7 @@
     </div>
     <div class="browse-all-note" id="browseAllNote">
       <p id="browseAllText">Looking for more options from other cities? Browse all available cars.</p>
-      <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Browse All Cars</button>
+      <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Browse More Cars</button>
     </div>
   </section>
 </main>
@@ -1394,6 +1394,14 @@
     runListingsSearch();
   }
 
+  function browseMoreCars() {
+    // Keep user's keyword/model intent, relax restrictive filters for wider results.
+    if (citySelect) citySelect.value = 'All Cities';
+    if (makeSelect) makeSelect.value = 'Any Make';
+    if (conditionSelect) conditionSelect.value = 'Any Condition';
+    runListingsSearch();
+  }
+
   if (listingSearchInput && listingSearchBtn) {
     listingSearchInput.addEventListener('input', runListingsSearch);
     listingSearchInput.addEventListener('keydown', (event) => {
@@ -1406,7 +1414,7 @@
   }
   if (applyFiltersBtn) applyFiltersBtn.addEventListener('click', runListingsSearch);
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
-  if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', resetListingFilters);
+  if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', browseMoreCars);
 
   const params = new URLSearchParams(window.location.search);
   const prefillQ = params.get('q');

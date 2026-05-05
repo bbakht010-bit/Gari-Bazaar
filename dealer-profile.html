@@ -344,6 +344,28 @@
       slot.appendChild(image);
     }
   });
+
+  (function addQuickNav() {
+    if (document.getElementById('gb-quick-nav')) return;
+    const nav = document.createElement('div');
+    nav.id = 'gb-quick-nav';
+    nav.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:8px;background:#ffffff;border:1px solid #e5e7eb;border-radius:999px;padding:8px;box-shadow:0 10px 24px rgba(0,0,0,0.14);';
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.textContent = 'Back';
+    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;';
+    back.addEventListener('click', () => {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'index.html';
+    });
+    const home = document.createElement('a');
+    home.href = 'index.html';
+    home.textContent = 'Home';
+    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;';
+    nav.appendChild(back);
+    nav.appendChild(home);
+    document.body.appendChild(nav);
+  })();
 </script>
 </body>
 </html>

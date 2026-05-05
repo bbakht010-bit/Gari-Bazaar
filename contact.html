@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --gold: #ca8a04;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: #fff; line-height: 1.65; }
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%; height: 70px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--green-mid); text-decoration: none; }
+  .logo span { color: var(--gold); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .btn {
+    text-decoration: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .hero {
+    margin-top: 70px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 48px 5% 36px;
+  }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(30px, 4.5vw, 44px); }
+  .hero p { margin-top: 12px; opacity: 0.88; max-width: 560px; }
+  .content { max-width: 520px; margin: 0 auto; padding: 40px 5% 72px; }
+  .card {
+    border: 1px solid var(--gray-200); border-radius: 14px; padding: 22px;
+  }
+  .card h2 { font-size: 16px; color: var(--green-mid); margin-bottom: 14px; }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; }
+  input, textarea {
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 9px; padding: 10px 12px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; margin-bottom: 14px;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(21,128,61,0.1); }
+  textarea { min-height: 110px; resize: vertical; }
+  .submit {
+    width: 100%; border: none; background: var(--green-main); color: white; border-radius: 9px;
+    padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .submit:hover { background: var(--green-mid); }
+  .hint { font-size: 13px; color: var(--gray-500); margin-top: 16px; line-height: 1.5; }
+  .hint a { color: var(--green-main); font-weight: 600; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <div class="nav-right">
+    <a class="btn" href="listings.html">Browse Cars</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>Contact us</h1>
+  <p>Questions about listings, dealer registration, or partnerships? Send us a message. (Form opens your email client until we add a backend.)</p>
+</section>
+
+<main class="content">
+  <div class="card">
+    <h2>Write to GariBazaar</h2>
+    <form id="contactForm" action="#" method="get">
+      <label for="subj">Subject</label>
+      <input id="subj" name="subj" type="text" required placeholder="e.g. Dealer registration help">
+      <label for="body">Message</label>
+      <textarea id="body" name="body" required placeholder="How can we help?"></textarea>
+      <button type="submit" class="submit">Send via email</button>
+    </form>
+    <p class="hint">Dealer support: use <a href="mailto:support@garibazaar.pk">support@garibazaar.pk</a> (replace with your real address when live). For urgent showroom issues, mention your registered business name.</p>
+  </div>
+</main>
+
+<script>
+function addQuickNav() {
+  if (document.getElementById('gb-quick-nav')) return;
+  const mountPoint = document.querySelector('nav .nav-right') || document.querySelector('nav');
+  if (!mountPoint) return;
+  const nav = document.createElement('div');
+  nav.id = 'gb-quick-nav';
+  nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.textContent = 'Back';
+  back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:"DM Sans",sans-serif;line-height:1;';
+  back.addEventListener('click', () => {
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = 'index.html';
+  });
+  const home = document.createElement('a');
+  home.href = 'index.html';
+  home.textContent = 'Home';
+  home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:"DM Sans",sans-serif;line-height:1;';
+  nav.appendChild(back);
+  nav.appendChild(home);
+  mountPoint.appendChild(nav);
+}
+addQuickNav();
+
+document.getElementById('contactForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const subj = encodeURIComponent(document.getElementById('subj').value.trim());
+  const body = encodeURIComponent(document.getElementById('body').value.trim());
+  window.location.href = 'mailto:support@garibazaar.pk?subject=' + subj + '&body=' + body;
+});
+</script>
+</body>
+</html>

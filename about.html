@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --gold: #ca8a04;
+    --gray-50: #f9fafb;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: #fff; line-height: 1.65; }
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%; height: 70px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700; color: var(--green-mid); text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .btn {
+    text-decoration: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .btn:hover { background: #f0fdf4; }
+  .hero {
+    margin-top: 70px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 48px 5% 36px;
+  }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(30px, 4.5vw, 44px); }
+  .hero p { margin-top: 12px; opacity: 0.88; max-width: 640px; }
+  .content { max-width: 720px; margin: 0 auto; padding: 40px 5% 72px; }
+  .content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--green-mid); margin: 28px 0 12px; }
+  .content h2:first-child { margin-top: 0; }
+  .content p { color: var(--gray-700); margin-bottom: 14px; font-size: 15px; }
+  .content ul { margin: 8px 0 16px 1.2rem; color: var(--gray-700); font-size: 15px; }
+  .content ul li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <div class="nav-right">
+    <a class="btn" href="listings.html">Browse Cars</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>About GariBazaar</h1>
+  <p>We are building Pakistan’s verified dealer-first marketplace — so buyers find real inventory from trusted showrooms, not anonymous listings.</p>
+</section>
+
+<main class="content">
+  <h2>Our mission</h2>
+  <p>GariBazaar connects serious car buyers with professional dealerships across Pakistan. Every listing is tied to a registered dealer profile, so you know who you are dealing with before you pick up the phone or visit the lot.</p>
+
+  <h2>Where we operate</h2>
+  <p>We launched with Islamabad and Rawalpindi dealers and expand city by city. Our roadmap includes Lahore, Faisalabad, and beyond as more verified dealerships join.</p>
+
+  <h2>Why dealer-only?</h2>
+  <p>Buyer trust and post-sale accountability matter — especially for used cars. By focusing on licensed dealers and employees, we can build tools for showroom teams: dashboards, subscriptions, ratings, and (coming soon) in-app inquiries.</p>
+
+  <h2>For dealers</h2>
+  <ul>
+    <li>Public profile pages and searchable inventory.</li>
+    <li>Growth tiers for visibility and listings (pricing on the homepage).</li>
+    <li>Coming next: Firebase-backed accounts, real-time inventory sync, and image hosting.</li>
+  </ul>
+</main>
+
+<script>
+(function addQuickNav() {
+  var pathNorm = window.location.pathname.replace(/\\/g, '/');
+  var segs = pathNorm.split('/').filter(Boolean);
+  var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
+  if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
+  if (document.getElementById('gb-quick-nav')) return;
+  const mountPoint = document.querySelector('nav .nav-right') || document.querySelector('nav');
+  if (!mountPoint) return;
+  const nav = document.createElement('div');
+  nav.id = 'gb-quick-nav';
+  nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.textContent = 'Back';
+  back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:"DM Sans",sans-serif;line-height:1;';
+  back.addEventListener('click', () => {
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = 'index.html';
+  });
+  const home = document.createElement('a');
+  home.href = 'index.html';
+  home.textContent = 'Home';
+  home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:"DM Sans",sans-serif;line-height:1;';
+  nav.appendChild(back);
+  nav.appendChild(home);
+  mountPoint.appendChild(nav);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Dealers — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: #fff; }
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 5%; height: 70px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700; color: var(--green-mid); text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .btn {
+    text-decoration: none; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 700;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .btn:hover { background: var(--green-faint); }
+  .hero {
+    margin-top: 70px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 52px 5% 40px;
+  }
+  .hero-inner { max-width: 1120px; margin: 0 auto; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(34px, 5vw, 52px); }
+  .hero p { margin-top: 10px; color: rgba(255,255,255,0.82); max-width: 660px; line-height: 1.7; }
+  .content { max-width: 1120px; margin: 20px auto 60px; padding: 0 5%; }
+  .search-row {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--gray-200); border-radius: 12px; background: var(--gray-50);
+    padding: 8px; margin-bottom: 16px;
+  }
+  .search-row input {
+    flex: 1; border: 1.5px solid var(--gray-200); border-radius: 9px; padding: 10px 12px; font-size: 13px;
+    font-family: 'DM Sans', sans-serif; outline: none;
+  }
+  .search-row input:focus { border-color: var(--green-main); box-shadow: 0 0 0 3px rgba(21,128,61,0.1); }
+  .search-row button {
+    border: none; background: var(--green-main); color: white; border-radius: 9px; padding: 10px 14px;
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+  .search-row button:hover { background: var(--green-mid); }
+  .dealers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .dealer-card {
+    border: 1px solid var(--gray-200); border-radius: 14px; background: white; padding: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .dealer-card:hover { transform: translateY(-3px); border-color: var(--green-light); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
+  .dealer-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .dealer-logo {
+    width: 46px; height: 46px; border-radius: 11px; border: 1px solid var(--gray-200); overflow: hidden;
+  }
+  .dealer-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dealer-name { font-size: 16px; font-weight: 700; }
+  .dealer-city { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+  .dealer-meta { font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 10px; }
+  .dealer-rate { font-size: 12px; color: var(--gold); margin-bottom: 10px; font-weight: 700; }
+  .card-btn {
+    display: block; text-decoration: none; text-align: center; border-radius: 9px; padding: 9px 11px; font-size: 13px; font-weight: 700;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .card-btn:hover { background: var(--green-faint); color: var(--green-mid); }
+  .empty {
+    display: none; margin-top: 12px; border: 1px solid var(--gray-200); border-radius: 12px;
+    background: var(--gray-50); padding: 12px; font-size: 13px; color: var(--gray-700);
+  }
+  .empty.show { display: block; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <a class="btn" href="listings.html">Browse Cars</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>All Verified Dealers</h1>
+    <p>Explore all verified dealerships on GariBazaar. Compare ratings, cities, inventory size, and open any public dealer profile.</p>
+  </div>
+</section>
+
+<main class="content">
+  <div class="search-row">
+    <input id="dealerSearchInput" type="text" placeholder="Search dealers by name, city, or speciality">
+    <button id="dealerSearchBtn" type="button">Search</button>
+  </div>
+
+  <section class="dealers-grid" id="allDealersGrid">
+    <article class="dealer-card" data-search="al-haram motors islamabad sedans family cars">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Al-Haram Motors logo"></div>
+        <div><h3 class="dealer-name">Al-Haram Motors</h3><p class="dealer-city">Islamabad</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: Sedans, Family Cars<br>Active Cars: 12</p>
+      <p class="dealer-rate">4.9 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+    <article class="dealer-card" data-search="city motors rawalpindi new cars">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=300&q=80" alt="City Motors logo"></div>
+        <div><h3 class="dealer-name">City Motors</h3><p class="dealer-city">Rawalpindi</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: New Cars, Imported<br>Active Cars: 8</p>
+      <p class="dealer-rate">4.8 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+    <article class="dealer-card" data-search="prime autos lahore budget cars hatchbacks">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=300&q=80" alt="Prime Autos logo"></div>
+        <div><h3 class="dealer-name">Prime Autos</h3><p class="dealer-city">Lahore</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: Hatchbacks, Budget Cars<br>Active Cars: 15</p>
+      <p class="dealer-rate">4.7 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+    <article class="dealer-card" data-search="skyline motors islamabad suvs crossovers">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?auto=format&fit=crop&w=300&q=80" alt="Skyline Motors logo"></div>
+        <div><h3 class="dealer-name">Skyline Motors</h3><p class="dealer-city">Islamabad</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: SUVs, Crossovers<br>Active Cars: 6</p>
+      <p class="dealer-rate">4.6 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+    <article class="dealer-card" data-search="capital wheels islamabad premium cars">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=300&q=80" alt="Capital Wheels logo"></div>
+        <div><h3 class="dealer-name">Capital Wheels</h3><p class="dealer-city">Islamabad</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: Premium Cars<br>Active Cars: 9</p>
+      <p class="dealer-rate">4.7 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+    <article class="dealer-card" data-search="metro motors rawalpindi sedans">
+      <div class="dealer-top">
+        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=300&q=80" alt="Metro Motors logo"></div>
+        <div><h3 class="dealer-name">Metro Motors</h3><p class="dealer-city">Rawalpindi</p></div>
+      </div>
+      <p class="dealer-meta">Speciality: Sedans, Daily Drivers<br>Active Cars: 7</p>
+      <p class="dealer-rate">4.5 / 5.0</p>
+      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
+    </article>
+  </section>
+  <p class="empty" id="dealerEmptyState">No dealer matched this search. Try a city name like Islamabad or Rawalpindi.</p>
+</main>
+
+<script>
+  const dealerSearchInput = document.getElementById('dealerSearchInput');
+  const dealerSearchBtn = document.getElementById('dealerSearchBtn');
+  const allDealersGrid = document.getElementById('allDealersGrid');
+  const dealerEmptyState = document.getElementById('dealerEmptyState');
+
+  function runDealerSearch() {
+    if (!dealerSearchInput || !allDealersGrid) return;
+    const query = dealerSearchInput.value.trim().toLowerCase();
+    let visible = 0;
+    allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
+      const haystack = (card.getAttribute('data-search') || '').toLowerCase();
+      const show = !query || haystack.includes(query);
+      card.style.display = show ? '' : 'none';
+      if (show) visible += 1;
+    });
+    if (dealerEmptyState) dealerEmptyState.classList.toggle('show', visible === 0);
+  }
+
+  if (dealerSearchInput && dealerSearchBtn) {
+    dealerSearchInput.addEventListener('input', runDealerSearch);
+    dealerSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        runDealerSearch();
+      }
+    });
+    dealerSearchBtn.addEventListener('click', runDealerSearch);
+  }
+</script>
+</body>
+</html>

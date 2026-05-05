@@ -85,7 +85,37 @@
 
   .nav-cta {
     display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .nav-buyer-links {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    margin-right: 2px;
+    padding-right: 12px;
+    border-right: 1px solid var(--gray-200);
+  }
+
+  .nav-buyer-links a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-buyer-links a:hover { color: var(--green-mid); }
+  .nav-buyer-links a.join { color: var(--green-main); }
+
+  @media (max-width: 900px) {
+    .nav-buyer-links {
+      border-right: none;
+      padding-right: 0;
+    }
   }
 
   .btn-outline {
@@ -841,6 +871,10 @@
     <li><a href="dealers.html">Top Dealers</a></li>
   </ul>
   <div class="nav-cta">
+    <div class="nav-buyer-links">
+      <a href="buyer-login.html">Sign in</a>
+      <a href="buyer-signup.html" class="join">Join</a>
+    </div>
     <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
     <a href="register.html" class="btn-primary">List Your Dealership</a>
   </div>
@@ -886,6 +920,7 @@
           <option>Suzuki</option>
           <option>Hyundai</option>
           <option>Kia</option>
+          <option>MG</option>
         </select>
       </div>
       <div class="field">
@@ -909,15 +944,18 @@
         <input id="priceMax" type="number" placeholder="e.g., 12000000">
       </div>
       <div class="field">
-        <label for="year">Year</label>
+        <label for="year">Minimum year</label>
         <select id="year">
-          <option>Any Year</option>
+          <option value="">Any Year</option>
           <option>2025</option>
           <option>2024</option>
           <option>2023</option>
           <option>2022</option>
           <option>2021</option>
           <option>2020</option>
+          <option>2019</option>
+          <option>2018</option>
+          <option>2017</option>
         </select>
       </div>
       <div class="field">
@@ -936,6 +974,24 @@
           <option>Any Transmission</option>
           <option>Automatic</option>
           <option>Manual</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="bodyType">Body type</label>
+        <select id="bodyType">
+          <option>Any</option>
+          <option>Sedan</option>
+          <option>SUV</option>
+          <option>Hatchback</option>
+          <option>Crossover</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="assembly">Assembly</label>
+        <select id="assembly">
+          <option>Any</option>
+          <option>Local</option>
+          <option>Imported</option>
         </select>
       </div>
     </div>
@@ -958,34 +1014,34 @@
     <div class="filter-group">
       <h4>Condition</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox"> New</span><span class="count">5</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Used</span><span class="count">7</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="New"> New</span><span class="count">5</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="Used"> Used</span><span class="count">7</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>Transmission</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox"> Automatic</span><span class="count">8</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Manual</span><span class="count">4</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Automatic"> Automatic</span><span class="count">8</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Manual"> Manual</span><span class="count">4</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>City</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox"> Islamabad</span><span class="count">6</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> Rawalpindi</span><span class="count">6</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Islamabad"> Islamabad</span><span class="count">6</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Rawalpindi"> Rawalpindi</span><span class="count">6</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>Price Range</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox"> Under 30 Lakh</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> 30 - 60 Lakh</span><span class="count">4</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> 60 - 100 Lakh</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox"> 100+ Lakh</span><span class="count">2</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="u30"> Under 30 Lakh</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="30-60"> 30 - 60 Lakh</span><span class="count">4</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="60-100"> 60 - 100 Lakh</span><span class="count">3</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="100p"> 100+ Lakh</span><span class="count">2</span></label></li>
       </ul>
     </div>
   </aside>
@@ -993,7 +1049,7 @@
   <section>
     <div class="results-top">
       <div>
-        <h3 id="resultsCount">12 Verified Cars</h3>
+        <h3 id="resultsCount">13 Verified Cars</h3>
         <p>Showing trusted dealer listings with direct contact options.</p>
       </div>
       <div class="field sort-control">
@@ -1008,7 +1064,7 @@
     </div>
 
     <div class="car-grid">
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="1">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <span class="owner-pill">Managed by Owner</span>
@@ -1032,7 +1088,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="2">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <span class="owner-pill">Managed by Owner</span>
@@ -1056,7 +1112,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Hatchback" data-assembly="Local" data-stock-index="3a">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <span class="owner-pill">Managed by Owner</span>
@@ -1080,7 +1136,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Imported" data-stock-index="3b">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1103,7 +1159,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Local" data-stock-index="4">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1126,7 +1182,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="5">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1149,7 +1205,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="6">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1172,7 +1228,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Hatchback" data-assembly="Local" data-stock-index="7">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1195,7 +1251,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Local" data-stock-index="8">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1218,7 +1274,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Imported" data-stock-index="9">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1241,7 +1297,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="10">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1264,7 +1320,7 @@
         </div>
       </article>
 
-      <article class="car-card" tabindex="0">
+      <article class="car-card" tabindex="0" data-body="Crossover" data-assembly="Local" data-stock-index="11">
         <div class="car-photo">
           <span class="verified-pill">Verified Dealer</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -1303,6 +1359,8 @@
     <div class="footer-col">
       <h4>For Buyers</h4>
       <ul>
+        <li><a href="buyer-login.html">Buyer sign in</a></li>
+        <li><a href="buyer-signup.html">Create buyer account</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
         <li><a href="listings.html">Search by City</a></li>
@@ -1330,13 +1388,16 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2025 GariBazaar. All rights reserved. Made in Pakistan</p>
+    <p>© 2026 GariBazaar. All rights reserved. Made in Pakistan</p>
     <p>Islamabad · Rawalpindi</p>
   </div>
 </footer>
 
 <script>
   const cards = document.querySelectorAll('.car-card');
+  const cardList = Array.from(cards);
+  const carGrid = document.querySelector('.car-grid');
+  const defaultCardOrder = cardList.slice();
   const listingSearchInput = document.getElementById('listingSearchInput');
   const listingSearchBtn = document.getElementById('listingSearchBtn');
   const applyFiltersBtn = document.getElementById('applyFiltersBtn');
@@ -1346,12 +1407,102 @@
   const makeSelect = document.getElementById('make');
   const modelInput = document.getElementById('model');
   const conditionSelect = document.getElementById('condition');
+  const priceMinInput = document.getElementById('priceMin');
+  const priceMaxInput = document.getElementById('priceMax');
+  const yearSelect = document.getElementById('year');
+  const mileageSelect = document.getElementById('mileage');
+  const transmissionSelect = document.getElementById('transmission');
+  const bodyTypeSelect = document.getElementById('bodyType');
+  const assemblySelect = document.getElementById('assembly');
+  const sortSelect = document.getElementById('sort');
   const browseAllNote = document.getElementById('browseAllNote');
   const browseAllText = document.getElementById('browseAllText');
   const browseAllCarsBtn = document.getElementById('browseAllCarsBtn');
 
   function normalize(value) {
     return (value || '').toLowerCase().trim();
+  }
+
+  function parseCardPricePk(card) {
+    const el = card.querySelector('.car-price');
+    if (!el) return null;
+    const lak = el.textContent.match(/([\d,.]+)\s*lakh/i);
+    if (lak) return parseFloat(lak[1].replace(/,/g, '')) * 100000;
+    return null;
+  }
+
+  function parseCardYear(card) {
+    const title = card.querySelector('.car-main h4');
+    if (!title) return null;
+    const m = title.textContent.match(/\b(19|20)\d{2}\b/);
+    return m ? parseInt(m[0], 10) : null;
+  }
+
+  function parseCardMileageKm(card) {
+    const specs = card.querySelector('.mini-specs');
+    if (!specs) return null;
+    const first = specs.querySelector('span');
+    if (!first) return null;
+    const cleaned = first.textContent.replace(/,/g, '');
+    const m = cleaned.match(/(\d+)\s*km/i);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  function mileageBandMatches(km, bandLabel) {
+    if (!bandLabel || bandLabel === 'Any Mileage') return true;
+    if (km == null || Number.isNaN(km)) return true;
+    if (bandLabel.startsWith('0 -')) return km <= 10000;
+    if (bandLabel.startsWith('10,000')) return km > 10000 && km <= 30000;
+    if (bandLabel.startsWith('30,000')) return km > 30000 && km <= 60000;
+    if (bandLabel.startsWith('60,000+')) return km > 60000;
+    return true;
+  }
+
+  function matchPriceSidebar(pk) {
+    const checked = [...document.querySelectorAll('.sidebar-price:checked')];
+    if (!checked.length) return true;
+    if (pk == null) return false;
+    const lakh = pk / 100000;
+    return checked.some((cb) => {
+      const v = cb.value;
+      if (v === 'u30') return lakh <= 30;
+      if (v === '30-60') return lakh > 30 && lakh <= 60;
+      if (v === '60-100') return lakh > 60 && lakh <= 100;
+      if (v === '100p') return lakh > 100;
+      return true;
+    });
+  }
+
+  function sortVisibleInGrid() {
+    if (!carGrid || !sortSelect) return;
+    const sortVal = sortSelect.value || '';
+    const all = [...document.querySelectorAll('.car-card')];
+    const visible = all.filter((c) => c.style.display !== 'none');
+    const hidden = all.filter((c) => c.style.display === 'none');
+    const priceFn = (c) => parseCardPricePk(c) ?? 0;
+    const yearFn = (c) => parseCardYear(c) ?? 0;
+    const mileFn = (c) => {
+      const k = parseCardMileageKm(c);
+      return k == null ? Infinity : k;
+    };
+    visible.sort((a, b) => {
+      if (sortVal === 'Newest Listings') {
+        const yd = yearFn(b) - yearFn(a);
+        if (yd !== 0) return yd;
+        return defaultCardOrder.indexOf(a) - defaultCardOrder.indexOf(b);
+      }
+      if (sortVal === 'Price: Low to High') return priceFn(a) - priceFn(b);
+      if (sortVal === 'Price: High to Low') return priceFn(b) - priceFn(a);
+      if (sortVal === 'Lowest Mileage') return mileFn(a) - mileFn(b);
+      return defaultCardOrder.indexOf(a) - defaultCardOrder.indexOf(b);
+    });
+    [...visible, ...hidden].forEach((c) => carGrid.appendChild(c));
+  }
+
+  function clearSidebarChecks() {
+    document.querySelectorAll('#filterSidebar input[type="checkbox"]').forEach((cb) => {
+      cb.checked = false;
+    });
   }
 
   function updateResultsCount(visibleCount) {
@@ -1362,10 +1513,27 @@
 
   function runListingsSearch() {
     const keyword = normalize(listingSearchInput ? listingSearchInput.value : '');
-    const city = citySelect && citySelect.value !== 'All Cities' ? normalize(citySelect.value) : '';
+    const cityFromSelect = citySelect && citySelect.value !== 'All Cities' ? normalize(citySelect.value) : '';
     const make = makeSelect && makeSelect.value !== 'Any Make' ? normalize(makeSelect.value) : '';
     const model = normalize(modelInput ? modelInput.value : '');
     const condition = conditionSelect && conditionSelect.value !== 'Any Condition' ? normalize(conditionSelect.value) : '';
+    const priceMinRaw = priceMinInput && priceMinInput.value.trim() ? parseFloat(priceMinInput.value) : NaN;
+    const priceMaxRaw = priceMaxInput && priceMaxInput.value.trim() ? parseFloat(priceMaxInput.value) : NaN;
+    const priceMin = !Number.isNaN(priceMinRaw) ? priceMinRaw : null;
+    const priceMax = !Number.isNaN(priceMaxRaw) ? priceMaxRaw : null;
+    const yearMin = yearSelect && yearSelect.value ? parseInt(yearSelect.value, 10) : null;
+    const mileageLabel = mileageSelect ? mileageSelect.value : 'Any Mileage';
+    const transmissionTop =
+      transmissionSelect && transmissionSelect.value !== 'Any Transmission'
+        ? normalize(transmissionSelect.value)
+        : '';
+    const bodyWant = bodyTypeSelect && bodyTypeSelect.value !== 'Any' ? normalize(bodyTypeSelect.value) : '';
+    const assemblyWant = assemblySelect && assemblySelect.value !== 'Any' ? normalize(assemblySelect.value) : '';
+
+    const sideCities = [...document.querySelectorAll('.sidebar-city:checked')].map((c) => normalize(c.value));
+    const sideConds = [...document.querySelectorAll('.sidebar-condition:checked')].map((c) => normalize(c.value));
+    const sideTrans = [...document.querySelectorAll('.sidebar-trans:checked')].map((c) => normalize(c.value));
+
     let visibleCount = 0;
     const totalCount = cards.length;
 
@@ -1380,22 +1548,85 @@
       const cardMake = title.split(' ')[0];
 
       const matchKeyword = !keyword || haystack.includes(keyword);
-      const matchCity = !city || haystack.includes(city);
+
+      const matchCity = sideCities.length
+        ? sideCities.some((c) => haystack.includes(c))
+        : (!cityFromSelect || haystack.includes(cityFromSelect));
+
       const matchMake = !make || cardMake === make;
       const matchModel = !model || title.includes(model);
-      const matchCondition = !condition || haystack.includes(condition);
-      const visible = matchKeyword && matchCity && matchMake && matchModel && matchCondition;
+
+      const matchCondition = sideConds.length
+        ? sideConds.some((c) => haystack.includes(c))
+        : (!condition || haystack.includes(condition));
+
+      const transNeed = sideTrans.length ? sideTrans : (transmissionTop ? [transmissionTop] : []);
+      const matchTransmission = !transNeed.length || transNeed.some((t) => haystack.includes(t));
+
+      const pk = parseCardPricePk(card);
+      const matchPriceInputs =
+        (priceMin == null || pk == null || pk >= priceMin) &&
+        (priceMax == null || pk == null || pk <= priceMax);
+
+      const cy = parseCardYear(card);
+      const matchYear = yearMin == null || !Number.isFinite(yearMin) || cy == null || cy >= yearMin;
+
+      const km = parseCardMileageKm(card);
+      const matchMileage = mileageBandMatches(km, mileageLabel);
+
+      const body = normalize(card.getAttribute('data-body') || '');
+      const matchBody = !bodyWant || body === bodyWant;
+
+      const assem = normalize(card.getAttribute('data-assembly') || '');
+      const matchAssembly = !assemblyWant || assem === assemblyWant;
+
+      const matchSidebarPrice = matchPriceSidebar(pk);
+
+      const visible =
+        matchKeyword &&
+        matchCity &&
+        matchMake &&
+        matchModel &&
+        matchCondition &&
+        matchTransmission &&
+        matchPriceInputs &&
+        matchYear &&
+        matchMileage &&
+        matchBody &&
+        matchAssembly &&
+        matchSidebarPrice;
 
       card.style.display = visible ? '' : 'none';
       if (visible) visibleCount += 1;
     });
 
+    sortVisibleInGrid();
     updateResultsCount(visibleCount);
-    const filtersActive = Boolean(keyword || city || make || model || condition);
+
+    const filtersActive = Boolean(
+      keyword ||
+      cityFromSelect ||
+      make ||
+      model ||
+      condition ||
+      priceMin != null ||
+      priceMax != null ||
+      (yearSelect && yearSelect.value) ||
+      (mileageSelect && mileageSelect.value !== 'Any Mileage') ||
+      (transmissionSelect && transmissionSelect.value !== 'Any Transmission') ||
+      (bodyTypeSelect && bodyTypeSelect.value !== 'Any') ||
+      (assemblySelect && assemblySelect.value !== 'Any') ||
+      sideCities.length ||
+      sideConds.length ||
+      sideTrans.length ||
+      document.querySelectorAll('.sidebar-price:checked').length
+    );
+
     const hiddenCount = totalCount - visibleCount;
     if (browseAllNote && browseAllText) {
       if (filtersActive && hiddenCount > 0) {
-        browseAllText.textContent = 'Showing ' + visibleCount + ' cars. ' + hiddenCount + ' more cars are available if you browse all cities and filters.';
+        browseAllText.textContent =
+          'Showing ' + visibleCount + ' cars. ' + hiddenCount + ' more cars are available if you browse all cities and filters.';
         browseAllNote.classList.add('show');
       } else {
         browseAllNote.classList.remove('show');
@@ -1409,15 +1640,31 @@
     if (makeSelect) makeSelect.value = 'Any Make';
     if (modelInput) modelInput.value = '';
     if (conditionSelect) conditionSelect.value = 'Any Condition';
+    if (priceMinInput) priceMinInput.value = '';
+    if (priceMaxInput) priceMaxInput.value = '';
+    if (yearSelect) yearSelect.value = '';
+    if (mileageSelect) mileageSelect.value = 'Any Mileage';
+    if (transmissionSelect) transmissionSelect.value = 'Any Transmission';
+    if (bodyTypeSelect) bodyTypeSelect.value = 'Any';
+    if (assemblySelect) assemblySelect.value = 'Any';
+    if (sortSelect) sortSelect.selectedIndex = 0;
+    clearSidebarChecks();
     runListingsSearch();
   }
 
   function browseMoreCars() {
-    // Keep user's intent, relax restrictive filters for wider results.
     const previousCity = citySelect ? citySelect.value : '';
     if (citySelect) citySelect.value = 'All Cities';
     if (makeSelect) makeSelect.value = 'Any Make';
     if (conditionSelect) conditionSelect.value = 'Any Condition';
+    if (priceMinInput) priceMinInput.value = '';
+    if (priceMaxInput) priceMaxInput.value = '';
+    if (yearSelect) yearSelect.value = '';
+    if (mileageSelect) mileageSelect.value = 'Any Mileage';
+    if (transmissionSelect) transmissionSelect.value = 'Any Transmission';
+    if (bodyTypeSelect) bodyTypeSelect.value = 'Any';
+    if (assemblySelect) assemblySelect.value = 'Any';
+    clearSidebarChecks();
     if (listingSearchInput && listingSearchInput.value.trim()) {
       const genericCities = ['islamabad', 'rawalpindi', 'lahore', 'karachi', 'faisalabad'];
       const cityToRemove = previousCity && previousCity !== 'All Cities' ? [previousCity.toLowerCase()] : [];
@@ -1447,6 +1694,15 @@
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
   if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', browseMoreCars);
 
+  ['priceMin', 'priceMax', 'year', 'mileage', 'transmission', 'bodyType', 'assembly'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', runListingsSearch);
+  });
+  document.querySelectorAll('#filterSidebar input[type="checkbox"]').forEach((cb) => {
+    cb.addEventListener('change', runListingsSearch);
+  });
+  if (sortSelect) sortSelect.addEventListener('change', runListingsSearch);
+
   const params = new URLSearchParams(window.location.search);
   const prefillQ = params.get('q');
   const prefillCity = params.get('city');
@@ -1455,7 +1711,7 @@
     const cityOptions = Array.from(citySelect.options).map((option) => option.value);
     if (cityOptions.includes(prefillCity)) citySelect.value = prefillCity;
   }
-  if (prefillQ || prefillCity) runListingsSearch();
+  runListingsSearch();
 
   cards.forEach((card) => {
     card.addEventListener('click', () => {

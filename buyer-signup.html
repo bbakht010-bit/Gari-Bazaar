@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Buyer Account — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --white: #ffffff;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    min-height: 100vh;
+  }
+  nav {
+    height: 70px;
+    border-bottom: 1px solid var(--gray-200);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-mid);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .back-link {
+    text-decoration: none;
+    color: var(--gray-600);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .wrap {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 430px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .card-head {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 24px;
+  }
+  .card-head h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    line-height: 1.15;
+  }
+  .card-head p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+  }
+  .card-body { padding: 22px; }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--gray-800);
+    font-weight: 600;
+  }
+  .field input {
+    width: 100%;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 14px;
+    outline: none;
+  }
+  .field input:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: var(--green-main);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn:hover { background: var(--green-mid); }
+  .muted-note {
+    margin-top: 14px;
+    border: 1px solid #bbf7d0;
+    background: var(--green-faint);
+    color: var(--green-mid);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .alt-links {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray-600);
+  }
+  .alt-links a { color: var(--green-main); font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+  <a class="back-link" href="listings.html">Browse cars</a>
+</nav>
+
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h1>Create buyer account</h1>
+      <p>Like PakWheels member accounts — one place for saved listings, dealer follows, and messages once the backend is connected.</p>
+    </div>
+    <div class="card-body">
+      <form id="buyer-signup-form">
+        <div class="field">
+          <label for="name">Full name</label>
+          <input id="name" type="text" autocomplete="name" placeholder="Ahmad Khan" required>
+        </div>
+        <div class="field">
+          <label for="phone">Mobile (Pakistan)</label>
+          <input id="phone" type="tel" autocomplete="tel" placeholder="03XX XXXXXXX" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required>
+        </div>
+        <button class="btn" type="submit">Create account</button>
+      </form>
+      <p class="muted-note">
+        Sign-up is UI-only until Firebase is configured. We will store a buyers profile document linked to Auth, similar to how dealer registration will work.
+      </p>
+      <p class="alt-links">
+        Already registered? <a href="buyer-login.html">Sign in</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  document.getElementById('buyer-signup-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    alert('Thanks — buyer registration will save to Firebase in Phase 2. You can keep browsing listings as a guest.');
+  });
+
+  (function addQuickNav() {
+    if (document.getElementById('gb-quick-nav')) return;
+    const hostNav = document.querySelector('nav');
+    if (!hostNav) return;
+    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
+    const nav = document.createElement('div');
+    nav.id = 'gb-quick-nav';
+    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.textContent = 'Back';
+    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
+    back.addEventListener('click', () => {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'index.html';
+    });
+    const home = document.createElement('a');
+    home.href = 'index.html';
+    home.textContent = 'Home';
+    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
+    nav.appendChild(back);
+    nav.appendChild(home);
+    mountPoint.appendChild(nav);
+  })();
+</script>
+</body>
+</html>

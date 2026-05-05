@@ -72,6 +72,40 @@
 
   .nav-cta {
     display: flex; gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .nav-buyer-links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-right: 4px;
+    padding-right: 14px;
+    border-right: 1px solid var(--gray-200);
+  }
+
+  .nav-buyer-links a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-buyer-links a:hover { color: var(--green-mid); }
+
+  .nav-buyer-links a.join { color: var(--green-main); }
+
+  @media (max-width: 900px) {
+    .nav-buyer-links {
+      border-right: none;
+      padding-right: 0;
+      width: 100%;
+      justify-content: flex-end;
+      order: 1;
+    }
   }
 
   .btn-outline {
@@ -945,6 +979,10 @@
     <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-cta">
+    <div class="nav-buyer-links">
+      <a href="buyer-login.html">Sign in</a>
+      <a href="buyer-signup.html" class="join">Join</a>
+    </div>
     <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
     <a href="register.html" class="btn-primary">List Your Dealership</a>
   </div>
@@ -1363,6 +1401,8 @@
     <div class="footer-col">
       <h4>For Buyers</h4>
       <ul>
+        <li><a href="buyer-login.html">Buyer sign in</a></li>
+        <li><a href="buyer-signup.html">Create buyer account</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
         <li><a href="listings.html">Search by City</a></li>

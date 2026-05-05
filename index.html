@@ -360,6 +360,64 @@
     display: flex; align-items: center; gap: 4px;
   }
 
+  .featured-tools {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .featured-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 260px;
+  }
+
+  .featured-search input {
+    flex: 1;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .featured-search input:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+
+  .small-btn {
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--gray-700);
+    background: white;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .small-btn:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
+
   .cars-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -462,6 +520,79 @@
   }
 
   .contact-btn:hover { background: var(--green-mid); }
+
+  .car-expanded {
+    border-top: 1px solid var(--gray-100);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0 18px;
+    transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.2s ease;
+  }
+
+  .car-card:hover .car-expanded,
+  .car-card:focus-within .car-expanded,
+  .car-card.expanded .car-expanded {
+    max-height: 230px;
+    opacity: 1;
+    padding: 12px 18px 16px;
+  }
+
+  .expanded-meta {
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 9px;
+  }
+
+  .expanded-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .expanded-link {
+    text-decoration: none;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 8px;
+  }
+
+  .expanded-link.wa {
+    background: #25d366;
+    color: white;
+  }
+
+  .expanded-link.call {
+    background: var(--green-faint);
+    color: var(--green-mid);
+    border: 1px solid #bbf7d0;
+  }
+
+  .expanded-link.detail {
+    margin-top: 7px;
+    display: block;
+    border: 1.5px solid var(--green-main);
+    color: var(--green-main);
+    background: white;
+  }
+
+  .expanded-link.detail:hover { background: var(--green-faint); }
+
+  .expanded-link.profile {
+    margin-top: 7px;
+    display: block;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    background: white;
+  }
+
+  .expanded-link.profile:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
 
   /* HOW IT WORKS */
   .how-section {
@@ -870,9 +1001,17 @@
     </div>
     <a href="listings.html" class="view-all">View all cars →</a>
   </div>
+  <div class="featured-tools">
+    <div class="featured-search">
+      <input type="text" placeholder="Search featured listings by make, model, or dealer">
+      <a href="listings.html" class="small-btn">Search</a>
+    </div>
+    <a href="listings.html" class="small-btn">View All Cars</a>
+    <a href="listings.html#results" class="small-btn">Browse Filters</a>
+  </div>
   <div class="cars-grid">
 
-    <div class="car-card">
+    <div class="car-card" tabindex="0">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -891,9 +1030,18 @@
           <button class="contact-btn">Contact</button>
         </div>
       </div>
+      <div class="car-expanded">
+        <p class="expanded-meta">Assigned: Ali (Sales Executive) · Response: under 15 min</p>
+        <div class="expanded-actions">
+          <a class="expanded-link wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20GLi%202021." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="expanded-link call" href="tel:+923111111111">Call Ali</a>
+        </div>
+        <a class="expanded-link detail" href="car-detail.html">Show Car Details</a>
+        <a class="expanded-link profile" href="dealer-profile.html">View Dealer Profile</a>
+      </div>
     </div>
 
-    <div class="car-card">
+    <div class="car-card" tabindex="0">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -912,9 +1060,18 @@
           <button class="contact-btn">Contact</button>
         </div>
       </div>
+      <div class="car-expanded">
+        <p class="expanded-meta">Assigned: Saad (Sales Executive) · Response: under 10 min</p>
+        <div class="expanded-actions">
+          <a class="expanded-link wa" href="https://wa.me/923122222222?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Honda%20Civic%20Oriel%202024." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="expanded-link call" href="tel:+923122222222">Call Saad</a>
+        </div>
+        <a class="expanded-link detail" href="car-detail.html">Show Car Details</a>
+        <a class="expanded-link profile" href="dealer-profile.html">View Dealer Profile</a>
+      </div>
     </div>
 
-    <div class="car-card">
+    <div class="car-card" tabindex="0">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -933,9 +1090,18 @@
           <button class="contact-btn">Contact</button>
         </div>
       </div>
+      <div class="car-expanded">
+        <p class="expanded-meta">Assigned: Usman (Owner Default) · Response: under 20 min</p>
+        <div class="expanded-actions">
+          <a class="expanded-link wa" href="https://wa.me/923133333333?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Suzuki%20Alto%20VXR%202023." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="expanded-link call" href="tel:+923133333333">Call Usman</a>
+        </div>
+        <a class="expanded-link detail" href="car-detail.html">Show Car Details</a>
+        <a class="expanded-link profile" href="dealer-profile.html">View Dealer Profile</a>
+      </div>
     </div>
 
-    <div class="car-card">
+    <div class="car-card" tabindex="0">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -953,6 +1119,15 @@
           <div class="car-price">115 Lakh <span>PKR</span></div>
           <button class="contact-btn">Contact</button>
         </div>
+      </div>
+      <div class="car-expanded">
+        <p class="expanded-meta">Assigned: Hamza (Owner Default) · Response: under 15 min</p>
+        <div class="expanded-actions">
+          <a class="expanded-link wa" href="https://wa.me/923144444444?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Hyundai%20Tucson%20AWD%202024." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a class="expanded-link call" href="tel:+923144444444">Call Hamza</a>
+        </div>
+        <a class="expanded-link detail" href="car-detail.html">Show Car Details</a>
+        <a class="expanded-link profile" href="dealer-profile.html">View Dealer Profile</a>
       </div>
     </div>
 
@@ -1205,6 +1380,20 @@
 </footer>
 
 <script>
+  document.querySelectorAll('.car-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      if (window.matchMedia('(hover: none)').matches) {
+        card.classList.toggle('expanded');
+      }
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.classList.toggle('expanded');
+      }
+    });
+  });
+
   document.querySelectorAll('.dealer-card').forEach((card) => {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'link');

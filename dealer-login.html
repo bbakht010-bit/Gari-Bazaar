@@ -202,6 +202,10 @@
   });
 
   (function addQuickNav() {
+    var pathNorm = window.location.pathname.replace(/\\/g, '/');
+    var segs = pathNorm.split('/').filter(Boolean);
+    var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
+    if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;

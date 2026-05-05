@@ -458,6 +458,43 @@
     gap: 18px;
   }
 
+  .browse-all-note {
+    margin-top: 16px;
+    border: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 12px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .browse-all-note.show { display: flex; }
+
+  .browse-all-note p {
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+
+  .browse-all-btn {
+    border: 1.5px solid var(--green-main);
+    background: white;
+    color: var(--green-main);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .browse-all-btn:hover {
+    background: var(--green-faint);
+    color: var(--green-mid);
+  }
+
   .car-card {
     position: relative;
     border: 1px solid var(--gray-200);
@@ -1232,6 +1269,10 @@
         </div>
       </article>
     </div>
+    <div class="browse-all-note" id="browseAllNote">
+      <p id="browseAllText">Looking for more options from other cities? Browse all available cars.</p>
+      <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Browse All Cars</button>
+    </div>
   </section>
 </main>
 
@@ -1287,6 +1328,9 @@
   const makeSelect = document.getElementById('make');
   const modelInput = document.getElementById('model');
   const conditionSelect = document.getElementById('condition');
+  const browseAllNote = document.getElementById('browseAllNote');
+  const browseAllText = document.getElementById('browseAllText');
+  const browseAllCarsBtn = document.getElementById('browseAllCarsBtn');
 
   function normalize(value) {
     return (value || '').toLowerCase().trim();
@@ -1305,6 +1349,7 @@
     const model = normalize(modelInput ? modelInput.value : '');
     const condition = conditionSelect && conditionSelect.value !== 'Any Condition' ? normalize(conditionSelect.value) : '';
     let visibleCount = 0;
+    const totalCount = cards.length;
 
     cards.forEach((card) => {
       const titleEl = card.querySelector('.car-main h4');
@@ -1328,6 +1373,16 @@
     });
 
     updateResultsCount(visibleCount);
+    const filtersActive = Boolean(keyword || city || make || model || condition);
+    const hiddenCount = totalCount - visibleCount;
+    if (browseAllNote && browseAllText) {
+      if (filtersActive && hiddenCount > 0) {
+        browseAllText.textContent = 'Showing ' + visibleCount + ' cars. ' + hiddenCount + ' more cars are available if you browse all cities and filters.';
+        browseAllNote.classList.add('show');
+      } else {
+        browseAllNote.classList.remove('show');
+      }
+    }
   }
 
   function resetListingFilters() {
@@ -1351,6 +1406,7 @@
   }
   if (applyFiltersBtn) applyFiltersBtn.addEventListener('click', runListingsSearch);
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
+  if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', resetListingFilters);
 
   const params = new URLSearchParams(window.location.search);
   const prefillQ = params.get('q');

@@ -598,6 +598,17 @@
     border-color: var(--green-light);
   }
 
+  .inline-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--green-main);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .inline-link:hover { color: var(--green-mid); text-decoration: underline; }
+
   .car-card:focus-visible,
   .contact-btn:focus-visible,
   .mobile-filter-toggle:focus-visible,
@@ -1216,6 +1227,24 @@
       toggleFilters.textContent = isOpen ? 'Hide Sidebar Filters' : 'Show Sidebar Filters';
     });
   }
+
+  document.querySelectorAll('.car-expanded').forEach((expanded) => {
+    if (!expanded.querySelector('.inline-link')) {
+      const detailLink = document.createElement('a');
+      detailLink.href = 'car-detail.html';
+      detailLink.className = 'inline-link';
+      detailLink.textContent = 'View full car details';
+      expanded.appendChild(detailLink);
+    }
+  });
+
+  document.querySelectorAll('.dealer-line').forEach((line) => {
+    if (line.querySelector('a')) return;
+    const dealerParts = line.textContent.split('—');
+    const dealerName = dealerParts[0] ? dealerParts[0].trim() : 'Dealer Profile';
+    const dealerCity = dealerParts[1] ? dealerParts[1].trim() : '';
+    line.innerHTML = '<a class="inline-link" href="dealer-profile.html" style="margin-top:0;">' + dealerName + '</a>' + (dealerCity ? ' — ' + dealerCity : '');
+  });
 </script>
 
 </body>

@@ -545,6 +545,11 @@
     border-color: var(--green-light);
   }
 
+  .dealer-card:focus-visible {
+    outline: 3px solid rgba(21,128,61,0.28);
+    outline-offset: 2px;
+  }
+
   .dealer-top {
     display: flex; align-items: center; gap: 14px;
     margin-bottom: 16px;
@@ -1199,6 +1204,29 @@
     <p>Islamabad · Rawalpindi</p>
   </div>
 </footer>
+
+<script>
+  document.querySelectorAll('.dealer-card').forEach((card) => {
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'link');
+    card.addEventListener('click', () => {
+      window.location.href = 'dealer-profile.html';
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        window.location.href = 'dealer-profile.html';
+      }
+    });
+  });
+
+  document.querySelectorAll('.contact-btn').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      window.location.href = 'car-detail.html';
+    });
+  });
+</script>
 
 </body>
 </html>

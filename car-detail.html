@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Detail — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #fff; color: var(--gray-900); }
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 10; height: 70px;
+    padding: 0 5%; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--gray-200); background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+  }
+  .logo { text-decoration: none; font-size: 26px; font-weight: 700; color: var(--green-mid); font-family: 'Playfair Display', serif; }
+  .logo span { color: var(--gold); }
+  .btn {
+    text-decoration: none; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .btn:hover { background: var(--green-faint); }
+  main { margin: 96px auto 64px; max-width: 1180px; padding: 0 5%; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+  .card { border: 1px solid var(--gray-200); border-radius: 14px; background: #fff; }
+  .gallery { overflow: hidden; }
+  .hero-photo {
+    height: 340px; background: linear-gradient(145deg, #f8fafc, #e5e7eb); display: flex; align-items: center; justify-content: center;
+  }
+  .hero-photo svg { width: 160px; opacity: 0.7; }
+  .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px; }
+  .thumb { border: 1px solid var(--gray-200); border-radius: 10px; background: var(--gray-50); height: 76px; }
+  .details { padding: 18px; }
+  .pill {
+    display: inline-flex; border: 1px solid #bbf7d0; border-radius: 100px; background: var(--green-pale);
+    color: var(--green-mid); font-size: 11px; font-weight: 700; padding: 4px 10px; text-transform: uppercase;
+  }
+  h1 { margin-top: 10px; font-size: 34px; line-height: 1.2; font-family: 'Playfair Display', serif; }
+  .price { margin-top: 8px; font-family: var(--font-numbers); font-size: 32px; color: var(--green-mid); }
+  .price span { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--gray-500); }
+  .spec-grid {
+    margin-top: 16px; border-top: 1px solid var(--gray-100); padding-top: 14px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+  }
+  .spec { border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px; }
+  .spec p { font-size: 12px; color: var(--gray-500); }
+  .spec h4 { margin-top: 4px; font-size: 14px; }
+  .description { margin-top: 18px; font-size: 15px; color: var(--gray-700); line-height: 1.7; }
+  aside { padding: 18px; }
+  .dealer-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .dealer-logo {
+    width: 48px; height: 48px; border-radius: 12px; background: var(--green-pale); display: flex; align-items: center; justify-content: center;
+    color: var(--green-mid); font-size: 22px;
+  }
+  .dealer-head h3 { font-size: 18px; }
+  .dealer-head p { color: var(--gray-500); font-size: 13px; }
+  .rating { color: var(--gold); font-size: 13px; margin-bottom: 10px; }
+  .contact-meta { color: var(--gray-700); font-size: 14px; margin-bottom: 12px; line-height: 1.6; }
+  .action {
+    display: block; width: 100%; text-align: center; text-decoration: none; font-size: 14px; font-weight: 700;
+    border-radius: 10px; padding: 11px 12px; margin-bottom: 8px;
+  }
+  .wa { background: #25d366; color: #fff; }
+  .call { background: var(--green-faint); color: var(--green-mid); border: 1px solid #bbf7d0; }
+  .profile { border: 1.5px solid var(--green-main); color: var(--green-main); }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .hero-photo { height: 260px; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <a href="listings.html" class="btn">Back to Listings</a>
+</nav>
+
+<main>
+  <section class="card gallery">
+    <div class="hero-photo">
+      <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
+    </div>
+    <div class="thumbs">
+      <div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div>
+    </div>
+    <div class="details">
+      <span class="pill">Verified Dealer Listing</span>
+      <h1>Toyota Corolla Altis 2022</h1>
+      <div class="price">52 Lakh <span>PKR</span></div>
+      <div class="spec-grid">
+        <div class="spec"><p>Mileage</p><h4>21,000 km</h4></div>
+        <div class="spec"><p>Transmission</p><h4>Automatic</h4></div>
+        <div class="spec"><p>Condition</p><h4>Used</h4></div>
+        <div class="spec"><p>City</p><h4>Islamabad</h4></div>
+        <div class="spec"><p>Fuel Type</p><h4>Petrol</h4></div>
+        <div class="spec"><p>Registration</p><h4>Islamabad</h4></div>
+      </div>
+      <p class="description">Clean and well-maintained Corolla Altis from a verified dealership. Inspection reports can be shared on request. Financing and exchange options are available after on-site visit.</p>
+    </div>
+  </section>
+
+  <aside class="card">
+    <div class="dealer-head">
+      <div class="dealer-logo">D</div>
+      <div>
+        <h3>Al-Haram Motors</h3>
+        <p>Islamabad</p>
+      </div>
+    </div>
+    <p class="rating">4.9 / 5.0 · 180+ reviews</p>
+    <p class="contact-meta">Contact Person: Ali (Sales Executive)<br>Phone: +92 311 1111111<br>Response time: under 15 minutes</p>
+    <a class="action wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20Altis%202022." target="_blank" rel="noopener noreferrer">WhatsApp Dealer</a>
+    <a class="action call" href="tel:+923111111111">Call Dealer</a>
+    <a class="action profile" href="dealer-profile.html">View Dealer Profile</a>
+  </aside>
+</main>
+</body>
+</html>

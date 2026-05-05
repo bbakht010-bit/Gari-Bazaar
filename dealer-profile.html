@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dealer Profile — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-light: #22c55e;
+    --green-pale: #dcfce7;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-500: #6b7280;
+    --gray-700: #374151;
+    --gray-900: #111827;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: var(--gray-50); }
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 10; height: 70px;
+    padding: 0 5%; display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--gray-200); background: rgba(255,255,255,0.97); backdrop-filter: blur(10px);
+  }
+  .logo { text-decoration: none; font-size: 26px; font-weight: 700; color: var(--green-mid); font-family: 'Playfair Display', serif; }
+  .logo span { color: var(--gold); }
+  .btn {
+    text-decoration: none; padding: 9px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    border: 1.5px solid var(--green-main); color: var(--green-main);
+  }
+  .btn:hover { background: var(--green-faint); }
+  .hero {
+    margin-top: 70px; padding: 48px 5% 38px; background: linear-gradient(135deg, var(--green-dark), var(--green-mid)); color: #fff;
+  }
+  .hero-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-between; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  h1 { font-family: 'Playfair Display', serif; font-size: clamp(30px, 5vw, 48px); }
+  .hero p { margin-top: 8px; color: rgba(255,255,255,0.8); }
+  .verified { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.32); border-radius: 100px; padding: 7px 14px; font-size: 13px; }
+  main { max-width: 1140px; margin: 20px auto 60px; padding: 0 5%; display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+  .card { background: #fff; border: 1px solid var(--gray-200); border-radius: 14px; padding: 16px; }
+  .card h2 { font-size: 20px; margin-bottom: 10px; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+  .stat { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px; text-align: center; }
+  .stat h3 { font-size: 22px; color: var(--green-mid); }
+  .stat p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+  .line { color: var(--gray-700); font-size: 14px; line-height: 1.8; }
+  .rating { color: var(--gold); font-size: 14px; margin-top: 8px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .tag { border: 1px solid #bbf7d0; border-radius: 100px; background: var(--green-pale); color: var(--green-mid); font-size: 12px; padding: 5px 10px; font-weight: 600; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .action { text-align: center; text-decoration: none; border-radius: 9px; font-size: 14px; font-weight: 700; padding: 10px 12px; }
+  .wa { background: #25d366; color: #fff; }
+  .call { border: 1.5px solid var(--green-main); color: var(--green-main); }
+  .cars { display: grid; gap: 8px; margin-top: 8px; }
+  .car {
+    border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px;
+    display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  }
+  .car h4 { font-size: 14px; }
+  .car p { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+  .view { text-decoration: none; color: var(--green-main); font-weight: 600; font-size: 13px; }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
+  <a href="listings.html" class="btn">Browse Cars</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>Al-Haram Motors</h1>
+      <p>Trusted dealership in Islamabad with verified inventory and transparent buyer support.</p>
+    </div>
+    <div class="verified">Verified Dealer</div>
+  </div>
+</section>
+
+<main>
+  <section class="card">
+    <h2>Dealer Overview</h2>
+    <p class="line">Location: I-8 Markaz, Islamabad<br>Established: 2018<br>Speciality: Sedans and family cars</p>
+    <p class="rating">4.9 / 5.0 · Based on 182 reviews</p>
+    <div class="tags">
+      <span class="tag">Verified Documents</span>
+      <span class="tag">Owner Active</span>
+      <span class="tag">Fast Responses</span>
+    </div>
+    <div class="stats">
+      <article class="stat"><h3>182</h3><p>Reviews</p></article>
+      <article class="stat"><h3>12</h3><p>Active Cars</p></article>
+      <article class="stat"><h3>234</h3><p>Cars Sold</p></article>
+    </div>
+  </section>
+
+  <aside class="card">
+    <h2>Contact Dealer</h2>
+    <p class="line">Primary Contact: Ali (Sales Executive)<br>Phone: +92 311 1111111<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM</p>
+    <div class="actions">
+      <a class="action wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20want%20to%20inquire%20about%20your%20cars." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a class="action call" href="tel:+923111111111">Call Now</a>
+    </div>
+  </aside>
+
+  <section class="card" style="grid-column: 1 / -1;">
+    <h2>Active Listings</h2>
+    <div class="cars">
+      <article class="car">
+        <div><h4>Toyota Corolla Altis 2022</h4><p>52 Lakh PKR · 21,000 km · Automatic</p></div>
+        <a href="car-detail.html" class="view">View</a>
+      </article>
+      <article class="car">
+        <div><h4>Honda Civic Oriel 2024</h4><p>79 Lakh PKR · 0 km · Automatic</p></div>
+        <a href="car-detail.html" class="view">View</a>
+      </article>
+      <article class="car">
+        <div><h4>Toyota Yaris ATIV 2022</h4><p>43 Lakh PKR · 25,400 km · Automatic</p></div>
+        <a href="car-detail.html" class="view">View</a>
+      </article>
+    </div>
+  </section>
+</main>
+</body>
+</html>

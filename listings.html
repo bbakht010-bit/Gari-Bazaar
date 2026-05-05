@@ -210,6 +210,32 @@
     font-size: 14px;
   }
 
+  .listing-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 11px;
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  .listing-search-bar input {
+    flex: 1;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 9px;
+    padding: 10px 11px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+
+  .listing-search-bar input:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+
   .top-filter-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -287,6 +313,20 @@
     color: var(--green-main);
     background: var(--green-faint);
   }
+
+  .listing-search-btn {
+    border: none;
+    background: var(--green-main);
+    color: white;
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  .listing-search-btn:hover { background: var(--green-mid); }
 
   .mobile-filter-toggle {
     display: none;
@@ -768,6 +808,11 @@
       </div>
     </div>
 
+    <div class="listing-search-bar">
+      <input id="listingSearchInput" type="text" placeholder="Search by make, model, dealer, city">
+      <button class="listing-search-btn" id="listingSearchBtn" type="button">Search</button>
+    </div>
+
     <div class="top-filter-grid">
       <div class="field">
         <label for="city">City</label>
@@ -841,8 +886,8 @@
     </div>
 
     <div class="filter-actions">
-      <button class="btn-filter-reset" type="button">Reset</button>
-      <button class="btn-filter-primary" type="button">Apply Filters</button>
+      <button class="btn-filter-reset" id="resetFiltersBtn" type="button">Reset</button>
+      <button class="btn-filter-primary" id="applyFiltersBtn" type="button">Apply Filters</button>
     </div>
 
     <button class="mobile-filter-toggle" id="toggleFilters" type="button" aria-expanded="false" aria-controls="filterSidebar">
@@ -893,7 +938,7 @@
   <section>
     <div class="results-top">
       <div>
-        <h3>12 Verified Cars</h3>
+        <h3 id="resultsCount">12 Verified Cars</h3>
         <p>Showing trusted dealer listings with direct contact options.</p>
       </div>
       <div class="field sort-control">
@@ -1233,6 +1278,90 @@
 
 <script>
   const cards = document.querySelectorAll('.car-card');
+  const listingSearchInput = document.getElementById('listingSearchInput');
+  const listingSearchBtn = document.getElementById('listingSearchBtn');
+  const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+  const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+  const resultsCount = document.getElementById('resultsCount');
+  const citySelect = document.getElementById('city');
+  const makeSelect = document.getElementById('make');
+  const modelInput = document.getElementById('model');
+  const conditionSelect = document.getElementById('condition');
+
+  function normalize(value) {
+    return (value || '').toLowerCase().trim();
+  }
+
+  function updateResultsCount(visibleCount) {
+    if (!resultsCount) return;
+    const label = visibleCount === 1 ? 'Verified Car' : 'Verified Cars';
+    resultsCount.textContent = visibleCount + ' ' + label;
+  }
+
+  function runListingsSearch() {
+    const keyword = normalize(listingSearchInput ? listingSearchInput.value : '');
+    const city = citySelect && citySelect.value !== 'All Cities' ? normalize(citySelect.value) : '';
+    const make = makeSelect && makeSelect.value !== 'Any Make' ? normalize(makeSelect.value) : '';
+    const model = normalize(modelInput ? modelInput.value : '');
+    const condition = conditionSelect && conditionSelect.value !== 'Any Condition' ? normalize(conditionSelect.value) : '';
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const titleEl = card.querySelector('.car-main h4');
+      const dealerEl = card.querySelector('.dealer-line');
+      const specsEl = card.querySelector('.mini-specs');
+      const title = normalize(titleEl ? titleEl.textContent : '');
+      const dealer = normalize(dealerEl ? dealerEl.textContent : '');
+      const specs = normalize(specsEl ? specsEl.textContent : '');
+      const haystack = [title, dealer, specs].join(' ');
+      const cardMake = title.split(' ')[0];
+
+      const matchKeyword = !keyword || haystack.includes(keyword);
+      const matchCity = !city || haystack.includes(city);
+      const matchMake = !make || cardMake === make;
+      const matchModel = !model || title.includes(model);
+      const matchCondition = !condition || haystack.includes(condition);
+      const visible = matchKeyword && matchCity && matchMake && matchModel && matchCondition;
+
+      card.style.display = visible ? '' : 'none';
+      if (visible) visibleCount += 1;
+    });
+
+    updateResultsCount(visibleCount);
+  }
+
+  function resetListingFilters() {
+    if (listingSearchInput) listingSearchInput.value = '';
+    if (citySelect) citySelect.value = 'All Cities';
+    if (makeSelect) makeSelect.value = 'Any Make';
+    if (modelInput) modelInput.value = '';
+    if (conditionSelect) conditionSelect.value = 'Any Condition';
+    runListingsSearch();
+  }
+
+  if (listingSearchInput && listingSearchBtn) {
+    listingSearchInput.addEventListener('input', runListingsSearch);
+    listingSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        runListingsSearch();
+      }
+    });
+    listingSearchBtn.addEventListener('click', runListingsSearch);
+  }
+  if (applyFiltersBtn) applyFiltersBtn.addEventListener('click', runListingsSearch);
+  if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
+
+  const params = new URLSearchParams(window.location.search);
+  const prefillQ = params.get('q');
+  const prefillCity = params.get('city');
+  if (prefillQ && listingSearchInput) listingSearchInput.value = prefillQ;
+  if (prefillCity && citySelect) {
+    const cityOptions = Array.from(citySelect.options).map((option) => option.value);
+    if (cityOptions.includes(prefillCity)) citySelect.value = prefillCity;
+  }
+  if (prefillQ || prefillCity) runListingsSearch();
+
   cards.forEach((card) => {
     card.addEventListener('click', () => {
       if (window.matchMedia('(hover: none)').matches) {

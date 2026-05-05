@@ -66,6 +66,38 @@
   }
   .dealer-photo svg { width: 34px; opacity: 0.65; }
   .listing-wrap { grid-column: 1 / -1; }
+  .dealer-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+  .dealer-search input {
+    flex: 1;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+  .dealer-search input:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+  .dealer-search button {
+    border: none;
+    border-radius: 9px;
+    background: var(--green-main);
+    color: white;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .dealer-search button:hover { background: var(--green-mid); }
   .cars-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 8px;
   }
@@ -166,8 +198,12 @@
 
   <section class="card listing-wrap">
     <h2>Active Listings</h2>
-    <div class="cars-grid">
-      <article class="car-card">
+    <div class="dealer-search">
+      <input id="dealerProfileSearchInput" type="text" placeholder="Search this dealer inventory">
+      <button id="dealerProfileSearchBtn" type="button">Search</button>
+    </div>
+    <div class="cars-grid" id="dealerCarsGrid">
+      <article class="car-card" data-search="Toyota Corolla Altis 2022 Islamabad 21000 Automatic Used Ali Sales Executive">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -188,7 +224,7 @@
         </div>
       </article>
 
-      <article class="car-card">
+      <article class="car-card" data-search="Honda Civic Oriel 2024 Rawalpindi 0 Automatic New Saad Sales Executive">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -209,7 +245,7 @@
         </div>
       </article>
 
-      <article class="car-card">
+      <article class="car-card" data-search="Toyota Yaris ATIV 2022 Islamabad 25400 Automatic Used Hamza Owner">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -232,5 +268,30 @@
     </div>
   </section>
 </main>
+<script>
+  const dealerProfileSearchInput = document.getElementById('dealerProfileSearchInput');
+  const dealerProfileSearchBtn = document.getElementById('dealerProfileSearchBtn');
+  const dealerCarsGrid = document.getElementById('dealerCarsGrid');
+
+  function runDealerProfileSearch() {
+    if (!dealerProfileSearchInput || !dealerCarsGrid) return;
+    const query = dealerProfileSearchInput.value.trim().toLowerCase();
+    dealerCarsGrid.querySelectorAll('.car-card').forEach((card) => {
+      const haystack = (card.getAttribute('data-search') || '').toLowerCase();
+      card.style.display = !query || haystack.includes(query) ? '' : 'none';
+    });
+  }
+
+  if (dealerProfileSearchInput && dealerProfileSearchBtn) {
+    dealerProfileSearchInput.addEventListener('input', runDealerProfileSearch);
+    dealerProfileSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        runDealerProfileSearch();
+      }
+    });
+    dealerProfileSearchBtn.addEventListener('click', runDealerProfileSearch);
+  }
+</script>
 </body>
 </html>

@@ -973,13 +973,13 @@
     <h2>Find Your Next Car</h2>
     <p>Search from hundreds of verified dealership listings across Pakistan</p>
     <div class="search-bar">
-      <select>
+      <select id="homeCitySelect">
         <option>All Cities</option>
         <option>Islamabad</option>
         <option>Rawalpindi</option>
       </select>
-      <input type="text" placeholder="Search by make, model or dealer...">
-      <button>Search Cars</button>
+      <input id="homeSearchInput" type="text" placeholder="Search by make, model or dealer...">
+      <button id="homeSearchBtn" type="button">Search Cars</button>
     </div>
     <div class="search-tags">
       <span class="tag">Toyota Corolla</span>
@@ -1003,15 +1003,15 @@
   </div>
   <div class="featured-tools">
     <div class="featured-search">
-      <input type="text" placeholder="Search featured listings by make, model, or dealer">
-      <a href="listings.html" class="small-btn">Search</a>
+      <input id="featuredSearchInput" type="text" placeholder="Search featured listings by make, model, or dealer">
+      <button id="featuredSearchBtn" class="small-btn" type="button">Search</button>
     </div>
     <a href="listings.html" class="small-btn">View All Cars</a>
     <a href="listings.html#results" class="small-btn">Browse Filters</a>
   </div>
-  <div class="cars-grid">
+  <div class="cars-grid" id="featuredCarsGrid">
 
-    <div class="car-card" tabindex="0">
+    <div class="car-card" tabindex="0" data-search="Toyota Corolla GLi 2021 Al-Haram Motors Islamabad Petrol Automatic Used">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -1041,7 +1041,7 @@
       </div>
     </div>
 
-    <div class="car-card" tabindex="0">
+    <div class="car-card" tabindex="0" data-search="Honda Civic Oriel 2024 City Motors Rawalpindi Petrol Automatic New">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -1071,7 +1071,7 @@
       </div>
     </div>
 
-    <div class="car-card" tabindex="0">
+    <div class="car-card" tabindex="0" data-search="Suzuki Alto VXR 2023 Prime Autos Lahore Petrol Manual Used">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -1101,7 +1101,7 @@
       </div>
     </div>
 
-    <div class="car-card" tabindex="0">
+    <div class="car-card" tabindex="0" data-search="Hyundai Tucson AWD 2024 Skyline Motors Islamabad Petrol Automatic New">
       <div class="car-img"><svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="80"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg></div>
       <div class="car-body">
         <div class="car-badges">
@@ -1380,6 +1380,57 @@
 </footer>
 
 <script>
+  function runHomeSearchRedirect() {
+    const input = document.getElementById('homeSearchInput');
+    const city = document.getElementById('homeCitySelect');
+    if (!input || !city) return;
+    const q = encodeURIComponent(input.value.trim());
+    const cityValue = city.value === 'All Cities' ? '' : encodeURIComponent(city.value);
+    let target = 'listings.html';
+    const params = [];
+    if (q) params.push('q=' + q);
+    if (cityValue) params.push('city=' + cityValue);
+    if (params.length) target += '?' + params.join('&');
+    window.location.href = target;
+  }
+
+  const homeSearchInput = document.getElementById('homeSearchInput');
+  const homeSearchBtn = document.getElementById('homeSearchBtn');
+  if (homeSearchInput && homeSearchBtn) {
+    homeSearchBtn.addEventListener('click', runHomeSearchRedirect);
+    homeSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        runHomeSearchRedirect();
+      }
+    });
+  }
+
+  function runFeaturedSearch() {
+    const input = document.getElementById('featuredSearchInput');
+    const grid = document.getElementById('featuredCarsGrid');
+    if (!input || !grid) return;
+    const query = input.value.trim().toLowerCase();
+    const cards = grid.querySelectorAll('.car-card');
+    cards.forEach((card) => {
+      const haystack = (card.getAttribute('data-search') || '').toLowerCase();
+      card.style.display = !query || haystack.includes(query) ? '' : 'none';
+    });
+  }
+
+  const featuredSearchInput = document.getElementById('featuredSearchInput');
+  const featuredSearchBtn = document.getElementById('featuredSearchBtn');
+  if (featuredSearchInput && featuredSearchBtn) {
+    featuredSearchInput.addEventListener('input', runFeaturedSearch);
+    featuredSearchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        runFeaturedSearch();
+      }
+    });
+    featuredSearchBtn.addEventListener('click', runFeaturedSearch);
+  }
+
   document.querySelectorAll('.car-card').forEach((card) => {
     card.addEventListener('click', () => {
       if (window.matchMedia('(hover: none)').matches) {

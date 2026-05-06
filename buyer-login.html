@@ -172,9 +172,6 @@
         <button class="btn-login" type="submit">Sign in</button>
         <div id="buyer-login-error" class="error"></div>
       </form>
-      <p class="muted-note">
-        Accounts are not live yet — this matches the flow PakWheels-style sites use so we can plug in Firebase Auth next. Submitting shows a reminder until Phase 2.
-      </p>
       <p class="alt-links">
         No account? <a href="buyer-signup.html">Create a buyer profile</a>
         · <a href="dealer-login.html">Dealer login</a>
@@ -183,35 +180,89 @@
   </section>
 </main>
 
-<script>
-  document.getElementById('buyer-login-form').addEventListener('submit', function (event) {
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
+    authDomain: "gari-bazaar.firebaseapp.com",
+    projectId: "gari-bazaar",
+    storageBucket: "gari-bazaar.firebasestorage.app",
+    messagingSenderId: "296364565325",
+    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
+    measurementId: "G-7LT0S01NPP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const form = document.getElementById("buyer-login-form");
+  const errorBox = document.getElementById("buyer-login-error");
+  const submitButton = form.querySelector('button[type="submit"]');
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.add("show");
+  }
+
+  function hideError() {
+    errorBox.classList.remove("show");
+    errorBox.textContent = "";
+  }
+
+  form.addEventListener("submit", async function (event) {
     event.preventDefault();
-    const box = document.getElementById('buyer-login-error');
-    box.classList.remove('show');
-    box.textContent = 'Buyer login will connect to Firebase Authentication in Phase 2. For now, browse listings without signing in.';
-    box.classList.add('show');
+    hideError();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Signing in...";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = "index.html";
+    } catch (error) {
+      const code = error && error.code ? error.code : "";
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+        showError("Invalid email or password. Please try again.");
+      } else if (code === "auth/invalid-email") {
+        showError("Please enter a valid email address.");
+      } else if (code === "auth/too-many-requests") {
+        showError("Too many attempts. Please wait a moment and try again.");
+      } else if (code === "auth/configuration-not-found") {
+        showError("Firebase Email/Password sign-in is not enabled yet. Enable it in Firebase Authentication settings.");
+      } else {
+        showError("Unable to sign in right now. Please try again.");
+      }
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Sign in";
+    }
   });
 
   (function addQuickNav() {
-    if (document.getElementById('gb-quick-nav')) return;
-    const hostNav = document.querySelector('nav');
+    if (document.getElementById("gb-quick-nav")) return;
+    const hostNav = document.querySelector("nav");
     if (!hostNav) return;
-    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
-    const nav = document.createElement('div');
-    nav.id = 'gb-quick-nav';
-    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.textContent = 'Back';
-    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
-    back.addEventListener('click', () => {
+    const mountPoint = hostNav.querySelector(".nav-cta, .nav-right") || hostNav;
+    const nav = document.createElement("div");
+    nav.id = "gb-quick-nav";
+    nav.style.cssText = "display:flex;gap:8px;align-items:center;margin-left:10px;";
+    const back = document.createElement("button");
+    back.type = "button";
+    back.textContent = "Back";
+    back.style.cssText = "border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;";
+    back.addEventListener("click", () => {
       if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
+      else window.location.href = "index.html";
     });
-    const home = document.createElement('a');
-    home.href = 'index.html';
-    home.textContent = 'Home';
-    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
+    const home = document.createElement("a");
+    home.href = "index.html";
+    home.textContent = "Home";
+    home.style.cssText = "text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;";
     nav.appendChild(back);
     nav.appendChild(home);
     mountPoint.appendChild(nav);

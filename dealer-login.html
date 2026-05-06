@@ -125,6 +125,32 @@
     cursor: pointer;
   }
   .btn-login:hover { background: var(--green-mid); }
+  .btn-google {
+    width: 100%;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--gray-800);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-google:hover { background: var(--gray-50); }
+  .btn-create {
+    width: 100%;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    background: var(--green-faint);
+    color: var(--green-mid);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-create:hover { background: #dcfce7; }
 
   .error {
     margin-top: 10px;
@@ -139,7 +165,7 @@
   }
   .error.show { display: block; }
 
-  .dummy-note {
+  .auth-note {
     margin-top: 14px;
     border: 1px solid #bbf7d0;
     background: var(--green-faint);
@@ -166,39 +192,166 @@
     <div class="card-body">
       <form id="login-form">
         <div class="field">
-          <label for="username">Username</label>
-          <input id="username" type="text" placeholder="Enter username">
+          <label for="email">Dealer Email</label>
+          <input id="email" type="email" autocomplete="username" placeholder="dealer@example.com" required>
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Enter password">
+          <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
         </div>
         <button class="btn-login" type="submit">Login to Dashboard</button>
+        <button id="dealer-google-login" class="btn-google" type="button">Continue with Google</button>
+        <button id="dealer-create-email" class="btn-create" type="button">New dealer? Create account with Email</button>
         <div id="login-error" class="error"></div>
       </form>
-      <div class="dummy-note">
-        Demo credentials for this prototype: <strong>username: admin</strong> and <strong>password: admin</strong>.
+      <div class="auth-note">
+        Dealer login is connected to Firebase Authentication. Use your dealer account credentials to access dashboard.
       </div>
     </div>
   </section>
 </main>
 
-<script>
-  document.getElementById('login-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorBox = document.getElementById('login-error');
-    errorBox.classList.remove('show');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    if (username === 'admin' && password === 'admin') {
-      sessionStorage.setItem('garibazaar_dealer_session', 'active');
-      window.location.href = 'dealer-dashboard.html';
+  const firebaseConfig = {
+    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
+    authDomain: "gari-bazaar.firebaseapp.com",
+    projectId: "gari-bazaar",
+    storageBucket: "gari-bazaar.firebasestorage.app",
+    messagingSenderId: "296364565325",
+    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
+    measurementId: "G-7LT0S01NPP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  const form = document.getElementById("login-form");
+  const errorBox = document.getElementById("login-error");
+  const submitButton = form.querySelector('button[type="submit"]');
+  const googleButton = document.getElementById("dealer-google-login");
+  const createEmailButton = document.getElementById("dealer-create-email");
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.classList.add("show");
+  }
+
+  function hideError() {
+    errorBox.classList.remove("show");
+    errorBox.textContent = "";
+  }
+
+  function rememberDealerSession(user) {
+    sessionStorage.setItem("garibazaar_dealer_session", "active");
+    localStorage.setItem("gb_dealer_uid", user.uid);
+    localStorage.setItem("gb_dealer_email", user.email || "");
+  }
+
+  function hasCompleteDealerProfile(user) {
+    const raw = localStorage.getItem("gb_dealer_profile_" + user.uid);
+    if (!raw) return false;
+    try {
+      const profile = JSON.parse(raw);
+      return !!(
+        profile &&
+        profile.businessName &&
+        profile.ownerName &&
+        profile.phone &&
+        profile.city &&
+        profile.address
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function getDealerPostLoginPath(user) {
+    return hasCompleteDealerProfile(user) ? "dealer-dashboard.html" : "register.html";
+  }
+
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+    hideError();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Signing in...";
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      rememberDealerSession(credential.user);
+      window.location.href = getDealerPostLoginPath(credential.user);
+    } catch (error) {
+      const code = error && error.code ? error.code : "";
+      if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
+        showError("Invalid dealer email or password.");
+      } else if (code === "auth/invalid-email") {
+        showError("Please enter a valid email address.");
+      } else {
+        showError("Unable to sign in right now. Please try again.");
+      }
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = "Login to Dashboard";
+    }
+  });
+
+  googleButton.addEventListener("click", async function () {
+    hideError();
+    googleButton.disabled = true;
+    googleButton.textContent = "Please wait...";
+    try {
+      const credential = await signInWithPopup(auth, googleProvider);
+      rememberDealerSession(credential.user);
+      window.location.href = getDealerPostLoginPath(credential.user);
+    } catch (error) {
+      const code = error && error.code ? error.code : "";
+      if (code === "auth/popup-closed-by-user") {
+        showError("Google sign-in was cancelled.");
+      } else if (code === "auth/unauthorized-domain") {
+        showError("This domain is not authorized in Firebase Auth settings yet.");
+      } else {
+        showError("Google sign-in failed. Please try again.");
+      }
+    } finally {
+      googleButton.disabled = false;
+      googleButton.textContent = "Continue with Google";
+    }
+  });
+
+  createEmailButton.addEventListener("click", async function () {
+    hideError();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    if (!email || !password) {
+      showError("Enter email and password first, then click create account.");
       return;
     }
-
-    errorBox.textContent = 'Invalid credentials. Use admin / admin for this demo.';
-    errorBox.classList.add('show');
+    createEmailButton.disabled = true;
+    createEmailButton.textContent = "Creating account...";
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      rememberDealerSession(credential.user);
+      window.location.href = "register.html";
+    } catch (error) {
+      const code = error && error.code ? error.code : "";
+      if (code === "auth/email-already-in-use") {
+        showError("This email already has a dealer account. Please sign in.");
+      } else if (code === "auth/weak-password") {
+        showError("Password should be at least 6 characters.");
+      } else if (code === "auth/invalid-email") {
+        showError("Please enter a valid email address.");
+      } else {
+        showError("Could not create dealer account right now.");
+      }
+    } finally {
+      createEmailButton.disabled = false;
+      createEmailButton.textContent = "New dealer? Create account with Email";
+    }
   });
 
   (function addQuickNav() {

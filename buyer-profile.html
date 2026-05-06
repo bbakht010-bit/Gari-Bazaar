@@ -107,6 +107,22 @@
     border-color: var(--green-main);
     box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
   }
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    border: 2px solid var(--gray-200);
+    background: var(--gray-100);
+    object-fit: cover;
+    display: block;
+    margin: 2px auto 10px;
+  }
+  .avatar-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+  }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .msg {
     margin-top: 10px;
@@ -125,7 +141,6 @@
 <nav>
   <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
   <div class="nav-actions">
-    <a class="btn" href="index.html">Home</a>
     <button id="profile-logout" class="btn">Log out</button>
   </div>
 </nav>
@@ -138,6 +153,12 @@
     </div>
     <div class="card-body">
       <form id="buyer-profile-form">
+        <img id="profileAvatarPreview" class="profile-avatar" alt="Profile picture preview">
+        <div class="field">
+          <label for="profilePicture">Profile picture</label>
+          <input id="profilePicture" type="file" accept="image/png,image/jpeg,image/webp">
+        </div>
+        <p class="avatar-note">Upload JPG, PNG, or WEBP. Recommended square image.</p>
         <div class="field">
           <label for="fullName">Full name</label>
           <input id="fullName" type="text" placeholder="Your name" required>
@@ -159,10 +180,6 @@
               <option>Faisalabad</option>
             </select>
           </div>
-        </div>
-        <div class="field">
-          <label for="budget">Budget range</label>
-          <input id="budget" type="text" placeholder="e.g. 25-35 lakh">
         </div>
         <button id="profile-save" class="btn btn-primary" type="submit">Save profile</button>
         <div id="profile-msg" class="msg"></div>
@@ -191,6 +208,8 @@
   const form = document.getElementById("buyer-profile-form");
   const msg = document.getElementById("profile-msg");
   const logoutButton = document.getElementById("profile-logout");
+  const avatarInput = document.getElementById("profilePicture");
+  const avatarPreview = document.getElementById("profileAvatarPreview");
 
   function profileKey(uid) {
     return "gb_buyer_profile_" + uid;
@@ -205,10 +224,12 @@
     document.getElementById("fullName").value = profile.fullName || "";
     document.getElementById("phone").value = profile.phone || "";
     document.getElementById("city").value = profile.city || "";
-    document.getElementById("budget").value = profile.budget || "";
+    avatarPreview.src = profile.profilePicture || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.fullName || "Buyer") + "&background=ecfdf5&color=166534&size=160";
   }
 
   let currentUser = null;
+  let isExistingProfile = false;
+  let pendingProfilePicture = "";
   onAuthStateChanged(auth, (user) => {
     if (!user) {
       window.location.href = "buyer-login.html";
@@ -216,28 +237,55 @@
     }
     currentUser = user;
     const raw = localStorage.getItem(profileKey(user.uid));
-    if (!raw) return;
+    if (!raw) {
+      avatarPreview.src = "https://ui-avatars.com/api/?name=Buyer&background=ecfdf5&color=166534&size=160";
+      return;
+    }
+    isExistingProfile = true;
     try {
       const profile = JSON.parse(raw);
+      pendingProfilePicture = profile.profilePicture || "";
       fillForm(profile);
     } catch (error) {
       showMessage("Saved profile data is invalid. Please save again.", true);
     }
   });
 
+  avatarInput.addEventListener("change", () => {
+    const file = avatarInput.files && avatarInput.files[0];
+    if (!file) return;
+    const isValidType = /^image\/(png|jpeg|webp)$/.test(file.type);
+    if (!isValidType) {
+      showMessage("Please upload PNG, JPG, or WEBP image only.", true);
+      avatarInput.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      pendingProfilePicture = String(reader.result || "");
+      avatarPreview.src = pendingProfilePicture;
+    };
+    reader.readAsDataURL(file);
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (!currentUser) return;
+    const wasExistingProfile = isExistingProfile;
     const profile = {
       fullName: document.getElementById("fullName").value.trim(),
       phone: document.getElementById("phone").value.trim(),
       city: document.getElementById("city").value,
-      budget: document.getElementById("budget").value.trim(),
+      profilePicture: pendingProfilePicture || avatarPreview.src || "",
       email: currentUser.email || "",
       updatedAt: new Date().toISOString()
     };
     localStorage.setItem(profileKey(currentUser.uid), JSON.stringify(profile));
+    isExistingProfile = true;
     showMessage("Profile saved successfully.", false);
+    if (!wasExistingProfile) {
+      window.location.href = "index.html";
+    }
   });
 
   logoutButton.addEventListener("click", async () => {

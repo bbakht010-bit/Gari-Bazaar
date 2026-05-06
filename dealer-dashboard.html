@@ -149,15 +149,15 @@
 <nav>
   <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
   <div class="nav-right">
-    <span class="pill">Skyline Motors · Owner Dashboard</span>
+    <span id="dealerDashboardPill" class="pill">Dealer Dashboard</span>
     <a class="btn btn-outline" href="listings.html">View Listings Page</a>
     <a class="btn btn-primary" href="admin.html">Open Admin</a>
   </div>
 </nav>
 
 <section class="hero">
-  <h1>Dealer Owner Dashboard</h1>
-  <p>Add cars, add employees, and assign who handles each listing. If a car has no assigned employee, it automatically uses owner contact and shows "Managed by Owner".</p>
+  <h1 id="dealerDashboardTitle">Dealer Dashboard</h1>
+  <p id="dealerDashboardSubtitle">Add cars, add employees, and assign who handles each listing. If a car has no assigned employee, it automatically uses owner contact and shows "Managed by Owner".</p>
 </section>
 
 <main class="wrap">
@@ -236,12 +236,50 @@
 </main>
 
 <script>
-  if (sessionStorage.getItem('garibazaar_dealer_session') !== 'active') {
+  const dealerUid = localStorage.getItem('gb_dealer_uid');
+  if (!dealerUid) {
     window.location.href = 'dealer-login.html';
+  }
+  const dealerProfileKey = 'gb_dealer_profile_' + dealerUid;
+  const dealerProfileRaw = localStorage.getItem(dealerProfileKey);
+  if (!dealerProfileRaw) {
+    window.location.href = 'register.html';
+  }
+
+  let dealerProfile = null;
+  try {
+    dealerProfile = dealerProfileRaw ? JSON.parse(dealerProfileRaw) : null;
+  } catch {
+    dealerProfile = null;
+  }
+  const hasCompleteDealerProfile = !!(
+    dealerProfile &&
+    dealerProfile.businessName &&
+    dealerProfile.ownerName &&
+    dealerProfile.phone &&
+    dealerProfile.city &&
+    dealerProfile.address
+  );
+  if (!hasCompleteDealerProfile) {
+    window.location.href = 'register.html';
   }
 
   const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1';
-  const ownerContact = { name: 'Hamza', role: 'Owner', phone: '923000000001', whatsapp: '923000000001' };
+  const ownerContact = {
+    name: (dealerProfile && dealerProfile.ownerName) || 'Owner',
+    role: 'Owner',
+    phone: (dealerProfile && dealerProfile.phone) || '923000000001',
+    whatsapp: (dealerProfile && dealerProfile.whatsapp) || '923000000001'
+  };
+
+  const dealerName = (dealerProfile && dealerProfile.businessName) || 'Your Dealership';
+  const dealerCity = (dealerProfile && dealerProfile.city) || 'Pakistan';
+  const pill = document.getElementById('dealerDashboardPill');
+  const title = document.getElementById('dealerDashboardTitle');
+  const subtitle = document.getElementById('dealerDashboardSubtitle');
+  if (pill) pill.textContent = dealerName + ' · Dealer Dashboard';
+  if (title) title.textContent = dealerName + ' Dashboard';
+  if (subtitle) subtitle.textContent = 'City: ' + dealerCity + ' · Add cars, employees, and listing assignments for your dealership.';
 
   const state = {
     employees: [],

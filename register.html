@@ -604,7 +604,7 @@
       </div>
       <div class="section-sub">Details of the dealership owner or manager</div>
       <div class="rule-note">
-        Default contact rule: all car inquiries are routed to the owner unless you assign an employee per car in dashboard.
+        Default contact rule: all car inquiries are routed to the owner unless you assign an employee per car in dashboard. Owner email comes from your logged-in dealer account automatically.
       </div>
       <div class="form-grid">
         <div class="field">
@@ -624,8 +624,8 @@
           <input type="tel" id="owner-whatsapp" placeholder="03XX-XXXXXXX">
         </div>
         <div class="field span2">
-          <label>Email Address <span>*</span></label>
-          <input type="email" id="owner-email" placeholder="owner@yourdealership.com">
+          <label>Logged-in Dealer Email</label>
+          <input type="email" id="owner-email-readonly" placeholder="Auto-filled from login" readonly>
         </div>
       </div>
     </div>
@@ -842,7 +842,36 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
+    authDomain: "gari-bazaar.firebaseapp.com",
+    projectId: "gari-bazaar",
+    storageBucket: "gari-bazaar.firebasestorage.app",
+    messagingSenderId: "296364565325",
+    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
+    measurementId: "G-7LT0S01NPP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  let currentUser = null;
+  const ownerEmailReadonly = document.getElementById('owner-email-readonly');
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = 'dealer-login.html';
+      return;
+    }
+    currentUser = user;
+    localStorage.setItem('gb_dealer_uid', user.uid);
+    localStorage.setItem('gb_dealer_email', user.email || '');
+    if (ownerEmailReadonly) ownerEmailReadonly.value = user.email || '';
+  });
+
   // Plan selection highlight
   document.querySelectorAll('.plan-option').forEach(option => {
     option.addEventListener('click', function() {
@@ -914,8 +943,7 @@
       { id: 'dealer-address', message: 'Full address is required.' },
       { id: 'owner-name', message: 'Owner full name is required.' },
       { id: 'owner-cnic', message: 'CNIC number is required.' },
-      { id: 'owner-phone', message: 'Owner phone number is required.' },
-      { id: 'owner-email', message: 'Owner email address is required.' }
+      { id: 'owner-phone', message: 'Owner phone number is required.' }
     ];
 
     let firstInvalid = null;
@@ -974,9 +1002,34 @@
       return;
     }
 
+    if (!currentUser) {
+      alert('Your dealer session has expired. Please sign in again.');
+      window.location.href = 'dealer-login.html';
+      return;
+    }
+
+    const dealerProfile = {
+      businessName: document.getElementById('dealer-name').value.trim(),
+      city: document.getElementById('dealer-city').value,
+      area: document.getElementById('dealer-area').value.trim(),
+      address: document.getElementById('dealer-address').value.trim(),
+      description: (document.querySelector('textarea') || { value: '' }).value.trim(),
+      ownerName: document.getElementById('owner-name').value.trim(),
+      ownerCnic: document.getElementById('owner-cnic').value.trim(),
+      phone: document.getElementById('owner-phone').value.trim(),
+      whatsapp: document.getElementById('owner-whatsapp').value.trim() || document.getElementById('owner-phone').value.trim(),
+      email: currentUser.email || '',
+      plan: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('gb_dealer_profile_' + currentUser.uid, JSON.stringify(dealerProfile));
+
     this.textContent = 'Application Submitted!';
     this.style.background = '#166534';
     this.disabled = true;
+    setTimeout(() => {
+      window.location.href = 'dealer-dashboard.html';
+    }, 500);
   });
 
   (function addQuickNav() {

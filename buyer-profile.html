@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buyer Profile - GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-faint: #f0fdf4;
+    --white: #ffffff;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-900: #111827;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    min-height: 100vh;
+  }
+  nav {
+    height: 70px;
+    border-bottom: 1px solid var(--gray-200);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-mid);
+    text-decoration: none;
+  }
+  .logo span { color: #ca8a04; }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    border: 1px solid var(--gray-200);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--gray-600);
+    cursor: pointer;
+  }
+  .btn-primary {
+    border: none;
+    background: var(--green-main);
+    color: white;
+  }
+  .wrap {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .card-head {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: #fff;
+    padding: 24px;
+  }
+  .card-head h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    line-height: 1.2;
+  }
+  .card-head p { margin-top: 8px; font-size: 14px; color: rgba(255,255,255,0.85); }
+  .card-body { padding: 20px; }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #1f2937;
+    font-weight: 700;
+  }
+  .field input, .field select {
+    width: 100%;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 11px 12px;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--green-main);
+    box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+  }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .msg {
+    margin-top: 10px;
+    border-radius: 10px;
+    padding: 10px 11px;
+    font-size: 12px;
+    line-height: 1.5;
+    display: none;
+  }
+  .msg.show { display: block; }
+  .msg.success { border: 1px solid #bbf7d0; background: var(--green-faint); color: var(--green-mid); }
+  .msg.error { border: 1px solid #fecdd3; background: #fff1f2; color: #9f1239; }
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+  <div class="nav-actions">
+    <a class="btn" href="index.html">Home</a>
+    <button id="profile-logout" class="btn">Log out</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h1>Your buyer profile</h1>
+      <p>Complete your profile once, and edit it any time.</p>
+    </div>
+    <div class="card-body">
+      <form id="buyer-profile-form">
+        <div class="field">
+          <label for="fullName">Full name</label>
+          <input id="fullName" type="text" placeholder="Your name" required>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" type="tel" placeholder="03xx-xxxxxxx" required>
+          </div>
+          <div class="field">
+            <label for="city">City</label>
+            <select id="city" required>
+              <option value="">Select city</option>
+              <option>Islamabad</option>
+              <option>Rawalpindi</option>
+              <option>Lahore</option>
+              <option>Karachi</option>
+              <option>Peshawar</option>
+              <option>Faisalabad</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="budget">Budget range</label>
+          <input id="budget" type="text" placeholder="e.g. 25-35 lakh">
+        </div>
+        <button id="profile-save" class="btn btn-primary" type="submit">Save profile</button>
+        <div id="profile-msg" class="msg"></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
+    authDomain: "gari-bazaar.firebaseapp.com",
+    projectId: "gari-bazaar",
+    storageBucket: "gari-bazaar.firebasestorage.app",
+    messagingSenderId: "296364565325",
+    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
+    measurementId: "G-7LT0S01NPP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const form = document.getElementById("buyer-profile-form");
+  const msg = document.getElementById("profile-msg");
+  const logoutButton = document.getElementById("profile-logout");
+
+  function profileKey(uid) {
+    return "gb_buyer_profile_" + uid;
+  }
+
+  function showMessage(text, isError) {
+    msg.className = "msg show " + (isError ? "error" : "success");
+    msg.textContent = text;
+  }
+
+  function fillForm(profile) {
+    document.getElementById("fullName").value = profile.fullName || "";
+    document.getElementById("phone").value = profile.phone || "";
+    document.getElementById("city").value = profile.city || "";
+    document.getElementById("budget").value = profile.budget || "";
+  }
+
+  let currentUser = null;
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "buyer-login.html";
+      return;
+    }
+    currentUser = user;
+    const raw = localStorage.getItem(profileKey(user.uid));
+    if (!raw) return;
+    try {
+      const profile = JSON.parse(raw);
+      fillForm(profile);
+    } catch (error) {
+      showMessage("Saved profile data is invalid. Please save again.", true);
+    }
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!currentUser) return;
+    const profile = {
+      fullName: document.getElementById("fullName").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      city: document.getElementById("city").value,
+      budget: document.getElementById("budget").value.trim(),
+      email: currentUser.email || "",
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(profileKey(currentUser.uid), JSON.stringify(profile));
+    showMessage("Profile saved successfully.", false);
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("gb_last_signed_in_uid");
+      localStorage.removeItem("gb_last_signed_in_email");
+      window.location.href = "index.html";
+    } catch (error) {
+      showMessage("Could not log out. Please try again.", true);
+    }
+  });
+</script>
+</body>
+</html>

@@ -97,6 +97,20 @@
   .nav-buyer-links a:hover { color: var(--green-mid); }
 
   .nav-buyer-links a.join { color: var(--green-main); }
+  .nav-profile-link {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green-main);
+    text-decoration: none;
+    border: 1.5px solid var(--green-main);
+    border-radius: 999px;
+    padding: 7px 12px;
+    white-space: nowrap;
+  }
+  .nav-profile-link:hover { background: var(--green-faint); }
 
   @media (max-width: 900px) {
     .nav-buyer-links {
@@ -979,10 +993,10 @@
     <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-cta">
-    <div class="nav-buyer-links">
-      <a href="buyer-login.html">Sign in</a>
-      <a href="buyer-signup.html" class="join">Join</a>
+    <div id="navBuyerLinks" class="nav-buyer-links">
+      <a id="navBuyerSignIn" href="buyer-login.html">Sign in</a>
     </div>
+    <a id="navProfileLink" class="nav-profile-link" href="buyer-profile.html">My Profile</a>
     <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
     <a href="register.html" class="btn-primary">List Your Dealership</a>
   </div>
@@ -1582,6 +1596,52 @@
     nav.appendChild(home);
     mountPoint.appendChild(nav);
   })();
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
+    authDomain: "gari-bazaar.firebaseapp.com",
+    projectId: "gari-bazaar",
+    storageBucket: "gari-bazaar.firebasestorage.app",
+    messagingSenderId: "296364565325",
+    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
+    measurementId: "G-7LT0S01NPP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const navBuyerLinks = document.getElementById("navBuyerLinks");
+  const navProfileLink = document.getElementById("navProfileLink");
+
+  function setSignedInUi(isSignedIn) {
+    if (!navBuyerLinks || !navProfileLink) return;
+    if (isSignedIn) {
+      navBuyerLinks.style.display = "none";
+      navProfileLink.style.display = "inline-flex";
+    } else {
+      navBuyerLinks.style.display = "flex";
+      navProfileLink.style.display = "none";
+    }
+  }
+
+  const hasSessionHint = !!localStorage.getItem("gb_last_signed_in_uid");
+  if (hasSessionHint) setSignedInUi(true);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      localStorage.setItem("gb_last_signed_in_uid", user.uid);
+      localStorage.setItem("gb_last_signed_in_email", user.email || "");
+      setSignedInUi(true);
+    } else {
+      const stillHasHint = !!localStorage.getItem("gb_last_signed_in_uid");
+      setSignedInUi(stillHasHint);
+    }
+  });
 </script>
 
 </body>

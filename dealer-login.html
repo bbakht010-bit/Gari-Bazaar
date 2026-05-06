@@ -175,6 +175,16 @@
     font-size: 12px;
     line-height: 1.55;
   }
+  .link-reset {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--gray-600);
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
 </style>
 </head>
 <body>
@@ -207,26 +217,14 @@
       <div class="auth-note">
         Dealer login is connected to Firebase Authentication. Use your dealer account credentials to access dashboard.
       </div>
+      <button id="dealer-reset-local" class="link-reset" type="button">Reset dealer local profile (this browser only)</button>
     </div>
   </section>
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
-    authDomain: "gari-bazaar.firebaseapp.com",
-    projectId: "gari-bazaar",
-    storageBucket: "gari-bazaar.firebasestorage.app",
-    messagingSenderId: "296364565325",
-    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
-    measurementId: "G-7LT0S01NPP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, getDealerProfile, isDealerProfileComplete, upsertDealerProfile } from "./firebase-client.js";
   const googleProvider = new GoogleAuthProvider();
 
   const form = document.getElementById("login-form");
@@ -234,6 +232,7 @@
   const submitButton = form.querySelector('button[type="submit"]');
   const googleButton = document.getElementById("dealer-google-login");
   const createEmailButton = document.getElementById("dealer-create-email");
+  const resetLocalButton = document.getElementById("dealer-reset-local");
 
   function showError(message) {
     errorBox.textContent = message;
@@ -251,26 +250,22 @@
     localStorage.setItem("gb_dealer_email", user.email || "");
   }
 
-  function hasCompleteDealerProfile(user) {
-    const raw = localStorage.getItem("gb_dealer_profile_" + user.uid);
-    if (!raw) return false;
-    try {
-      const profile = JSON.parse(raw);
-      return !!(
-        profile &&
-        profile.businessName &&
-        profile.ownerName &&
-        profile.phone &&
-        profile.city &&
-        profile.address
-      );
-    } catch (error) {
-      return false;
+  async function getDealerPostLoginPath(user) {
+    let profile = await getDealerProfile(user.uid);
+    if (!profile) {
+      const legacyRaw = localStorage.getItem("gb_dealer_profile_" + user.uid);
+      if (legacyRaw) {
+        try {
+          const legacy = JSON.parse(legacyRaw);
+          await upsertDealerProfile(user.uid, legacy);
+          profile = legacy;
+        } catch (_error) {}
+      }
     }
-  }
-
-  function getDealerPostLoginPath(user) {
-    return hasCompleteDealerProfile(user) ? "dealer-dashboard.html" : "register.html";
+    if (profile) {
+      localStorage.setItem("gb_dealer_profile_" + user.uid, JSON.stringify(profile));
+    }
+    return isDealerProfileComplete(profile) ? "dealer-dashboard.html" : "register.html";
   }
 
   form.addEventListener("submit", async function (event) {
@@ -283,8 +278,13 @@
     submitButton.textContent = "Signing in...";
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
+      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      if (record.role && record.role !== "dealer") {
+        showError("This account is not a dealer account.");
+        return;
+      }
       rememberDealerSession(credential.user);
-      window.location.href = getDealerPostLoginPath(credential.user);
+      window.location.href = await getDealerPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
@@ -306,8 +306,13 @@
     googleButton.textContent = "Please wait...";
     try {
       const credential = await signInWithPopup(auth, googleProvider);
+      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      if (record.role && record.role !== "dealer") {
+        showError("This account is not a dealer account.");
+        return;
+      }
       rememberDealerSession(credential.user);
-      window.location.href = getDealerPostLoginPath(credential.user);
+      window.location.href = await getDealerPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/popup-closed-by-user") {
@@ -335,6 +340,7 @@
     createEmailButton.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
       rememberDealerSession(credential.user);
       window.location.href = "register.html";
     } catch (error) {
@@ -354,6 +360,21 @@
     }
   });
 
+  resetLocalButton.addEventListener("click", () => {
+    const keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+      if (key.startsWith("gb_dealer_profile_")) {
+        localStorage.removeItem(key);
+      }
+    });
+    localStorage.removeItem("gb_dealer_uid");
+    localStorage.removeItem("gb_dealer_email");
+    localStorage.removeItem("garibazaar_dealer_dashboard_v1");
+    sessionStorage.removeItem("garibazaar_dealer_session");
+    hideError();
+    showError("Dealer local profile data has been reset for this browser.");
+  });
+
   (function addQuickNav() {
     var pathNorm = window.location.pathname.replace(/\\/g, '/');
     var segs = pathNorm.split('/').filter(Boolean);
@@ -362,6 +383,7 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
     nav.id = 'gb-quick-nav';

@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    match /users/{uid} {
+      allow create: if isOwner(uid);
+      allow read, update, delete: if isOwner(uid) || isAdmin();
+    }
+
+    match /buyerProfiles/{uid} {
+      allow create, update, delete: if isOwner(uid) || isAdmin();
+      allow read: if isOwner(uid) || isAdmin();
+    }
+
+    match /dealerProfiles/{uid} {
+      allow create, update, delete: if isOwner(uid) || isAdmin();
+      allow read: if true;
+    }
+  }
+}

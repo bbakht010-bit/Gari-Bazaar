@@ -166,7 +166,7 @@
         <button class="btn" type="submit">Create account</button>
       </form>
       <p class="muted-note">
-        Sign-up is UI-only until Firebase is configured. We will store a buyers profile document linked to Auth, similar to how dealer registration will work.
+        Create your account, then complete buyer profile (name, phone, city) before continuing.
       </p>
       <p class="alt-links">
         Already registered? <a href="buyer-login.html">Sign in</a>
@@ -175,10 +175,57 @@
   </section>
 </main>
 
-<script>
-  document.getElementById('buyer-signup-form').addEventListener('submit', function (event) {
+<script type="module">
+  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, upsertBuyerProfile } from "./firebase-client.js";
+  const form = document.getElementById('buyer-signup-form');
+
+  function isValidPakistanMobile(phone) {
+    return /^03\d{2}[-\s]?\d{7}$/.test(phone);
+  }
+
+  form.addEventListener('submit', async function (event) {
     event.preventDefault();
-    alert('Thanks — buyer registration will save to Firebase in Phase 2. You can keep browsing listings as a guest.');
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!name || !phone || !email || !password) {
+      alert('Please fill all required fields.');
+      return;
+    }
+    if (!isValidPakistanMobile(phone)) {
+      alert('Phone must be in format 03xx-xxxxxxx.');
+      return;
+    }
+
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      localStorage.setItem('gb_last_signed_in_uid', credential.user.uid);
+      localStorage.setItem('gb_last_signed_in_email', credential.user.email || '');
+      const profile = {
+        fullName: name,
+        phone: phone,
+        city: '',
+        email: credential.user.email || '',
+        updatedAt: new Date().toISOString()
+      };
+      await upsertBuyerProfile(credential.user.uid, profile);
+      window.location.href = 'buyer-profile.html';
+    } catch (error) {
+      const code = error && error.code ? error.code : '';
+      if (code === 'auth/email-already-in-use') {
+        alert('This email already has an account. Please sign in.');
+      } else if (code === 'auth/weak-password') {
+        alert('Password should be at least 6 characters.');
+      } else if (code === 'auth/invalid-email') {
+        alert('Please enter a valid email address.');
+      } else {
+        alert('Could not create account right now. Please try again.');
+      }
+    }
   });
 
   (function addQuickNav() {

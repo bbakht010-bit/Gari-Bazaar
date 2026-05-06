@@ -64,6 +64,18 @@
     font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif;
   }
   .search-row button:hover { background: var(--green-mid); }
+  .sell-cta {
+    display: none;
+    margin-bottom: 12px;
+    border: 1px solid #bbf7d0;
+    background: var(--green-faint);
+    color: var(--green-mid);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .sell-cta.show { display: block; }
   .dealers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
   .dealer-card {
     border: 1px solid var(--gray-200); border-radius: 14px; background: white; padding: 14px;
@@ -84,6 +96,17 @@
     border: 1.5px solid var(--green-main); color: var(--green-main);
   }
   .card-btn:hover { background: var(--green-faint); color: var(--green-mid); }
+  .card-btn.whatsapp-btn {
+    margin-top: 8px;
+    border-color: #16a34a;
+    background: #16a34a;
+    color: #fff;
+  }
+  .card-btn.whatsapp-btn:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
+  }
   .empty {
     display: none; margin-top: 12px; border: 1px solid var(--gray-200); border-radius: 12px;
     background: var(--gray-50); padding: 12px; font-size: 13px; color: var(--gray-700);
@@ -105,6 +128,9 @@
 </section>
 
 <main class="content">
+  <div id="sellCtaBanner" class="sell-cta">
+    Want to sell your car? Explore verified dealers below and open a dealer profile to contact them directly.
+  </div>
   <div class="search-row">
     <input id="dealerSearchInput" type="text" placeholder="Search dealers by name, city, or speciality">
     <button id="dealerSearchBtn" type="button">Search</button>
@@ -174,6 +200,51 @@
   const dealerSearchBtn = document.getElementById('dealerSearchBtn');
   const allDealersGrid = document.getElementById('allDealersGrid');
   const dealerEmptyState = document.getElementById('dealerEmptyState');
+  const sellCtaBanner = document.getElementById('sellCtaBanner');
+
+  (function initSellIntentMode() {
+    const params = new URLSearchParams(window.location.search);
+    const sellMode = params.get('sell') === '1';
+    if (!sellMode) return;
+    if (sellCtaBanner) sellCtaBanner.classList.add('show');
+    if (dealerSearchInput) {
+      dealerSearchInput.placeholder = 'Search dealers to sell your car (city or dealer name)';
+      dealerSearchInput.focus();
+    }
+  })();
+
+  (function addSellMyCarButtons() {
+    const dealerPhones = {
+      'al-haram motors': '923001110101',
+      'city motors': '923001110102',
+      'prime autos': '923001110103',
+      'skyline motors': '923001110104',
+      'capital wheels': '923001110105',
+      'metro motors': '923001110106'
+    };
+
+    allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
+      const nameEl = card.querySelector('.dealer-name');
+      if (!nameEl) return;
+      const dealerName = nameEl.textContent.trim();
+      const key = dealerName.toLowerCase();
+      const phone = dealerPhones[key] || '923001110000';
+      const waText = [
+        'Assalam o Alaikum ' + dealerName + ',',
+        'I want to sell my car through your dealership on GariBazaar.',
+        'Please share the process and required details.'
+      ].join(' ');
+      const href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(waText);
+      if (card.querySelector('.whatsapp-btn')) return;
+      const btn = document.createElement('a');
+      btn.className = 'card-btn whatsapp-btn';
+      btn.href = href;
+      btn.target = '_blank';
+      btn.rel = 'noopener noreferrer';
+      btn.textContent = 'Sell My Car (WhatsApp)';
+      card.appendChild(btn);
+    });
+  })();
 
   function runDealerSearch() {
     if (!dealerSearchInput || !allDealersGrid) return;

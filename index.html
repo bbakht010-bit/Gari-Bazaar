@@ -121,6 +121,31 @@
     }
   }
 
+  @media (max-width: 560px) {
+    .nav-cta {
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .nav-buyer-links {
+      width: auto;
+      margin-right: 0;
+      order: 0;
+    }
+    .nav-buyer-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 999px;
+      background: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-700);
+    }
+  }
+
   .btn-outline {
     padding: 9px 20px;
     border: 1.5px solid var(--green-main);
@@ -180,6 +205,14 @@
     font-size: 13px; font-weight: 500;
     margin-bottom: 28px;
     animation: fadeUp 0.6s ease both;
+  }
+  .hero-greeting {
+    display: none;
+    margin-bottom: 14px;
+    color: rgba(255,255,255,0.9);
+    font-size: 17px;
+    font-weight: 700;
+    animation: fadeUp 0.6s 0.05s ease both;
   }
 
   .badge-dot {
@@ -1006,11 +1039,13 @@
     <div class="badge-dot"></div>
     Pakistan's Verified Dealer Network
   </div>
+  <div id="heroGreeting" class="hero-greeting"></div>
   <h1>Buy Cars From <span>Trusted</span> Dealerships Only</h1>
   <p>GariBazaar connects you with verified, government-registered car dealerships across Pakistan. No middlemen, no fake listings — just real dealers.</p>
   <div class="hero-buttons">
     <a href="listings.html" class="btn-hero-primary">Browse Verified Cars</a>
     <a href="dealers.html" class="btn-hero-secondary">Browse Dealers</a>
+    <a href="dealers.html?sell=1" class="btn-hero-secondary">Want to sell your car? Explore dealers now</a>
   </div>
   <p class="hero-note">Need quick help? Use WhatsApp support for direct assistance.</p>
   <div class="hero-stats">
@@ -1597,24 +1632,35 @@
 </script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
-    authDomain: "gari-bazaar.firebaseapp.com",
-    projectId: "gari-bazaar",
-    storageBucket: "gari-bazaar.firebasestorage.app",
-    messagingSenderId: "296364565325",
-    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
-    measurementId: "G-7LT0S01NPP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, getBuyerProfile } from "./firebase-client.js";
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
+  const heroGreeting = document.getElementById("heroGreeting");
+
+  async function updateHeroGreeting(user) {
+    if (!heroGreeting) return;
+    if (!user) {
+      heroGreeting.style.display = "none";
+      heroGreeting.textContent = "";
+      return;
+    }
+    const profile = await getBuyerProfile(user.uid);
+    if (!profile) {
+      heroGreeting.style.display = "none";
+      heroGreeting.textContent = "";
+      return;
+    }
+    const name = (profile.fullName || "").trim();
+    if (!name) {
+      heroGreeting.style.display = "none";
+      heroGreeting.textContent = "";
+      return;
+    }
+    heroGreeting.textContent = "Hello, " + name;
+    heroGreeting.style.display = "block";
+  }
 
   function setSignedInUi(isSignedIn) {
     if (!navBuyerLinks || !navProfileLink) return;
@@ -1635,9 +1681,11 @@
       localStorage.setItem("gb_last_signed_in_uid", user.uid);
       localStorage.setItem("gb_last_signed_in_email", user.email || "");
       setSignedInUi(true);
+      updateHeroGreeting(user);
     } else {
       const stillHasHint = !!localStorage.getItem("gb_last_signed_in_uid");
       setSignedInUi(stillHasHint);
+      updateHeroGreeting(null);
     }
   });
 </script>

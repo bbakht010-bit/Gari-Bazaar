@@ -843,30 +843,22 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
-    authDomain: "gari-bazaar.firebaseapp.com",
-    projectId: "gari-bazaar",
-    storageBucket: "gari-bazaar.firebasestorage.app",
-    messagingSenderId: "296364565325",
-    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
-    measurementId: "G-7LT0S01NPP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, upsertDealerProfile } from "./firebase-client.js";
   let currentUser = null;
   const ownerEmailReadonly = document.getElementById('owner-email-readonly');
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = 'dealer-login.html';
       return;
     }
     currentUser = user;
+    const record = await ensureUserRecord(user.uid, user.email, "dealer");
+    if (record.role && record.role !== "dealer") {
+      window.location.href = "index.html";
+      return;
+    }
     localStorage.setItem('gb_dealer_uid', user.uid);
     localStorage.setItem('gb_dealer_email', user.email || '');
     if (ownerEmailReadonly) ownerEmailReadonly.value = user.email || '';
@@ -933,7 +925,7 @@
   });
 
   // Submit button
-  submitBtn.addEventListener('click', function() {
+  submitBtn.addEventListener('click', async function() {
     clearFieldErrors();
 
     const requiredFields = [
@@ -1022,6 +1014,7 @@
       plan: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
       updatedAt: new Date().toISOString()
     };
+    await upsertDealerProfile(currentUser.uid, dealerProfile);
     localStorage.setItem('gb_dealer_profile_' + currentUser.uid, JSON.stringify(dealerProfile));
 
     this.textContent = 'Application Submitted!';
@@ -1040,6 +1033,7 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
     nav.id = 'gb-quick-nav';

@@ -116,6 +116,69 @@
   .contact-link.call { background: var(--green-faint); color: var(--green-mid); border: 1px solid #bbf7d0; }
 
   .note { margin-top: 8px; font-size: 12px; color: var(--gray-600); line-height: 1.6; }
+  .body-map-editor {
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px;
+    background: var(--gray-50);
+  }
+  .body-map-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .body-map-toolbar label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-600);
+  }
+  .body-map-toolbar select { max-width: 180px; }
+  .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .panel-btn {
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 7px 6px;
+    background: white;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-700);
+    cursor: pointer;
+  }
+  .panel-btn:hover { border-color: var(--green-main); }
+  .panel-btn.mark-sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+  .panel-btn.mark-touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
+  .panel-btn.mark-repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .panel-btn.readonly { cursor: default; }
+  .panel-legend {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--gray-600);
+  }
+  .legend-chip {
+    border: 1px solid var(--gray-300);
+    border-radius: 999px;
+    padding: 3px 7px;
+    background: white;
+    font-weight: 700;
+  }
+  .legend-chip.sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+  .legend-chip.touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
+  .legend-chip.repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .damage-summary {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
   .inventory-search {
     margin-bottom: 10px;
     display: flex;
@@ -181,7 +244,29 @@
           <div class="field"><label>Transmission *</label><select id="car-trans"><option value="">Select</option><option>Automatic</option><option>Manual</option></select></div>
           <div class="field"><label>Condition *</label><select id="car-condition"><option value="">Select</option><option>New</option><option>Used</option></select></div>
           <div class="field"><label>City *</label><select id="car-city"><option value="">Select</option><option>Islamabad</option><option>Rawalpindi</option></select></div>
+          <div class="field"><label>Paint Status *</label><select id="car-paint-status"><option value="">Select</option><option value="original">Original paint</option><option value="touched">Touch-up done</option><option value="sprayed">Sprayed</option><option value="mixed">Mixed condition</option></select></div>
           <div class="field full"><label>Assign Employee (Optional)</label><select id="car-assignee"><option value="">No employee selected (owner default)</option></select></div>
+          <div class="field full">
+            <label>Body Work Map (Top View)</label>
+            <div class="body-map-editor">
+              <div class="body-map-toolbar">
+                <label for="car-panel-mark">Click mode:</label>
+                <select id="car-panel-mark">
+                  <option value="sprayed">Mark as Sprayed</option>
+                  <option value="touched">Mark as Touched</option>
+                  <option value="repaired">Mark as Repaired</option>
+                  <option value="clear">Clear Mark</option>
+                </select>
+              </div>
+              <div id="car-panel-grid" class="panel-grid"></div>
+              <div class="panel-legend">
+                <span class="legend-chip sprayed">Sprayed</span>
+                <span class="legend-chip touched">Touched</span>
+                <span class="legend-chip repaired">Repaired</span>
+              </div>
+            </div>
+          </div>
+          <div class="field full"><label>Body Notes (Visible to Buyer)</label><input id="car-body-note" type="text" placeholder="e.g. Hood sprayed, right door touched only"></div>
         </div>
         <div class="actions">
           <button class="btn btn-primary" type="submit">Add Car</button>
@@ -286,6 +371,23 @@
     cars: [],
     inventoryQuery: ''
   };
+  const panelOrder = ['hood', 'roof', 'trunk', 'left_fender', 'right_fender', 'left_front_door', 'right_front_door', 'left_rear_door', 'right_rear_door', 'front_bumper', 'rear_bumper', 'left_quarter', 'right_quarter'];
+  const panelLabel = {
+    hood: 'Hood',
+    roof: 'Roof',
+    trunk: 'Trunk',
+    left_fender: 'L Fender',
+    right_fender: 'R Fender',
+    left_front_door: 'L F Door',
+    right_front_door: 'R F Door',
+    left_rear_door: 'L R Door',
+    right_rear_door: 'R R Door',
+    front_bumper: 'Front Bmpr',
+    rear_bumper: 'Rear Bmpr',
+    left_quarter: 'L Quarter',
+    right_quarter: 'R Quarter'
+  };
+  let currentPanelMarks = {};
 
   function seedData() {
     if (state.employees.length || state.cars.length) return;
@@ -294,8 +396,8 @@
       { id: crypto.randomUUID(), name: 'Saad', role: 'Sales Executive', phone: '923122222222', whatsapp: '923122222222' }
     ];
     state.cars = [
-      { id: crypto.randomUUID(), name: 'Toyota Corolla Altis 2022', price: '52', mileage: '21,000 km', transmission: 'Automatic', condition: 'Used', city: 'Islamabad', assigneeId: state.employees[0].id },
-      { id: crypto.randomUUID(), name: 'Hyundai Tucson AWD 2024', price: '114', mileage: '0 km', transmission: 'Automatic', condition: 'New', city: 'Rawalpindi', assigneeId: '' }
+      { id: crypto.randomUUID(), name: 'Toyota Corolla Altis 2022', price: '52', mileage: '21,000 km', transmission: 'Automatic', condition: 'Used', city: 'Islamabad', paintStatus: 'mixed', bodyNote: 'Hood sprayed, left rear door touched.', panelMarks: { hood: 'sprayed', left_rear_door: 'touched' }, assigneeId: state.employees[0].id },
+      { id: crypto.randomUUID(), name: 'Hyundai Tucson AWD 2024', price: '114', mileage: '0 km', transmission: 'Automatic', condition: 'New', city: 'Rawalpindi', paintStatus: 'original', bodyNote: '', panelMarks: {}, assigneeId: '' }
     ];
   }
 
@@ -306,6 +408,12 @@
       const parsed = JSON.parse(raw);
       state.employees = Array.isArray(parsed.employees) ? parsed.employees : [];
       state.cars = Array.isArray(parsed.cars) ? parsed.cars : [];
+      state.cars = state.cars.map((car) => ({
+        ...car,
+        paintStatus: car.paintStatus || 'original',
+        bodyNote: car.bodyNote || '',
+        panelMarks: car.panelMarks && typeof car.panelMarks === 'object' ? car.panelMarks : {}
+      }));
       if (!state.employees.length && !state.cars.length) seedData();
     } catch {
       seedData();
@@ -323,6 +431,40 @@
   function contactForCar(car) {
     const employee = car.assigneeId ? byId(state.employees, car.assigneeId) : null;
     return employee || ownerContact;
+  }
+
+  function paintLabel(value) {
+    if (value === 'original') return 'Original paint';
+    if (value === 'touched') return 'Touch-up done';
+    if (value === 'sprayed') return 'Sprayed';
+    if (value === 'mixed') return 'Mixed condition';
+    return 'Not specified';
+  }
+
+  function panelCounts(panelMarks) {
+    const marks = Object.values(panelMarks || {});
+    return {
+      sprayed: marks.filter((m) => m === 'sprayed').length,
+      touched: marks.filter((m) => m === 'touched').length,
+      repaired: marks.filter((m) => m === 'repaired').length
+    };
+  }
+
+  function renderBodyPanelGrid(targetId, panelMarks, isReadonly) {
+    const root = document.getElementById(targetId);
+    if (!root) return;
+    root.innerHTML = '';
+    panelOrder.forEach((key) => {
+      const mark = panelMarks[key] || '';
+      const cell = document.createElement(isReadonly ? 'div' : 'button');
+      cell.className = 'panel-btn' + (mark ? ' mark-' + mark : '') + (isReadonly ? ' readonly' : '');
+      if (!isReadonly) {
+        cell.type = 'button';
+        cell.setAttribute('data-panel-key', key);
+      }
+      cell.textContent = panelLabel[key];
+      root.appendChild(cell);
+    });
   }
 
   function setError(el, text) {
@@ -370,7 +512,7 @@
     const query = state.inventoryQuery.toLowerCase();
     const filteredCars = state.cars.filter((car) => {
       const contact = contactForCar(car);
-      const haystack = [car.name, car.city, car.transmission, car.condition, car.mileage, contact.name, contact.role].join(' ').toLowerCase();
+      const haystack = [car.name, car.city, car.transmission, car.condition, car.mileage, car.paintStatus, car.bodyNote, contact.name, contact.role].join(' ').toLowerCase();
       return !query || haystack.includes(query);
     });
     if (!filteredCars.length) {
@@ -385,6 +527,7 @@
       item.innerHTML =
         '<div class="item-main"><h4>' + car.name + ' · ' + car.price + ' Lakh</h4>' +
         '<p>' + car.city + ' · ' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
+        '<p>Paint: ' + paintLabel(car.paintStatus) + (car.bodyNote ? ' · ' + car.bodyNote : '') + '</p>' +
         '<p>Contact: ' + contact.name + ' (' + contact.role + ')' + (managedByOwner ? ' · Owner default' : '') + '</p></div>' +
         '<div class="item-actions">' +
         '<select class="mini-btn" data-assign="' + car.id + '"><option value="">Owner default</option>' +
@@ -401,7 +544,7 @@
     const query = state.inventoryQuery.toLowerCase();
     const filteredCars = state.cars.filter((car) => {
       const contact = contactForCar(car);
-      const haystack = [car.name, car.city, car.transmission, car.condition, car.mileage, contact.name, contact.role].join(' ').toLowerCase();
+      const haystack = [car.name, car.city, car.transmission, car.condition, car.mileage, car.paintStatus, car.bodyNote, contact.name, contact.role].join(' ').toLowerCase();
       return !query || haystack.includes(query);
     });
     if (!filteredCars.length) {
@@ -411,6 +554,8 @@
     filteredCars.forEach((car) => {
       const contact = contactForCar(car);
       const managedByOwner = !car.assigneeId || !byId(state.employees, car.assigneeId);
+      const counts = panelCounts(car.panelMarks);
+      const panelGridId = 'preview-panels-' + car.id;
       const card = document.createElement('article');
       card.className = 'preview-card';
       card.innerHTML =
@@ -419,11 +564,16 @@
         '<span class="badge ' + (managedByOwner ? 'owner">Managed by Owner' : 'emp">Assigned to Advisor') + '</span></div>' +
         '<div class="preview-body"><h4>' + car.name + '</h4><div class="price">' + car.price + ' Lakh PKR</div>' +
         '<p class="meta">' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
+        '<p class="meta">Paint: ' + paintLabel(car.paintStatus) + '</p>' +
+        '<div id="' + panelGridId + '" class="panel-grid" style="margin-top:8px;"></div>' +
+        '<p class="damage-summary">Body Work: Sprayed ' + counts.sprayed + ' · Touched ' + counts.touched + ' · Repaired ' + counts.repaired + '</p>' +
+        (car.bodyNote ? '<p class="damage-summary">Note: ' + car.bodyNote + '</p>' : '') +
         '<p class="meta">' + car.city + ' · Contact: ' + contact.name + ' (' + contact.role + ')</p>' +
         '<div class="contact-row">' +
         '<a class="contact-link wa" target="_blank" rel="noopener noreferrer" href="https://wa.me/' + contact.whatsapp + '?text=Assalamualaikum%20' + encodeURIComponent(contact.name) + '%2C%20I%20am%20interested%20in%20' + encodeURIComponent(car.name) + '.">WhatsApp</a>' +
         '<a class="contact-link call" href="tel:+' + contact.phone + '">Call</a></div></div>';
       root.appendChild(card);
+      renderBodyPanelGrid(panelGridId, car.panelMarks || {}, true);
     });
   }
 
@@ -471,17 +621,33 @@
     const transmission = document.getElementById('car-trans').value;
     const condition = document.getElementById('car-condition').value;
     const city = document.getElementById('car-city').value;
+    const paintStatus = document.getElementById('car-paint-status').value;
+    const bodyNote = document.getElementById('car-body-note').value.trim();
     const assigneeId = document.getElementById('car-assignee').value;
 
-    if (!name || !price || !mileage || !transmission || !condition || !city) {
+    if (!name || !price || !mileage || !transmission || !condition || !city || !paintStatus) {
       return setError(err, 'Please complete all required car fields.');
     }
     const numericPrice = Number(price);
     if (!Number.isFinite(numericPrice) || numericPrice < 0) {
       return setError(err, 'Price cannot be below 0.');
     }
-    state.cars.push({ id: crypto.randomUUID(), name, price: String(numericPrice), mileage, transmission, condition, city, assigneeId });
+    state.cars.push({
+      id: crypto.randomUUID(),
+      name,
+      price: String(numericPrice),
+      mileage,
+      transmission,
+      condition,
+      city,
+      paintStatus,
+      bodyNote,
+      panelMarks: { ...currentPanelMarks },
+      assigneeId
+    });
     e.target.reset();
+    currentPanelMarks = {};
+    renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
     renderAll();
   });
 
@@ -517,6 +683,21 @@
     });
   }
 
+  const panelGrid = document.getElementById('car-panel-grid');
+  if (panelGrid) {
+    panelGrid.addEventListener('click', (event) => {
+      const key = event.target.getAttribute('data-panel-key');
+      if (!key) return;
+      const mode = document.getElementById('car-panel-mark').value;
+      if (mode === 'clear') {
+        delete currentPanelMarks[key];
+      } else {
+        currentPanelMarks[key] = mode;
+      }
+      renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
+    });
+  }
+
   loadState();
   const carPriceInput = document.getElementById('car-price');
   if (carPriceInput) {
@@ -534,6 +715,7 @@
       }
     });
   }
+  renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
   renderAll();
 
   (function addQuickNav() {

@@ -406,8 +406,9 @@
 <nav>
   <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
   <div class="nav-right">
-    <span class="pill">Admin: Bbula</span>
+    <span id="adminPill" class="pill">Admin</span>
     <a class="btn btn-outline" href="index.html">Back to Site</a>
+    <button id="adminLogoutBtn" class="btn btn-outline" type="button">Logout</button>
     <button class="btn btn-primary" type="button">Export Daily Report</button>
   </div>
 </nav>
@@ -782,6 +783,24 @@
 </main>
 
 <script>
+  (function requireAdminSession() {
+    const allowed = 'bbuland7@gmail.com';
+    const active = (sessionStorage.getItem('gb_admin_session_email') || '').toLowerCase();
+    if (active !== allowed) {
+      window.location.href = 'admin-login.html';
+      return;
+    }
+    const adminPill = document.getElementById('adminPill');
+    if (adminPill) adminPill.textContent = 'Admin: ' + active;
+    const logoutBtn = document.getElementById('adminLogoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        sessionStorage.removeItem('gb_admin_session_email');
+        window.location.href = 'admin-login.html';
+      });
+    }
+  })();
+
   const tabButtons = document.querySelectorAll('.tab-btn');
   const panels = document.querySelectorAll('.panel');
 

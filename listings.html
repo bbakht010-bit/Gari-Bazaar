@@ -1393,29 +1393,6 @@
 </footer>
 
 <script>
-  (function requireDealerAccess() {
-    const dealerUid = localStorage.getItem('gb_dealer_uid');
-    const isDealerLoggedIn = !!dealerUid;
-    if (!isDealerLoggedIn) {
-      window.location.href = 'dealer-login.html';
-      return;
-    }
-    const dealerProfileRaw = localStorage.getItem('gb_dealer_profile_' + dealerUid);
-    if (!dealerProfileRaw) {
-      window.location.href = 'register.html';
-      return;
-    }
-    try {
-      const profile = JSON.parse(dealerProfileRaw);
-      const isComplete = !!(profile && profile.businessName && profile.ownerName && profile.phone && profile.city && profile.address);
-      if (!isComplete) {
-        window.location.href = 'register.html';
-      }
-    } catch (error) {
-      window.location.href = 'register.html';
-    }
-  })();
-
   const cards = document.querySelectorAll('.car-card');
   const cardList = Array.from(cards);
   const carGrid = document.querySelector('.car-grid');

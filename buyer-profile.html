@@ -189,21 +189,8 @@
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
-    authDomain: "gari-bazaar.firebaseapp.com",
-    projectId: "gari-bazaar",
-    storageBucket: "gari-bazaar.firebasestorage.app",
-    messagingSenderId: "296364565325",
-    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
-    measurementId: "G-7LT0S01NPP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, getBuyerProfile, upsertBuyerProfile } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-profile-form");
   const msg = document.getElementById("profile-msg");
@@ -211,13 +198,13 @@
   const avatarInput = document.getElementById("profilePicture");
   const avatarPreview = document.getElementById("profileAvatarPreview");
 
-  function profileKey(uid) {
-    return "gb_buyer_profile_" + uid;
-  }
-
   function showMessage(text, isError) {
     msg.className = "msg show " + (isError ? "error" : "success");
     msg.textContent = text;
+  }
+
+  function isValidPakistanMobile(phone) {
+    return /^03\d{2}[-\s]?\d{7}$/.test(phone);
   }
 
   function fillForm(profile) {
@@ -230,20 +217,20 @@
   let currentUser = null;
   let isExistingProfile = false;
   let pendingProfilePicture = "";
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "buyer-login.html";
       return;
     }
     currentUser = user;
-    const raw = localStorage.getItem(profileKey(user.uid));
-    if (!raw) {
-      avatarPreview.src = "https://ui-avatars.com/api/?name=Buyer&background=ecfdf5&color=166534&size=160";
-      return;
-    }
-    isExistingProfile = true;
     try {
-      const profile = JSON.parse(raw);
+      await ensureUserRecord(user.uid, user.email, "buyer");
+      const profile = await getBuyerProfile(user.uid);
+      if (!profile) {
+        avatarPreview.src = "https://ui-avatars.com/api/?name=Buyer&background=ecfdf5&color=166534&size=160";
+        return;
+      }
+      isExistingProfile = true;
       pendingProfilePicture = profile.profilePicture || "";
       fillForm(profile);
     } catch (error) {
@@ -268,19 +255,30 @@
     reader.readAsDataURL(file);
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) return;
+    const fullName = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const city = document.getElementById("city").value.trim();
+    if (!fullName || !phone || !city) {
+      showMessage("Full name, phone, and city are required.", true);
+      return;
+    }
+    if (!isValidPakistanMobile(phone)) {
+      showMessage("Phone must be in format 03xx-xxxxxxx (or 03xxxxxxxxx).", true);
+      return;
+    }
     const wasExistingProfile = isExistingProfile;
     const profile = {
-      fullName: document.getElementById("fullName").value.trim(),
-      phone: document.getElementById("phone").value.trim(),
-      city: document.getElementById("city").value,
+      fullName: fullName,
+      phone: phone,
+      city: city,
       profilePicture: pendingProfilePicture || avatarPreview.src || "",
       email: currentUser.email || "",
       updatedAt: new Date().toISOString()
     };
-    localStorage.setItem(profileKey(currentUser.uid), JSON.stringify(profile));
+    await upsertBuyerProfile(currentUser.uid, profile);
     isExistingProfile = true;
     showMessage("Profile saved successfully.", false);
     if (!wasExistingProfile) {

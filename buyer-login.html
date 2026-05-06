@@ -208,21 +208,8 @@
 </main>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
-    authDomain: "gari-bazaar.firebaseapp.com",
-    projectId: "gari-bazaar",
-    storageBucket: "gari-bazaar.firebasestorage.app",
-    messagingSenderId: "296364565325",
-    appId: "1:296364565325:web:59a017564b7dd55c9d0d04",
-    measurementId: "G-7LT0S01NPP"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, getBuyerProfile, isBuyerProfileComplete, upsertBuyerProfile } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-login-form");
   const errorBox = document.getElementById("buyer-login-error");
@@ -241,10 +228,19 @@
     errorBox.textContent = "";
   }
 
-  function getPostLoginPath(user) {
-    const profileKey = "gb_buyer_profile_" + user.uid;
-    const hasProfile = !!localStorage.getItem(profileKey);
-    return hasProfile ? "index.html" : "buyer-profile.html";
+  async function getPostLoginPath(user) {
+    let profile = await getBuyerProfile(user.uid);
+    if (!profile) {
+      const legacyRaw = localStorage.getItem("gb_buyer_profile_" + user.uid);
+      if (legacyRaw) {
+        try {
+          const legacy = JSON.parse(legacyRaw);
+          await upsertBuyerProfile(user.uid, legacy);
+          profile = legacy;
+        } catch (_error) {}
+      }
+    }
+    return isBuyerProfileComplete(profile) ? "index.html" : "buyer-profile.html";
   }
 
   function rememberSession(user) {
@@ -264,8 +260,13 @@
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
+      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      if (record.role && record.role !== "buyer") {
+        showError("This account is not a buyer account.");
+        return;
+      }
       rememberSession(credential.user);
-      window.location.href = getPostLoginPath(credential.user);
+      window.location.href = await getPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
@@ -291,8 +292,13 @@
     googleButton.textContent = "Please wait...";
     try {
       const credential = await signInWithPopup(auth, googleProvider);
+      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      if (record.role && record.role !== "buyer") {
+        showError("This account is not a buyer account.");
+        return;
+      }
       rememberSession(credential.user);
-      window.location.href = getPostLoginPath(credential.user);
+      window.location.href = await getPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/popup-closed-by-user") {
@@ -321,6 +327,7 @@
     createEmailButton.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
       rememberSession(credential.user);
       window.location.href = "buyer-profile.html";
     } catch (error) {
@@ -344,6 +351,7 @@
     if (document.getElementById("gb-quick-nav")) return;
     const hostNav = document.querySelector("nav");
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
     const mountPoint = hostNav.querySelector(".nav-cta, .nav-right") || hostNav;
     const nav = document.createElement("div");
     nav.id = "gb-quick-nav";

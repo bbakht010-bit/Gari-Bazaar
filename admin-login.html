@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --green-mid:#166534; --green-main:#15803d; --gray-200:#e5e7eb; --gray-600:#4b5563; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans',sans-serif; min-height:100vh; background:linear-gradient(135deg,#f8fafc,#ecfdf5); }
+  nav { height:70px; border-bottom:1px solid var(--gray-200); background:rgba(255,255,255,.95); padding:0 5%; display:flex; align-items:center; justify-content:space-between; }
+  .logo { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--green-mid); text-decoration:none; }
+  .logo span { color:#ca8a04; }
+  .wrap { min-height:calc(100vh - 70px); display:grid; place-items:center; padding:24px; }
+  .card { width:100%; max-width:430px; background:#fff; border:1px solid var(--gray-200); border-radius:16px; box-shadow:0 14px 32px rgba(0,0,0,.08); overflow:hidden; }
+  .head { background:linear-gradient(135deg,#0a4a2a,var(--green-mid)); color:#fff; padding:24px; }
+  .head h1 { font-family:'Playfair Display',serif; font-size:30px; }
+  .head p { margin-top:8px; font-size:13px; color:rgba(255,255,255,.85); }
+  .body { padding:20px; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; margin-bottom:6px; font-size:13px; font-weight:700; color:#1f2937; }
+  .field input { width:100%; border:1.5px solid var(--gray-200); border-radius:10px; padding:11px 12px; font-size:14px; outline:none; }
+  .field input:focus { border-color:var(--green-main); box-shadow:0 0 0 3px rgba(21,128,61,.1); }
+  .btn { width:100%; border:none; border-radius:10px; background:var(--green-main); color:#fff; font-size:14px; font-weight:700; padding:12px; cursor:pointer; }
+  .error { margin-top:10px; border:1px solid #fecdd3; background:#fff1f2; color:#9f1239; border-radius:9px; padding:9px 10px; font-size:12px; line-height:1.5; display:none; }
+  .error.show { display:block; }
+</style>
+</head>
+<body>
+<nav><a class="logo" href="index.html">Gari<span>Bazaar</span></a></nav>
+<main class="wrap">
+  <section class="card">
+    <div class="head">
+      <h1>Admin Login</h1>
+      <p>Only authorized admin email can access control center.</p>
+    </div>
+    <div class="body">
+      <form id="admin-login-form">
+        <div class="field"><label for="admin-email">Email</label><input id="admin-email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="admin-password">Password</label><input id="admin-password" type="password" autocomplete="current-password" required></div>
+        <button id="admin-login-btn" class="btn" type="submit">Login as Admin</button>
+        <div id="admin-login-error" class="error"></div>
+      </form>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { app, ensureUserRecord, setUserRole } from "./firebase-client.js";
+  const ADMIN_EMAIL = "bbuland7@gmail.com";
+  const auth = getAuth(app);
+  const form = document.getElementById("admin-login-form");
+  const errorBox = document.getElementById("admin-login-error");
+  const button = document.getElementById("admin-login-btn");
+  function showError(message) { errorBox.textContent = message; errorBox.classList.add("show"); }
+  function hideError() { errorBox.classList.remove("show"); errorBox.textContent = ""; }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    hideError();
+    const email = document.getElementById("admin-email").value.trim().toLowerCase();
+    const password = document.getElementById("admin-password").value;
+    button.disabled = true;
+    button.textContent = "Signing in...";
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const signedEmail = (credential.user.email || "").toLowerCase();
+      if (signedEmail !== ADMIN_EMAIL) {
+        await signOut(auth);
+        showError("This account is not authorized for admin access.");
+        return;
+      }
+      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "admin");
+      if (record.role !== "admin") {
+        await setUserRole(credential.user.uid, "admin");
+      }
+      sessionStorage.setItem("gb_admin_session_email", signedEmail);
+      window.location.href = "admin.html";
+    } catch (error) {
+      showError("Invalid admin credentials.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Login as Admin";
+    }
+  });
+</script>
+</body>
+</html>

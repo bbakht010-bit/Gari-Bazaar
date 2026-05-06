@@ -871,10 +871,11 @@
     <li><a href="dealers.html">Top Dealers</a></li>
   </ul>
   <div class="nav-cta">
-    <div class="nav-buyer-links">
+    <div id="navBuyerLinks" class="nav-buyer-links">
       <a href="buyer-login.html">Sign in</a>
       <a href="buyer-signup.html" class="join">Join</a>
     </div>
+    <a id="navProfileLink" href="buyer-profile.html" class="btn-primary" style="display:none;">My Profile</a>
     <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
   </div>
 </nav>
@@ -1422,6 +1423,93 @@
     return (value || '').toLowerCase().trim();
   }
 
+  function compactWhitespace(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function parseDealerLine(text) {
+    const clean = compactWhitespace(text);
+    const parts = clean.split('—').map((p) => compactWhitespace(p));
+    return {
+      dealer: parts[0] || '',
+      city: parts[1] || ''
+    };
+  }
+
+  function parseContactMeta(text) {
+    const clean = compactWhitespace(text);
+    const value = clean.replace(/^contact:\s*/i, '');
+    const nameMatch = value.match(/^([^(]+)\(([^)]+)\)/);
+    if (nameMatch) {
+      return {
+        name: compactWhitespace(nameMatch[1]),
+        role: compactWhitespace(nameMatch[2])
+      };
+    }
+    return { name: value, role: '' };
+  }
+
+  function extractPhoneFromCard(card) {
+    const callLink = card.querySelector('.contact-link.call');
+    if (!callLink) return '';
+    const href = callLink.getAttribute('href') || '';
+    return href.replace(/^tel:\+?/, '').trim();
+  }
+
+  function parsePriceLakh(card) {
+    const priceEl = card.querySelector('.car-price');
+    if (!priceEl) return '';
+    const match = priceEl.textContent.match(/([\d.,]+)\s*lakh/i);
+    return match ? match[1].replace(/,/g, '') : '';
+  }
+
+  function attachCardLinks() {
+    cards.forEach((card) => {
+      const title = compactWhitespace((card.querySelector('.car-main h4') || {}).textContent || '');
+      const dealerLineText = compactWhitespace((card.querySelector('.dealer-line') || {}).textContent || '');
+      const contactMetaText = compactWhitespace((card.querySelector('.contact-meta') || {}).textContent || '');
+      const specs = card.querySelectorAll('.mini-specs span');
+      const mileage = compactWhitespace(specs[0] ? specs[0].textContent : '');
+      const transmission = compactWhitespace(specs[1] ? specs[1].textContent : '');
+      const condition = compactWhitespace(specs[2] ? specs[2].textContent : '');
+      const cityFromSpecs = compactWhitespace(specs[3] ? specs[3].textContent : '');
+      const { dealer, city: cityFromDealer } = parseDealerLine(dealerLineText);
+      const city = cityFromSpecs || cityFromDealer;
+      const contact = parseContactMeta(contactMetaText);
+      const phone = extractPhoneFromCard(card);
+      const price = parsePriceLakh(card);
+
+      const commonParams = new URLSearchParams({
+        car: title,
+        price: price,
+        mileage: mileage,
+        transmission: transmission,
+        condition: condition,
+        city: city,
+        dealer: dealer,
+        contactName: contact.name,
+        contactRole: contact.role,
+        phone: phone
+      });
+
+      const detailLink = card.querySelector('.detail-btn');
+      if (detailLink) {
+        detailLink.href = 'car-detail.html?' + commonParams.toString();
+      }
+      const dealerLink = card.querySelector('.dealer-btn');
+      if (dealerLink) {
+        const dealerParams = new URLSearchParams({
+          dealer: dealer,
+          city: city,
+          contactName: contact.name,
+          contactRole: contact.role,
+          phone: phone
+        });
+        dealerLink.href = 'dealer-profile.html?' + dealerParams.toString();
+      }
+    });
+  }
+
   function parseCardPricePk(card) {
     const el = card.querySelector('.car-price');
     if (!el) return null;
@@ -1756,6 +1844,8 @@
     }
   });
 
+  attachCardLinks();
+
   const listingCarImages = [
     'https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80',
     'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80',
@@ -1828,6 +1918,38 @@
     nav.appendChild(home);
     mountPoint.appendChild(nav);
   })();
+</script>
+
+<script type="module">
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth } from "./firebase-client.js";
+
+  const navBuyerLinks = document.getElementById("navBuyerLinks");
+  const navProfileLink = document.getElementById("navProfileLink");
+
+  function setSignedInUi(isSignedIn) {
+    if (!navBuyerLinks || !navProfileLink) return;
+    if (isSignedIn) {
+      navBuyerLinks.style.display = "none";
+      navProfileLink.style.display = "inline-flex";
+    } else {
+      navBuyerLinks.style.display = "flex";
+      navProfileLink.style.display = "none";
+    }
+  }
+
+  const hasSessionHint = !!localStorage.getItem("gb_last_signed_in_uid");
+  if (hasSessionHint) setSignedInUi(true);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      localStorage.setItem("gb_last_signed_in_uid", user.uid);
+      localStorage.setItem("gb_last_signed_in_email", user.email || "");
+      setSignedInUi(true);
+    } else {
+      setSignedInUi(false);
+    }
+  });
 </script>
 
 </body>

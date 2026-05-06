@@ -1521,6 +1521,104 @@
     });
   }
 
+  function compactWhitespace(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function parseDealerLine(text) {
+    const clean = compactWhitespace(text);
+    const parts = clean.split('—').map((part) => compactWhitespace(part));
+    return {
+      dealer: parts[0] || '',
+      city: parts[1] || ''
+    };
+  }
+
+  function parseExpandedMeta(text) {
+    const clean = compactWhitespace(text);
+    const assignedMatch = clean.match(/Assigned:\s*([^·]+)/i);
+    const assignedText = assignedMatch ? assignedMatch[1].trim() : '';
+    const personMatch = assignedText.match(/^([^(]+)\(([^)]+)\)/);
+    if (personMatch) {
+      return {
+        contactName: compactWhitespace(personMatch[1]),
+        contactRole: compactWhitespace(personMatch[2])
+      };
+    }
+    return {
+      contactName: assignedText || 'Dealer',
+      contactRole: 'Sales Executive'
+    };
+  }
+
+  function extractPhoneFromCard(card) {
+    const call = card.querySelector('.expanded-link.call');
+    if (!call) return '';
+    return (call.getAttribute('href') || '').replace(/^tel:\+?/, '').trim();
+  }
+
+  function parsePriceLakh(card) {
+    const price = card.querySelector('.car-price');
+    if (!price) return '';
+    const match = price.textContent.match(/([\d.,]+)\s*lakh/i);
+    return match ? match[1].replace(/,/g, '') : '';
+  }
+
+  function attachIndexCardLinks() {
+    document.querySelectorAll('#featuredCarsGrid .car-card').forEach((card) => {
+      const car = compactWhitespace((card.querySelector('.car-name') || {}).textContent || '');
+      const dealerLine = compactWhitespace((card.querySelector('.car-dealer') || {}).textContent || '');
+      const { dealer, city: cityFromDealer } = parseDealerLine(dealerLine);
+      const specs = card.querySelectorAll('.car-specs .spec');
+      const mileage = compactWhitespace(specs[1] ? specs[1].textContent : '');
+      const transmission = compactWhitespace(specs[2] ? specs[2].textContent : '');
+      const condition = card.querySelector('.badge-used') ? 'Used' : (card.querySelector('.badge-new') ? 'New' : '');
+      const meta = parseExpandedMeta((card.querySelector('.expanded-meta') || {}).textContent || '');
+      const phone = extractPhoneFromCard(card) || '923000000000';
+      const price = parsePriceLakh(card);
+
+      const detailParams = new URLSearchParams({
+        car: car,
+        price: price,
+        mileage: mileage,
+        transmission: transmission,
+        condition: condition,
+        city: cityFromDealer,
+        dealer: dealer,
+        contactName: meta.contactName,
+        contactRole: meta.contactRole,
+        phone: phone
+      });
+      const dealerParams = new URLSearchParams({
+        dealer: dealer,
+        city: cityFromDealer,
+        contactName: meta.contactName,
+        contactRole: meta.contactRole,
+        phone: phone
+      });
+
+      const detailLink = card.querySelector('.expanded-link.detail');
+      const profileLink = card.querySelector('.expanded-link.profile');
+      if (detailLink) detailLink.href = 'car-detail.html?' + detailParams.toString();
+      if (profileLink) profileLink.href = 'dealer-profile.html?' + dealerParams.toString();
+      card.setAttribute('data-car-detail-href', 'car-detail.html?' + detailParams.toString());
+    });
+
+    const topDealerCards = document.querySelectorAll('.dealers-grid .dealer-card');
+    topDealerCards.forEach((card) => {
+      const name = compactWhitespace((card.querySelector('.dealer-name') || {}).textContent || '');
+      const city = compactWhitespace((card.querySelector('.dealer-city') || {}).textContent || '');
+      const params = new URLSearchParams({
+        dealer: name,
+        city: city,
+        contactName: 'Dealer Team',
+        contactRole: 'Sales Desk',
+        phone: '923000000000'
+      });
+      card.setAttribute('data-dealer-href', 'dealer-profile.html?' + params.toString());
+    });
+  }
+
   const featuredSearchInput = document.getElementById('featuredSearchInput');
   const featuredSearchBtn = document.getElementById('featuredSearchBtn');
   if (featuredSearchInput && featuredSearchBtn) {
@@ -1533,6 +1631,8 @@
     });
     featuredSearchBtn.addEventListener('click', runFeaturedSearch);
   }
+
+  attachIndexCardLinks();
 
   document.querySelectorAll('.car-card').forEach((card) => {
     card.addEventListener('click', () => {
@@ -1552,12 +1652,12 @@
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'link');
     card.addEventListener('click', () => {
-      window.location.href = 'dealer-profile.html';
+      window.location.href = card.getAttribute('data-dealer-href') || 'dealer-profile.html';
     });
     card.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        window.location.href = 'dealer-profile.html';
+        window.location.href = card.getAttribute('data-dealer-href') || 'dealer-profile.html';
       }
     });
   });
@@ -1565,7 +1665,9 @@
   document.querySelectorAll('.contact-btn').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
-      window.location.href = 'car-detail.html';
+      const card = button.closest('.car-card');
+      const href = card ? card.getAttribute('data-car-detail-href') : '';
+      window.location.href = href || 'car-detail.html';
     });
   });
 

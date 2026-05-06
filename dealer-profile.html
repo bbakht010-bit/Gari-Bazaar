@@ -287,6 +287,84 @@
   </section>
 </main>
 <script>
+  (function hydrateDealerFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const dealer = params.get('dealer');
+    if (!dealer) return;
+    const city = params.get('city') || 'Pakistan';
+    const contactName = params.get('contactName') || 'Dealer';
+    const contactRole = params.get('contactRole') || 'Sales Executive';
+    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
+    const phone = phoneRaw || '923000000000';
+    const phoneDisplay = '+92 ' + phone.replace(/^92/, '').replace(/^(\d{3})(\d{7})$/, '$1 $2');
+
+    const heroTitle = document.querySelector('.hero-title h1');
+    const heroDesc = document.querySelector('.hero p');
+    if (heroTitle) heroTitle.textContent = dealer;
+    if (heroDesc) heroDesc.textContent = 'Trusted dealership in ' + city + ' with verified inventory and transparent buyer support.';
+
+    const overviewLine = document.querySelector('.card .line');
+    if (overviewLine) {
+      overviewLine.innerHTML = 'Location: Main Market, ' + city + '<br>Established: 2018<br>Speciality: Verified cars';
+    }
+
+    const contactCardLine = document.querySelector('aside.card .line');
+    if (contactCardLine) {
+      contactCardLine.innerHTML = 'Primary Contact: ' + contactName + ' (' + contactRole + ')<br>Phone: ' + phoneDisplay + '<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM';
+    }
+
+    const waBtn = document.querySelector('aside.card .action.wa');
+    const callBtn = document.querySelector('aside.card .action.call');
+    if (waBtn) {
+      const text = 'Assalamualaikum, I want to inquire about your cars.';
+      waBtn.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+    }
+    if (callBtn) {
+      callBtn.href = 'tel:+' + phone;
+    }
+  })();
+
+  (function attachDealerCarDetailLinks() {
+    const params = new URLSearchParams(window.location.search);
+    const dealer = params.get('dealer') || (document.querySelector('.hero-title h1') || {}).textContent || '';
+    const defaultCity = params.get('city') || '';
+    const contactName = params.get('contactName') || 'Dealer';
+    const contactRole = params.get('contactRole') || 'Sales Executive';
+    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
+    const phone = phoneRaw || '923000000000';
+
+    document.querySelectorAll('#dealerCarsGrid .car-card').forEach((card) => {
+      const car = ((card.querySelector('.car-main h4') || {}).textContent || '').trim();
+      const meta = ((card.querySelector('.car-main .meta') || {}).textContent || '').trim();
+      const metaParts = meta.split('·').map((p) => p.trim());
+      const city = metaParts[0] || defaultCity;
+      const mileage = metaParts[1] || '';
+      const transmission = metaParts[2] || '';
+      const priceText = ((card.querySelector('.car-main .price') || {}).textContent || '');
+      const priceMatch = priceText.match(/([\d.,]+)\s*lakh/i);
+      const price = priceMatch ? priceMatch[1].replace(/,/g, '') : '';
+      const conditionLine = ((card.querySelector('.car-expanded p:nth-child(2)') || {}).textContent || '');
+      const conditionMatch = conditionLine.match(/Condition:\s*([^·]+)/i);
+      const condition = conditionMatch ? conditionMatch[1].trim() : '';
+
+      const link = card.querySelector('.details-btn');
+      if (!link) return;
+      const detailParams = new URLSearchParams({
+        car: car,
+        price: price,
+        mileage: mileage,
+        transmission: transmission,
+        condition: condition,
+        city: city,
+        dealer: dealer,
+        contactName: contactName,
+        contactRole: contactRole,
+        phone: phone
+      });
+      link.href = 'car-detail.html?' + detailParams.toString();
+    });
+  })();
+
   const dealerProfileSearchInput = document.getElementById('dealerProfileSearchInput');
   const dealerProfileSearchBtn = document.getElementById('dealerProfileSearchBtn');
   const dealerCarsGrid = document.getElementById('dealerCarsGrid');

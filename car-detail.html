@@ -158,6 +158,78 @@
   </aside>
 </main>
 <script>
+  (function hydrateFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const car = params.get('car');
+    if (!car) return;
+
+    const price = params.get('price') || '0';
+    const mileage = params.get('mileage') || '-';
+    const transmission = params.get('transmission') || '-';
+    const condition = params.get('condition') || '-';
+    const city = params.get('city') || '-';
+    const dealer = params.get('dealer') || 'Verified Dealer';
+    const contactName = params.get('contactName') || 'Dealer';
+    const contactRole = params.get('contactRole') || 'Sales Executive';
+    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
+    const phone = phoneRaw || '923000000000';
+    const phoneDisplay = '+92 ' + phone.replace(/^92/, '').replace(/^(\d{3})(\d{7})$/, '$1 $2');
+
+    const titleEl = document.querySelector('.details h1');
+    const heroImg = document.querySelector('.hero-photo img');
+    const heroImgAlt = car + ' image';
+    if (titleEl) titleEl.textContent = car;
+    if (heroImg) heroImg.alt = heroImgAlt;
+
+    const priceEl = document.querySelector('.details .price');
+    if (priceEl) priceEl.innerHTML = price + ' Lakh <span>PKR</span>';
+
+    const specValues = document.querySelectorAll('.spec h4');
+    if (specValues[0]) specValues[0].textContent = mileage;
+    if (specValues[1]) specValues[1].textContent = transmission;
+    if (specValues[2]) specValues[2].textContent = condition;
+    if (specValues[3]) specValues[3].textContent = city;
+    if (specValues[4]) specValues[4].textContent = 'Petrol';
+    if (specValues[5]) specValues[5].textContent = city;
+
+    const description = document.querySelector('.description');
+    if (description) {
+      description.textContent = car + ' is available with ' + dealer + ' in ' + city + '. Contact ' + contactName + ' for inspection details, financing, and availability.';
+    }
+
+    const dealerNameEl = document.querySelector('.dealer-head h3');
+    const dealerCityEl = document.querySelector('.dealer-head p');
+    if (dealerNameEl) dealerNameEl.textContent = dealer;
+    if (dealerCityEl) dealerCityEl.textContent = city;
+
+    const contactMeta = document.querySelector('.contact-meta');
+    if (contactMeta) {
+      contactMeta.innerHTML = 'Contact Person: ' + contactName + ' (' + contactRole + ')<br>Phone: ' + phoneDisplay + '<br>Response time: under 15 minutes';
+    }
+
+    const waLink = document.querySelector('.action.wa');
+    const callLink = document.querySelector('.action.call');
+    if (waLink) {
+      const text = 'Assalamualaikum, I am interested in ' + car + '.';
+      waLink.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+    }
+    if (callLink) {
+      callLink.href = 'tel:+' + phone;
+    }
+
+    const dealerProfileLink = document.querySelector('.action.profile');
+    if (dealerProfileLink) {
+      const dealerParams = new URLSearchParams({
+        dealer: dealer,
+        city: city,
+        contactName: contactName,
+        contactRole: contactRole,
+        phone: phone
+      });
+      dealerProfileLink.href = 'dealer-profile.html?' + dealerParams.toString();
+    }
+  })();
+
   (function addQuickNav() {
     var pathNorm = window.location.pathname.replace(/\\/g, '/');
     var segs = pathNorm.split('/').filter(Boolean);

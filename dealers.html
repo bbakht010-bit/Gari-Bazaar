@@ -246,6 +246,23 @@
     });
   })();
 
+  (function attachDealerProfileLinks() {
+    allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
+      const nameEl = card.querySelector('.dealer-name');
+      const cityEl = card.querySelector('.dealer-city');
+      const profileLink = card.querySelector('.card-btn:not(.whatsapp-btn)');
+      if (!nameEl || !cityEl || !profileLink) return;
+      const params = new URLSearchParams({
+        dealer: nameEl.textContent.trim(),
+        city: cityEl.textContent.trim(),
+        contactName: 'Dealer Team',
+        contactRole: 'Sales Desk',
+        phone: '923000000000'
+      });
+      profileLink.href = 'dealer-profile.html?' + params.toString();
+    });
+  })();
+
   function runDealerSearch() {
     if (!dealerSearchInput || !allDealersGrid) return;
     const query = dealerSearchInput.value.trim().toLowerCase();

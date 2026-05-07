@@ -137,66 +137,14 @@
     <button id="dealerSearchBtn" type="button">Search</button>
   </div>
 
-  <section class="dealers-grid" id="allDealersGrid">
-    <article class="dealer-card" data-search="al-haram motors islamabad sedans family cars">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Al-Haram Motors logo"></div>
-        <div><h3 class="dealer-name">Al-Haram Motors</h3><p class="dealer-city">Islamabad</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: Sedans, Family Cars<br>Active Cars: 12</p>
-      <p class="dealer-rate">4.9 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-    <article class="dealer-card" data-search="city motors rawalpindi new cars">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=300&q=80" alt="City Motors logo"></div>
-        <div><h3 class="dealer-name">City Motors</h3><p class="dealer-city">Rawalpindi</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: New Cars, Imported<br>Active Cars: 8</p>
-      <p class="dealer-rate">4.8 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-    <article class="dealer-card" data-search="prime autos lahore budget cars hatchbacks">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=300&q=80" alt="Prime Autos logo"></div>
-        <div><h3 class="dealer-name">Prime Autos</h3><p class="dealer-city">Lahore</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: Hatchbacks, Budget Cars<br>Active Cars: 15</p>
-      <p class="dealer-rate">4.7 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-    <article class="dealer-card" data-search="skyline motors islamabad suvs crossovers">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1485291571150-772bcfc10da5?auto=format&fit=crop&w=300&q=80" alt="Skyline Motors logo"></div>
-        <div><h3 class="dealer-name">Skyline Motors</h3><p class="dealer-city">Islamabad</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: SUVs, Crossovers<br>Active Cars: 6</p>
-      <p class="dealer-rate">4.6 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-    <article class="dealer-card" data-search="capital wheels islamabad premium cars">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=300&q=80" alt="Capital Wheels logo"></div>
-        <div><h3 class="dealer-name">Capital Wheels</h3><p class="dealer-city">Islamabad</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: Premium Cars<br>Active Cars: 9</p>
-      <p class="dealer-rate">4.7 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-    <article class="dealer-card" data-search="metro motors rawalpindi sedans">
-      <div class="dealer-top">
-        <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=300&q=80" alt="Metro Motors logo"></div>
-        <div><h3 class="dealer-name">Metro Motors</h3><p class="dealer-city">Rawalpindi</p></div>
-      </div>
-      <p class="dealer-meta">Speciality: Sedans, Daily Drivers<br>Active Cars: 7</p>
-      <p class="dealer-rate">4.5 / 5.0</p>
-      <a class="card-btn" href="dealer-profile.html">View Dealer Profile</a>
-    </article>
-  </section>
+  <section class="dealers-grid" id="allDealersGrid"></section>
   <p class="empty" id="dealerEmptyState">No dealer matched this search. Try a city name like Islamabad or Rawalpindi.</p>
 </main>
 
-<script>
+<script type="module">
+  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
+
   const dealerSearchInput = document.getElementById('dealerSearchInput');
   const dealerSearchBtn = document.getElementById('dealerSearchBtn');
   const allDealersGrid = document.getElementById('allDealersGrid');
@@ -214,62 +162,85 @@
     }
   })();
 
-  (function addSellMyCarButtons() {
-    const dealerPhones = {
-      'al-haram motors': '923001110101',
-      'city motors': '923001110102',
-      'prime autos': '923001110103',
-      'skyline motors': '923001110104',
-      'capital wheels': '923001110105',
-      'metro motors': '923001110106'
-    };
+  function esc(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
 
-    allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
-      const nameEl = card.querySelector('.dealer-name');
-      if (!nameEl) return;
-      const dealerName = nameEl.textContent.trim();
-      const key = dealerName.toLowerCase();
-      const phone = dealerPhones[key] || '923001110000';
-      const waText = [
-        'Assalam o Alaikum ' + dealerName + ',',
-        'I want to sell my car through your dealership on GariBazaar.',
-        'Please share the process and required details.'
-      ].join(' ');
-      const href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(waText);
-      if (card.querySelector('.whatsapp-btn')) return;
-      const btn = document.createElement('a');
-      btn.className = 'card-btn whatsapp-btn';
-      btn.href = href;
-      btn.target = '_blank';
-      btn.rel = 'noopener noreferrer';
-      btn.textContent = 'Sell My Car (WhatsApp)';
-      card.appendChild(btn);
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function slugify(value) {
+    return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  async function renderLiveDealers() {
+    const [dealerSnap, listingSnap] = await Promise.all([
+      getDocs(collection(db, "dealerProfiles")),
+      getDocs(collection(db, "listings"))
+    ]);
+
+    const listingCountByDealer = new Map();
+    listingSnap.forEach((docSnap) => {
+      const listing = docSnap.data() || {};
+      const dealerId = String(listing.dealerId || "");
+      const moderation = String(listing.moderationStatus || "live").toLowerCase();
+      if (!dealerId || moderation !== "live") return;
+      listingCountByDealer.set(dealerId, (listingCountByDealer.get(dealerId) || 0) + 1);
     });
-  })();
 
-  (function attachDealerProfileLinks() {
-    const slugify = (value) =>
-      String(value || '')
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
-      const nameEl = card.querySelector('.dealer-name');
-      const cityEl = card.querySelector('.dealer-city');
-      const profileLink = card.querySelector('.card-btn:not(.whatsapp-btn)');
-      if (!nameEl || !cityEl || !profileLink) return;
-      const params = new URLSearchParams({
-        dealerId: [slugify(nameEl.textContent), slugify(cityEl.textContent)].filter(Boolean).join('-'),
-        dealer: nameEl.textContent.trim(),
-        city: cityEl.textContent.trim(),
-        contactName: 'Dealer Team',
-        contactRole: 'Sales Desk',
-        phone: '923000000000'
+    const cards = [];
+    dealerSnap.forEach((docSnap) => {
+      const dealer = { id: docSnap.id, ...(docSnap.data() || {}) };
+      const status = String(dealer.verificationStatus || "").toLowerCase();
+      const isVerified = status === "verified" || status === "approved";
+      if (!isVerified || dealer.suspended) return;
+
+      const name = clean(dealer.businessName || dealer.dealerName || dealer.id);
+      const city = clean(dealer.city || "-");
+      const speciality = clean(dealer.speciality || dealer.specialty || "Verified dealership");
+      const rating = clean(dealer.rating || "4.8 / 5.0");
+      const phone = clean(dealer.phone || dealer.whatsapp || "").replace(/[^\d]/g, "") || "923000000000";
+      const contactName = clean(dealer.ownerName || "Dealer Team");
+      const activeCars = listingCountByDealer.get(dealer.id) || 0;
+      const search = [name, city, speciality, "active cars " + activeCars].join(" ").toLowerCase();
+      const waText = encodeURIComponent("Assalam o Alaikum " + name + ", I want to sell my car through your dealership on GariBazaar.");
+      const dealerParams = new URLSearchParams({
+        dealerId: dealer.id || [slugify(name), slugify(city)].filter(Boolean).join('-'),
+        dealer: name,
+        city,
+        contactName,
+        contactRole: "Sales Desk",
+        phone
       });
-      profileLink.href = 'dealer-profile.html?' + params.toString();
+
+      cards.push(
+        '<article class="dealer-card" data-search="' + esc(search) + '">' +
+          '<div class="dealer-top">' +
+            '<div class="dealer-logo"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="' + esc(name) + ' logo"></div>' +
+            '<div><h3 class="dealer-name">' + esc(name) + '</h3><p class="dealer-city">' + esc(city) + '</p></div>' +
+          '</div>' +
+          '<p class="dealer-meta">Speciality: ' + esc(speciality) + '<br>Active Cars: ' + esc(activeCars) + '</p>' +
+          '<p class="dealer-rate">' + esc(rating) + '</p>' +
+          '<a class="card-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
+          '<a class="card-btn whatsapp-btn" href="https://wa.me/' + esc(phone) + '?text=' + waText + '" target="_blank" rel="noopener noreferrer">Sell My Car (WhatsApp)</a>' +
+        '</article>'
+      );
     });
-  })();
+
+    allDealersGrid.innerHTML = cards.join("");
+    if (!cards.length && dealerEmptyState) {
+      dealerEmptyState.textContent = "No verified dealers are available yet. Approve dealers from admin panel.";
+      dealerEmptyState.classList.add("show");
+    } else if (dealerEmptyState) {
+      dealerEmptyState.classList.remove("show");
+    }
+  }
 
   function runDealerSearch() {
     if (!dealerSearchInput || !allDealersGrid) return;
@@ -295,36 +266,13 @@
     dealerSearchBtn.addEventListener('click', runDealerSearch);
   }
 
-  (function addQuickNav() {
-    var pathNorm = window.location.pathname.replace(/\\/g, '/');
-    var segs = pathNorm.split('/').filter(Boolean);
-    var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
-    if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
-    if (document.getElementById('gb-quick-nav')) return;
-    const hostNav = document.querySelector('nav');
-    if (!hostNav) return;
-    if (hostNav.querySelector('.back-link, .nav-back')) return;
-    if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
-    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
-    const nav = document.createElement('div');
-    nav.id = 'gb-quick-nav';
-    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.textContent = 'Back';
-    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
-    back.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
-    });
-    const home = document.createElement('a');
-    home.href = 'index.html';
-    home.textContent = 'Home';
-    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
-    nav.appendChild(back);
-    nav.appendChild(home);
-    mountPoint.appendChild(nav);
-  })();
+  renderLiveDealers().catch((error) => {
+    console.error("Failed to load dealers:", error);
+    if (dealerEmptyState) {
+      dealerEmptyState.textContent = "Could not load live dealers right now.";
+      dealerEmptyState.classList.add("show");
+    }
+  });
 </script>
 </body>
 </html>

@@ -322,7 +322,8 @@
 
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
+  import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
 
   let dealerUid = "";
   const authReady = new Promise((resolve) => {
@@ -380,7 +381,6 @@
     window.location.href = 'register.html';
   }
 
-  const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1_' + dealerUid;
   const ownerContact = {
     name: (dealerProfile && dealerProfile.ownerName) || 'Owner',
     role: 'Owner',
@@ -400,7 +400,8 @@
   const state = {
     employees: [],
     cars: [],
-    inventoryQuery: ''
+    inventoryQuery: '',
+    suspended: !!(dealerProfile && dealerProfile.suspended)
   };
   const panelOrder = ['hood', 'roof', 'trunk', 'left_fender', 'right_fender', 'left_front_door', 'right_front_door', 'left_rear_door', 'right_rear_door', 'front_bumper', 'rear_bumper', 'left_quarter', 'right_quarter'];
   const panelLabel = {
@@ -420,39 +421,45 @@
   };
   let currentPanelMarks = {};
 
-  function seedData() {
-    if (state.employees.length || state.cars.length) return;
-    state.employees = [
-      { id: crypto.randomUUID(), name: 'Ali', role: 'Sales Executive', phone: '923111111111', whatsapp: '923111111111' },
-      { id: crypto.randomUUID(), name: 'Saad', role: 'Sales Executive', phone: '923122222222', whatsapp: '923122222222' }
-    ];
-    state.cars = [
-      { id: crypto.randomUUID(), name: 'Toyota Corolla Altis 2022', price: '52', mileage: '21,000 km', transmission: 'Automatic', condition: 'Used', city: 'Islamabad', paintStatus: 'mixed', bodyNote: 'Hood sprayed, left rear door touched.', panelMarks: { hood: 'sprayed', left_rear_door: 'touched' }, assigneeId: state.employees[0].id },
-      { id: crypto.randomUUID(), name: 'Hyundai Tucson AWD 2024', price: '114', mileage: '0 km', transmission: 'Automatic', condition: 'New', city: 'Rawalpindi', paintStatus: 'original', bodyNote: '', panelMarks: {}, assigneeId: '' }
-    ];
-  }
+  async function loadLiveState() {
+    const freshProfile = await getDealerProfile(dealerUid);
+    state.suspended = !!(freshProfile && freshProfile.suspended);
+    state.employees = Array.isArray(freshProfile && freshProfile.employees)
+      ? freshProfile.employees.map((emp) => ({
+          id: String(emp.id || crypto.randomUUID()),
+          name: String(emp.name || '').trim(),
+          role: String(emp.role || '').trim(),
+          phone: String(emp.phone || '').replace(/\D/g, ''),
+          whatsapp: String(emp.whatsapp || emp.phone || '').replace(/\D/g, '')
+        }))
+      : [];
 
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return seedData();
-      const parsed = JSON.parse(raw);
-      state.employees = Array.isArray(parsed.employees) ? parsed.employees : [];
-      state.cars = Array.isArray(parsed.cars) ? parsed.cars : [];
-      state.cars = state.cars.map((car) => ({
-        ...car,
-        paintStatus: car.paintStatus || 'original',
-        bodyNote: car.bodyNote || '',
-        panelMarks: car.panelMarks && typeof car.panelMarks === 'object' ? car.panelMarks : {}
+    const listingSnap = await getDocs(collection(db, "listings"));
+    state.cars = listingSnap.docs
+      .map((d) => ({ id: d.id, ...(d.data() || {}) }))
+      .filter((car) => String(car.dealerId || '') === dealerUid)
+      .filter((car) => String(car.moderationStatus || 'live').toLowerCase() !== 'removed')
+      .map((car) => ({
+        id: car.id,
+        name: String(car.carName || car.name || '').trim(),
+        price: String(car.priceLakh || car.price || '').trim(),
+        mileage: String(car.mileage || '').trim(),
+        transmission: String(car.transmission || '').trim(),
+        condition: String(car.condition || '').trim(),
+        city: String(car.city || dealerCity).trim(),
+        paintStatus: String(car.paintStatus || 'original').trim(),
+        bodyNote: String(car.bodyNote || '').trim(),
+        panelMarks: car.panelMarks && typeof car.panelMarks === 'object' ? car.panelMarks : {},
+        assigneeId: String(car.assignedEmployeeId || '').trim(),
+        moderationStatus: String(car.moderationStatus || 'review').trim()
       }));
-      if (!state.employees.length && !state.cars.length) seedData();
-    } catch {
-      seedData();
-    }
   }
 
-  function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  async function persistEmployees() {
+    await updateDoc(doc(db, "dealerProfiles", dealerUid), {
+      employees: state.employees,
+      updatedAt: serverTimestamp()
+    });
   }
 
   function byId(list, id) {
@@ -462,6 +469,27 @@
   function contactForCar(car) {
     const employee = car.assigneeId ? byId(state.employees, car.assigneeId) : null;
     return employee || ownerContact;
+  }
+
+  function requireActiveDealer(errTarget) {
+    if (!state.suspended) return true;
+    if (errTarget) setError(errTarget, 'Your dealership is suspended by admin. Contact support to reactivate.');
+    return false;
+  }
+
+  function setSuspendedUi() {
+    const forms = [document.getElementById('employee-form'), document.getElementById('car-form')];
+    forms.forEach((form) => {
+      if (!form) return;
+      form.querySelectorAll('input, select, button').forEach((el) => {
+        if (el.id === 'inventorySearchInput') return;
+        el.disabled = state.suspended;
+      });
+    });
+    const note = document.querySelector('.note');
+    if (state.suspended && note) {
+      note.innerHTML = 'Dealership is currently <strong>suspended</strong>. Inventory updates are locked until admin reactivates your account.';
+    }
   }
 
   function paintLabel(value) {
@@ -564,7 +592,8 @@
         '<select class="mini-btn" data-assign="' + car.id + '"><option value="">Owner default</option>' +
         state.employees.map((e) => '<option value="' + e.id + '"' + (e.id === car.assigneeId ? ' selected' : '') + '>' + e.name + '</option>').join('') +
         '</select>' +
-        '<button class="mini-btn" data-delete-car="' + car.id + '">Remove</button></div>';
+        '<button class="mini-btn" data-delete-car="' + car.id + '">Remove</button>' +
+        '<span class="badge ' + (car.moderationStatus === 'live' ? 'verify' : 'emp') + '">' + (car.moderationStatus === 'live' ? 'Published' : 'Pending Admin') + '</span></div>';
       root.appendChild(item);
     });
   }
@@ -622,13 +651,16 @@
     renderCars();
     renderPreview();
     renderKpis();
-    saveState();
+    setSuspendedUi();
   }
 
-  document.getElementById('employee-form').addEventListener('submit', (e) => {
+  document.getElementById('employee-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const err = document.getElementById('emp-error');
     clearError(err);
+    await loadLiveState();
+    renderAll();
+    if (!requireActiveDealer(err)) return;
 
     const name = document.getElementById('emp-name').value.trim();
     const role = document.getElementById('emp-role').value.trim();
@@ -636,15 +668,23 @@
     const wa = document.getElementById('emp-wa').value.trim();
     if (!name || !role || !phone || !wa) return setError(err, 'Please fill all employee fields.');
 
-    state.employees.push({ id: crypto.randomUUID(), name, role, phone: phone.replace(/\D/g, ''), whatsapp: wa.replace(/\D/g, '') });
-    e.target.reset();
-    renderAll();
+    try {
+      state.employees.push({ id: crypto.randomUUID(), name, role, phone: phone.replace(/\D/g, ''), whatsapp: wa.replace(/\D/g, '') });
+      await persistEmployees();
+      e.target.reset();
+      renderAll();
+    } catch (error) {
+      setError(err, 'Could not save employee: ' + (error && error.message ? error.message : 'Unknown error'));
+    }
   });
 
-  document.getElementById('car-form').addEventListener('submit', (e) => {
+  document.getElementById('car-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const err = document.getElementById('car-error');
     clearError(err);
+    await loadLiveState();
+    renderAll();
+    if (!requireActiveDealer(err)) return;
 
     const name = document.getElementById('car-name').value.trim();
     const price = document.getElementById('car-price').value.trim();
@@ -663,47 +703,114 @@
     if (!Number.isFinite(numericPrice) || numericPrice < 0) {
       return setError(err, 'Price cannot be below 0.');
     }
-    state.cars.push({
-      id: crypto.randomUUID(),
-      name,
-      price: String(numericPrice),
-      mileage,
-      transmission,
-      condition,
-      city,
-      paintStatus,
-      bodyNote,
-      panelMarks: { ...currentPanelMarks },
-      assigneeId
-    });
-    e.target.reset();
-    currentPanelMarks = {};
-    renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
-    renderAll();
+
+    const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
+    const listingId = crypto.randomUUID();
+    try {
+      await setDoc(doc(db, "listings", listingId), {
+        dealerId: dealerUid,
+        dealerName: dealerName,
+        carName: name,
+        priceLakh: String(numericPrice),
+        mileage,
+        transmission,
+        condition,
+        city,
+        paintStatus,
+        bodyNote,
+        panelMarks: { ...currentPanelMarks },
+        assignedEmployeeId: assigneeId || "",
+        contactName: contact.name,
+        contactRole: contact.role,
+        phone: contact.phone,
+        moderationStatus: "review",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+      e.target.reset();
+      currentPanelMarks = {};
+      renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
+      await loadLiveState();
+      renderAll();
+    } catch (error) {
+      setError(err, 'Could not save listing: ' + (error && error.message ? error.message : 'Unknown error'));
+    }
   });
 
-  document.getElementById('employee-list').addEventListener('click', (e) => {
+  document.getElementById('employee-list').addEventListener('click', async (e) => {
     const id = e.target.getAttribute('data-delete-emp');
     if (!id) return;
+    const err = document.getElementById('emp-error');
+    clearError(err);
+    await loadLiveState();
+    renderAll();
+    if (!requireActiveDealer(err)) return;
     state.employees = state.employees.filter((x) => x.id !== id);
     state.cars = state.cars.map((car) => ({ ...car, assigneeId: car.assigneeId === id ? '' : car.assigneeId }));
-    renderAll();
+    try {
+      await persistEmployees();
+      await Promise.all(
+        state.cars
+          .filter((car) => !car.assigneeId)
+          .map((car) =>
+            updateDoc(doc(db, "listings", car.id), {
+              assignedEmployeeId: "",
+              contactName: ownerContact.name,
+              contactRole: ownerContact.role,
+              phone: ownerContact.phone,
+              updatedAt: serverTimestamp()
+            })
+          )
+      );
+      await loadLiveState();
+      renderAll();
+    } catch (error) {
+      setError(err, 'Could not remove employee: ' + (error && error.message ? error.message : 'Unknown error'));
+    }
   });
 
-  document.getElementById('car-list').addEventListener('click', (e) => {
+  document.getElementById('car-list').addEventListener('click', async (e) => {
     const id = e.target.getAttribute('data-delete-car');
     if (!id) return;
-    state.cars = state.cars.filter((x) => x.id !== id);
+    const err = document.getElementById('car-error');
+    clearError(err);
+    await loadLiveState();
     renderAll();
+    if (!requireActiveDealer(err)) return;
+    try {
+      await deleteDoc(doc(db, "listings", id));
+      await loadLiveState();
+      renderAll();
+    } catch (error) {
+      setError(err, 'Could not delete listing: ' + (error && error.message ? error.message : 'Unknown error'));
+    }
   });
 
-  document.getElementById('car-list').addEventListener('change', (e) => {
+  document.getElementById('car-list').addEventListener('change', async (e) => {
     const id = e.target.getAttribute('data-assign');
     if (!id) return;
+    const err = document.getElementById('car-error');
+    clearError(err);
+    await loadLiveState();
+    renderAll();
+    if (!requireActiveDealer(err)) return;
     const car = byId(state.cars, id);
     if (!car) return;
-    car.assigneeId = e.target.value;
-    renderAll();
+    const assigneeId = e.target.value;
+    const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
+    try {
+      await updateDoc(doc(db, "listings", id), {
+        assignedEmployeeId: assigneeId || "",
+        contactName: contact.name,
+        contactRole: contact.role,
+        phone: contact.phone,
+        updatedAt: serverTimestamp()
+      });
+      await loadLiveState();
+      renderAll();
+    } catch (error) {
+      setError(err, 'Could not update assignment: ' + (error && error.message ? error.message : 'Unknown error'));
+    }
   });
 
   const inventorySearchInput = document.getElementById('inventorySearchInput');
@@ -729,7 +836,7 @@
     });
   }
 
-  loadState();
+  await loadLiveState();
   const carPriceInput = document.getElementById('car-price');
   if (carPriceInput) {
     carPriceInput.addEventListener('keydown', (event) => {

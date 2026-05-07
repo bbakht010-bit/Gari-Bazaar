@@ -15,6 +15,12 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
+    function isDealerUser() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "dealer";
+    }
+
     function validUserRole(role) {
       return role in ["buyer", "dealer", "admin"];
     }
@@ -44,7 +50,14 @@ service cloud.firestore {
 
     match /listings/{listingId} {
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow create: if isAdmin() ||
+        (isDealerUser() && request.resource.data.dealerId == request.auth.uid);
+      allow update: if isAdmin() ||
+        (isDealerUser() &&
+          resource.data.dealerId == request.auth.uid &&
+          request.resource.data.dealerId == resource.data.dealerId);
+      allow delete: if isAdmin() ||
+        (isDealerUser() && resource.data.dealerId == request.auth.uid);
     }
   }
 }

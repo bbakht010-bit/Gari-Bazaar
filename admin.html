@@ -423,27 +423,27 @@
     <article class="kpi">
       <div class="kpi-label">Pending Applications</div>
       <div class="kpi-value" id="kpiPending">0</div>
-      <div class="kpi-foot">Live Firestore feed pending</div>
+      <div class="kpi-foot">Live Firestore data</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Verified Dealerships</div>
       <div class="kpi-value" id="kpiVerifiedDealers">0</div>
-      <div class="kpi-foot">Live Firestore feed pending</div>
+      <div class="kpi-foot">Live Firestore data</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Active Listings</div>
       <div class="kpi-value" id="kpiActiveListings">0</div>
-      <div class="kpi-foot">Live Firestore feed pending</div>
+      <div class="kpi-foot">Live Firestore data</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Paid Subscriptions</div>
       <div class="kpi-value" id="kpiPaidSubs">0</div>
-      <div class="kpi-foot">Live Firestore feed pending</div>
+      <div class="kpi-foot">Live Firestore data</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Unassigned Cars</div>
       <div class="kpi-value" id="kpiUnassigned">0</div>
-      <div class="kpi-foot">Live Firestore feed pending</div>
+      <div class="kpi-foot">Live Firestore data</div>
     </article>
   </section>
 
@@ -485,7 +485,7 @@
             </thead>
             <tbody id="applicationsBody">
               <tr>
-                <td colspan="6">No applications yet. Real records will appear here when connected to live Firestore moderation queues.</td>
+                <td colspan="6">No pending applications right now.</td>
               </tr>
             </tbody>
           </table>
@@ -517,7 +517,7 @@
             </thead>
             <tbody id="dealershipsBody">
               <tr>
-                <td colspan="6">No dealerships loaded. This table is now clean from placeholder records.</td>
+                <td colspan="6">No dealerships found in Firestore.</td>
               </tr>
             </tbody>
           </table>
@@ -549,7 +549,7 @@
             </thead>
             <tbody id="listingsBody">
               <tr>
-                <td colspan="6">No listings loaded. Placeholder moderation records have been removed.</td>
+                <td colspan="6">No listings found in Firestore.</td>
               </tr>
             </tbody>
           </table>
@@ -613,7 +613,7 @@
             </thead>
             <tbody id="assignmentsBody">
               <tr>
-                <td colspan="6">No assignment data loaded yet.</td>
+                <td colspan="6">No assignment data available.</td>
               </tr>
             </tbody>
           </table>
@@ -677,7 +677,7 @@
           </article>
         </div>
         <div class="notice">
-          This admin panel is currently a UI-first management foundation. In the next backend phase, each action button will be connected to real database operations, approvals, and audit logs.
+          This admin panel now reads and moderates live Firestore data for dealer approvals, listing status, and assignment visibility.
         </div>
       </section>
     </div>

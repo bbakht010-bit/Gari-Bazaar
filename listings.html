@@ -109,7 +109,6 @@
   }
 
   .nav-buyer-links a:hover { color: var(--green-mid); }
-  .nav-buyer-links a.join { color: var(--green-main); }
 
   @media (max-width: 900px) {
     .nav-buyer-links {
@@ -905,7 +904,6 @@
     <a href="index.html" class="btn-nav-soft">Home</a>
     <div id="navBuyerLinks" class="nav-buyer-links">
       <a href="buyer-login.html">Sign in</a>
-      <a href="buyer-signup.html" class="join">Join</a>
     </div>
     <a id="navProfileLink" href="buyer-profile.html" class="btn-primary" style="display:none;">My Profile</a>
     <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
@@ -1392,7 +1390,6 @@
       <h4>For Buyers</h4>
       <ul>
         <li><a href="buyer-login.html">Buyer sign in</a></li>
-        <li><a href="buyer-signup.html">Create buyer account</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
         <li><a href="listings.html">Search by City</a></li>
@@ -1426,10 +1423,15 @@
 </footer>
 
 <script>
-  const cards = document.querySelectorAll('.car-card');
-  const cardList = Array.from(cards);
+  let cards = Array.from(document.querySelectorAll('.car-card'));
+  let cardList = cards.slice();
   const carGrid = document.querySelector('.car-grid');
-  const defaultCardOrder = cardList.slice();
+  let defaultCardOrder = cardList.slice();
+  function refreshCardCaches() {
+    cards = Array.from(document.querySelectorAll('.car-card'));
+    cardList = cards.slice();
+    defaultCardOrder = cardList.slice();
+  }
   const listingSearchInput = document.getElementById('listingSearchInput');
   const listingSearchBtn = document.getElementById('listingSearchBtn');
   const applyFiltersBtn = document.getElementById('applyFiltersBtn');
@@ -1941,6 +1943,146 @@
     line.prepend(logo);
   });
 
+</script>
+
+<script type="module">
+  import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
+
+  function esc(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function slugify(value) {
+    return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+
+  function toLakh(priceValue) {
+    const n = parseFloat(String(priceValue || "").replace(/[^\d.]/g, ""));
+    if (!Number.isFinite(n)) return "-";
+    if (n > 100000) return (n / 100000).toFixed(1).replace(/\.0$/, "");
+    return n.toFixed(1).replace(/\.0$/, "");
+  }
+
+  async function renderLiveListings() {
+    const carGrid = document.querySelector(".car-grid");
+    if (!carGrid) return;
+
+    const [dealerSnap, listingSnap] = await Promise.all([
+      getDocs(collection(db, "dealerProfiles")),
+      getDocs(collection(db, "listings"))
+    ]);
+
+    const dealers = new Map();
+    dealerSnap.forEach((docSnap) => {
+      dealers.set(docSnap.id, docSnap.data() || {});
+    });
+
+    const liveListings = [];
+    listingSnap.forEach((docSnap) => {
+      const listing = { id: docSnap.id, ...(docSnap.data() || {}) };
+      const dealerId = String(listing.dealerId || "");
+      const dealer = dealers.get(dealerId) || null;
+      const dealerStatus = String((dealer && dealer.verificationStatus) || "").toLowerCase();
+      const isVerifiedDealer = dealerStatus === "verified" || dealerStatus === "approved";
+      const isSuspended = !!(dealer && dealer.suspended);
+      const moderation = String(listing.moderationStatus || "live").toLowerCase();
+      if (!isVerifiedDealer || isSuspended || moderation !== "live") return;
+      liveListings.push({ listing, dealer, dealerId });
+    });
+
+    if (!liveListings.length) {
+      carGrid.innerHTML = '<p class="note">No live approved listings available right now. Approve dealers and publish listings from admin panel.</p>';
+      if (typeof refreshCardCaches === "function") refreshCardCaches();
+      if (typeof runListingsSearch === "function") runListingsSearch();
+      return;
+    }
+
+    carGrid.innerHTML = liveListings.map((entry, index) => {
+      const listing = entry.listing;
+      const dealer = entry.dealer || {};
+      const dealerName = clean(listing.dealerName || dealer.businessName || dealer.dealerName || "Verified Dealer");
+      const city = clean(listing.city || dealer.city || "-");
+      const contactName = clean(listing.contactName || dealer.ownerName || "Dealer Team");
+      const contactRole = clean(listing.contactRole || "Sales Desk");
+      const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
+      const phoneDigits = phoneRaw.replace(/[^\d]/g, "") || "923000000000";
+      const title = clean(listing.carName || listing.name || "Untitled Listing");
+      const mileage = clean(listing.mileage || "-");
+      const transmission = clean(listing.transmission || "-");
+      const condition = clean(listing.condition || "Used");
+      const priceLakh = toLakh(listing.priceLakh || listing.price);
+      const bodyType = clean(listing.bodyType || "Any");
+      const assembly = clean(listing.assembly || "Any");
+      const listingId = clean(listing.id || [slugify(title), slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
+      const dealerId = clean(entry.dealerId || [slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
+      const waText = encodeURIComponent("Assalamualaikum " + contactName + ", I am interested in " + title + ".");
+      const detailParams = new URLSearchParams({
+        listingId,
+        dealerId,
+        car: title,
+        price: priceLakh,
+        mileage,
+        transmission,
+        condition,
+        city,
+        dealer: dealerName,
+        contactName,
+        contactRole,
+        phone: phoneDigits
+      });
+      const dealerParams = new URLSearchParams({
+        dealerId,
+        dealer: dealerName,
+        city,
+        contactName,
+        contactRole,
+        phone: phoneDigits
+      });
+
+      return (
+        '<article class="car-card" tabindex="0" data-body="' + esc(bodyType) + '" data-assembly="' + esc(assembly) + '" data-stock-index="' + esc(index + 1) + '">' +
+          '<div class="car-photo">' +
+            '<span class="verified-pill">Verified Dealer</span>' +
+            '<img src="https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80" alt="Car listing image" loading="lazy">' +
+          '</div>' +
+          '<div class="car-main">' +
+            '<h4>' + esc(title) + '</h4>' +
+            '<div class="car-price">' + esc(priceLakh) + ' Lakh <span>PKR</span></div>' +
+          '</div>' +
+          '<div class="car-expanded">' +
+            '<p class="dealer-line">' + esc(dealerName) + " — " + esc(city) + "</p>" +
+            '<p class="contact-meta">Contact: ' + esc(contactName) + " (" + esc(contactRole) + ")</p>" +
+            '<div class="mini-specs">' +
+              "<span>" + esc(mileage) + "</span><span>" + esc(transmission) + "</span><span>" + esc(condition) + "</span><span>" + esc(city) + "</span>" +
+            "</div>" +
+            '<div class="contact-actions">' +
+              '<a class="contact-link wa" href="https://wa.me/' + esc(phoneDigits) + "?text=" + waText + '" target="_blank" rel="noopener noreferrer">WhatsApp ' + esc(contactName) + "</a>" +
+              '<a class="contact-link call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>" +
+            "</div>" +
+            '<a class="action-link detail-btn" href="car-detail.html?' + esc(detailParams.toString()) + '">Show Car Details</a>' +
+            '<a class="action-link dealer-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
+          "</div>" +
+        "</article>"
+      );
+    }).join("");
+
+    if (typeof refreshCardCaches === "function") refreshCardCaches();
+    if (typeof runListingsSearch === "function") runListingsSearch();
+  }
+
+  renderLiveListings().catch((error) => {
+    console.error("Failed to load live listings:", error);
+  });
 </script>
 
 <script type="module">

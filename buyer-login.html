@@ -46,11 +46,23 @@
   .logo span { color: var(--gold); }
   .back-link {
     text-decoration: none;
-    color: var(--gray-600);
-    font-size: 14px;
-    font-weight: 500;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 700;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 8px 12px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  .back-link:hover { color: var(--green-mid); }
+  .back-link:hover {
+    color: var(--green-mid);
+    border-color: var(--green-main);
+    background: var(--green-faint);
+  }
   .wrap {
     min-height: calc(100vh - 70px);
     display: grid;

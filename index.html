@@ -147,15 +147,19 @@
   }
 
   .btn-outline {
-    padding: 9px 20px;
+    min-height: 40px;
+    padding: 9px 18px;
     border: 1.5px solid var(--green-main);
     color: var(--green-main);
     background: transparent;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
     font-family: 'DM Sans', sans-serif;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .btn-outline:hover {
@@ -163,15 +167,19 @@
   }
 
   .btn-primary {
-    padding: 9px 20px;
+    min-height: 40px;
+    padding: 9px 18px;
     background: var(--green-main);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 14px; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
     font-family: 'DM Sans', sans-serif;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .btn-primary:hover { background: var(--green-mid); }
@@ -255,11 +263,12 @@
   }
 
   .btn-hero-primary {
-    padding: 15px 32px;
+    min-height: 48px;
+    padding: 14px 28px;
     background: white;
     color: var(--green-mid);
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 16px; font-weight: 600;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
@@ -273,11 +282,12 @@
   }
 
   .btn-hero-secondary {
-    padding: 15px 32px;
+    min-height: 48px;
+    padding: 14px 28px;
     background: transparent;
     color: white;
     border: 1.5px solid rgba(255,255,255,0.5);
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 16px; font-weight: 600;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;

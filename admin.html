@@ -422,28 +422,28 @@
   <section class="kpi-grid">
     <article class="kpi">
       <div class="kpi-label">Pending Applications</div>
-      <div class="kpi-value">18</div>
-      <div class="kpi-foot">6 new today</div>
+      <div class="kpi-value" id="kpiPending">0</div>
+      <div class="kpi-foot">Live Firestore feed pending</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Verified Dealerships</div>
-      <div class="kpi-value">120</div>
-      <div class="kpi-foot">Owner approved only</div>
+      <div class="kpi-value" id="kpiVerifiedDealers">0</div>
+      <div class="kpi-foot">Live Firestore feed pending</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Active Listings</div>
-      <div class="kpi-value">1,420</div>
-      <div class="kpi-foot">Islamabad + Rawalpindi</div>
+      <div class="kpi-value" id="kpiActiveListings">0</div>
+      <div class="kpi-foot">Live Firestore feed pending</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Paid Subscriptions</div>
-      <div class="kpi-value">64</div>
-      <div class="kpi-foot">56 growth, 8 pro</div>
+      <div class="kpi-value" id="kpiPaidSubs">0</div>
+      <div class="kpi-foot">Live Firestore feed pending</div>
     </article>
     <article class="kpi">
       <div class="kpi-label">Unassigned Cars</div>
-      <div class="kpi-value">47</div>
-      <div class="kpi-foot">Auto-routed to owner</div>
+      <div class="kpi-value" id="kpiUnassigned">0</div>
+      <div class="kpi-foot">Live Firestore feed pending</div>
     </article>
   </section>
 
@@ -483,40 +483,9 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="applicationsBody">
               <tr>
-                <td>Capital Autos Hub</td>
-                <td>Usman Tariq</td>
-                <td>Islamabad</td>
-                <td>Today, 10:42 AM</td>
-                <td><span class="status pending">Pending</span></td>
-                <td>
-                  <button class="mini-btn">Review Docs</button>
-                  <button class="mini-btn approve">Approve</button>
-                  <button class="mini-btn reject">Reject</button>
-                </td>
-              </tr>
-              <tr>
-                <td>RWP Wheel Point</td>
-                <td>Hamza Arif</td>
-                <td>Rawalpindi</td>
-                <td>Today, 9:05 AM</td>
-                <td><span class="status pending">Pending</span></td>
-                <td>
-                  <button class="mini-btn">Review Docs</button>
-                  <button class="mini-btn approve">Approve</button>
-                  <button class="mini-btn reject">Reject</button>
-                </td>
-              </tr>
-              <tr>
-                <td>Primeway Autos</td>
-                <td>Rehan Ali</td>
-                <td>Rawalpindi</td>
-                <td>Yesterday</td>
-                <td><span class="status verified">Verified</span></td>
-                <td>
-                  <button class="mini-btn">View Profile</button>
-                </td>
+                <td colspan="6">No applications yet. Real records will appear here when connected to live Firestore moderation queues.</td>
               </tr>
             </tbody>
           </table>
@@ -546,30 +515,9 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="dealershipsBody">
               <tr>
-                <td>Al-Haram Motors</td>
-                <td>Islamabad</td>
-                <td>12</td>
-                <td><span class="status active">Growth</span></td>
-                <td>4.9</td>
-                <td><button class="mini-btn">Open</button> <button class="mini-btn">Suspend</button></td>
-              </tr>
-              <tr>
-                <td>City Motors</td>
-                <td>Rawalpindi</td>
-                <td>8</td>
-                <td><span class="status default">Free</span></td>
-                <td>4.8</td>
-                <td><button class="mini-btn">Open</button> <button class="mini-btn">Upgrade</button></td>
-              </tr>
-              <tr>
-                <td>Skyline Motors</td>
-                <td>Islamabad</td>
-                <td>6</td>
-                <td><span class="status active">Pro</span></td>
-                <td>4.6</td>
-                <td><button class="mini-btn">Open</button> <button class="mini-btn">Suspend</button></td>
+                <td colspan="6">No dealerships loaded. This table is now clean from placeholder records.</td>
               </tr>
             </tbody>
           </table>
@@ -599,30 +547,9 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="listingsBody">
               <tr>
-                <td>Toyota Corolla Altis 2022</td>
-                <td>Al-Haram Motors</td>
-                <td>Ali (Employee)</td>
-                <td>Manual assignment</td>
-                <td><span class="status verified">Live</span></td>
-                <td><button class="mini-btn">Edit</button> <button class="mini-btn">Unpublish</button></td>
-              </tr>
-              <tr>
-                <td>Suzuki Alto VXR 2023</td>
-                <td>Prime Autos</td>
-                <td>Usman (Owner)</td>
-                <td>Default fallback</td>
-                <td><span class="status active">Review</span></td>
-                <td><button class="mini-btn">Assign Employee</button> <button class="mini-btn">Publish</button></td>
-              </tr>
-              <tr>
-                <td>Honda BR-V i-VTEC 2022</td>
-                <td>Primeway Autos</td>
-                <td>Rehan (Employee)</td>
-                <td>Manual assignment</td>
-                <td><span class="status flagged">Flagged</span></td>
-                <td><button class="mini-btn">Review</button> <button class="mini-btn reject">Remove</button></td>
+                <td colspan="6">No listings loaded. Placeholder moderation records have been removed.</td>
               </tr>
             </tbody>
           </table>
@@ -644,18 +571,18 @@
           <article class="card">
             <h4>Plan Overview</h4>
             <ul class="list">
-              <li><span>Free Plan Dealers</span><strong>56</strong></li>
-              <li><span>Growth Plan Dealers</span><strong>48</strong></li>
-              <li><span>Pro Plan Dealers</span><strong>16</strong></li>
-              <li><span>MRR (PKR)</span><strong>352,500</strong></li>
+              <li><span>Free Plan Dealers</span><strong>0</strong></li>
+              <li><span>Growth Plan Dealers</span><strong>0</strong></li>
+              <li><span>Pro Plan Dealers</span><strong>0</strong></li>
+              <li><span>MRR (PKR)</span><strong>0</strong></li>
             </ul>
           </article>
           <article class="card">
             <h4>Listing Limit Alerts</h4>
             <ul class="list">
-              <li><span>Free limit reached</span><strong>22 dealers</strong></li>
-              <li><span>Near growth limit</span><strong>9 dealers</strong></li>
-              <li><span>Payment failed</span><strong>3 dealers</strong></li>
+              <li><span>Free limit reached</span><strong>0 dealers</strong></li>
+              <li><span>Near growth limit</span><strong>0 dealers</strong></li>
+              <li><span>Payment failed</span><strong>0 dealers</strong></li>
             </ul>
           </article>
         </div>
@@ -684,30 +611,9 @@
                 <th>Mode</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="assignmentsBody">
               <tr>
-                <td>City Motors</td>
-                <td>Honda Civic Oriel 2024</td>
-                <td>Saad (Employee)</td>
-                <td>Enabled</td>
-                <td>Enabled</td>
-                <td><span class="status verified">Employee</span></td>
-              </tr>
-              <tr>
-                <td>Skyline Motors</td>
-                <td>Hyundai Tucson AWD 2024</td>
-                <td>Hamza (Owner)</td>
-                <td>Enabled</td>
-                <td>Enabled</td>
-                <td><span class="status default">Owner default</span></td>
-              </tr>
-              <tr>
-                <td>BlueLine Cars</td>
-                <td>Suzuki Swift GLX 2024</td>
-                <td>Ahmed (Owner)</td>
-                <td>Enabled</td>
-                <td>Enabled</td>
-                <td><span class="status default">Owner default</span></td>
+                <td colspan="6">No assignment data loaded yet.</td>
               </tr>
             </tbody>
           </table>
@@ -718,7 +624,7 @@
         <div class="panel-head">
           <div>
             <h2>Ratings and Reports</h2>
-            <p>Placeholder trust badges now, real review engine in phase 2.</p>
+            <p>Insights will appear when live rating and report collections are connected.</p>
           </div>
           <div class="actions">
             <button class="btn btn-outline" type="button">Download CSV</button>
@@ -728,18 +634,14 @@
         <div class="grid-2">
           <article class="card">
             <h4>Top Dealers by Rating</h4>
-            <ul class="list">
-              <li><span>Al-Haram Motors</span><strong>4.9</strong></li>
-              <li><span>City Motors</span><strong>4.8</strong></li>
-              <li><span>Prime Autos</span><strong>4.7</strong></li>
+            <ul class="list" id="insightsRatingList">
+              <li><span>No records</span><strong>-</strong></li>
             </ul>
           </article>
           <article class="card">
             <h4>Top Dealers by Sales</h4>
-            <ul class="list">
-              <li><span>Al-Haram Motors</span><strong>234</strong></li>
-              <li><span>City Motors</span><strong>189</strong></li>
-              <li><span>Prime Autos</span><strong>156</strong></li>
+            <ul class="list" id="insightsSalesList">
+              <li><span>No records</span><strong>-</strong></li>
             </ul>
           </article>
         </div>
@@ -784,7 +686,182 @@
 
 <script type="module">
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, getUserRecord } from "./firebase-client.js";
+  import { collection, doc, getDocs, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db, getUserRecord } from "./firebase-client.js";
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function statusBadge(statusText, variant) {
+    return '<span class="status ' + variant + '">' + escapeHtml(statusText) + "</span>";
+  }
+
+  function parseRating(value) {
+    const number = parseFloat(String(value || "").replace(/[^\d.]/g, ""));
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  async function loadAdminData() {
+    const applicationsBody = document.getElementById("applicationsBody");
+    const dealershipsBody = document.getElementById("dealershipsBody");
+    const listingsBody = document.getElementById("listingsBody");
+    const assignmentsBody = document.getElementById("assignmentsBody");
+    const ratingList = document.getElementById("insightsRatingList");
+    const salesList = document.getElementById("insightsSalesList");
+    const kpiPending = document.getElementById("kpiPending");
+    const kpiVerifiedDealers = document.getElementById("kpiVerifiedDealers");
+    const kpiActiveListings = document.getElementById("kpiActiveListings");
+    const kpiPaidSubs = document.getElementById("kpiPaidSubs");
+    const kpiUnassigned = document.getElementById("kpiUnassigned");
+
+    const [dealerSnap, listingSnap] = await Promise.all([
+      getDocs(collection(db, "dealerProfiles")),
+      getDocs(collection(db, "listings"))
+    ]);
+
+    const dealers = dealerSnap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    const listings = listingSnap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+
+    const pendingApps = dealers.filter((d) => {
+      const status = String(d.verificationStatus || "pending").toLowerCase();
+      return status !== "verified" && status !== "approved";
+    });
+    const verifiedDealers = dealers.filter((d) => {
+      const status = String(d.verificationStatus || "").toLowerCase();
+      return status === "verified" || status === "approved";
+    });
+    const activeListings = listings.filter((l) => String(l.moderationStatus || "live").toLowerCase() !== "removed");
+    const paidSubs = dealers.filter((d) => ["growth", "pro", "professional"].includes(String(d.plan || "").toLowerCase()));
+    const unassignedCars = listings.filter((l) => {
+      const role = String(l.contactRole || "").toLowerCase();
+      return !l.contactName || !role || role.includes("owner");
+    });
+
+    if (kpiPending) kpiPending.textContent = String(pendingApps.length);
+    if (kpiVerifiedDealers) kpiVerifiedDealers.textContent = String(verifiedDealers.length);
+    if (kpiActiveListings) kpiActiveListings.textContent = String(activeListings.length);
+    if (kpiPaidSubs) kpiPaidSubs.textContent = String(paidSubs.length);
+    if (kpiUnassigned) kpiUnassigned.textContent = String(unassignedCars.length);
+
+    if (applicationsBody) {
+      if (!pendingApps.length) {
+        applicationsBody.innerHTML = '<tr><td colspan="6">No pending applications right now.</td></tr>';
+      } else {
+        applicationsBody.innerHTML = pendingApps.map((d) => {
+          const owner = d.ownerName || d.contactName || "Dealer Owner";
+          const city = d.city || "-";
+          const submitted = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleString() : "-";
+          const status = String(d.verificationStatus || "pending").toLowerCase();
+          return "<tr>" +
+            "<td>" + escapeHtml(d.businessName || d.dealerName || d.id) + "</td>" +
+            "<td>" + escapeHtml(owner) + "</td>" +
+            "<td>" + escapeHtml(city) + "</td>" +
+            "<td>" + escapeHtml(submitted) + "</td>" +
+            "<td>" + statusBadge(status, "pending") + "</td>" +
+            "<td>" +
+            '<button class="mini-btn approve" data-app-action="approve" data-dealer-id="' + escapeHtml(d.id) + '">Approve</button> ' +
+            '<button class="mini-btn reject" data-app-action="reject" data-dealer-id="' + escapeHtml(d.id) + '">Reject</button>' +
+            "</td>" +
+            "</tr>";
+        }).join("");
+      }
+    }
+
+    if (dealershipsBody) {
+      if (!dealers.length) {
+        dealershipsBody.innerHTML = '<tr><td colspan="6">No dealerships found in Firestore.</td></tr>';
+      } else {
+        dealershipsBody.innerHTML = dealers.map((d) => {
+          const plan = String(d.plan || "free").toLowerCase();
+          const rating = parseRating(d.rating);
+          const activeCount = listings.filter((l) => String(l.dealerId || "") === String(d.id)).length;
+          const isSuspended = !!d.suspended;
+          const planBadge = plan === "free" ? "default" : "active";
+          return "<tr>" +
+            "<td>" + escapeHtml(d.businessName || d.dealerName || d.id) + "</td>" +
+            "<td>" + escapeHtml(d.city || "-") + "</td>" +
+            "<td>" + escapeHtml(activeCount) + "</td>" +
+            "<td>" + statusBadge(plan, planBadge) + "</td>" +
+            "<td>" + escapeHtml(rating ? rating.toFixed(1) : "-") + "</td>" +
+            "<td>" +
+            '<button class="mini-btn" data-dealer-action="' + (isSuspended ? "activate" : "suspend") + '" data-dealer-id="' + escapeHtml(d.id) + '">' + (isSuspended ? "Activate" : "Suspend") + "</button>" +
+            "</td>" +
+            "</tr>";
+        }).join("");
+      }
+    }
+
+    if (listingsBody) {
+      if (!listings.length) {
+        listingsBody.innerHTML = '<tr><td colspan="6">No listings found in Firestore.</td></tr>';
+      } else {
+        listingsBody.innerHTML = listings.map((l) => {
+          const status = String(l.moderationStatus || "live").toLowerCase();
+          const statusClass = status === "removed" ? "flagged" : (status === "review" ? "active" : "verified");
+          const contact = (l.contactName || "Owner") + " (" + (l.contactRole || "Owner") + ")";
+          const route = l.contactRole && String(l.contactRole).toLowerCase().includes("owner") ? "Owner default" : "Manual assignment";
+          return "<tr>" +
+            "<td>" + escapeHtml(l.carName || l.name || l.id) + "</td>" +
+            "<td>" + escapeHtml(l.dealerName || l.dealerId || "-") + "</td>" +
+            "<td>" + escapeHtml(contact) + "</td>" +
+            "<td>" + escapeHtml(route) + "</td>" +
+            "<td>" + statusBadge(status, statusClass) + "</td>" +
+            "<td>" +
+            '<button class="mini-btn" data-listing-action="' + (status === "live" ? "unpublish" : "publish") + '" data-listing-id="' + escapeHtml(l.id) + '">' + (status === "live" ? "Unpublish" : "Publish") + "</button> " +
+            '<button class="mini-btn reject" data-listing-action="remove" data-listing-id="' + escapeHtml(l.id) + '">Remove</button>' +
+            "</td>" +
+            "</tr>";
+        }).join("");
+      }
+    }
+
+    if (assignmentsBody) {
+      if (!listings.length) {
+        assignmentsBody.innerHTML = '<tr><td colspan="6">No assignment data available.</td></tr>';
+      } else {
+        assignmentsBody.innerHTML = listings.map((l) => {
+          const role = String(l.contactRole || "Owner");
+          const mode = role.toLowerCase().includes("owner") ? "Owner default" : "Employee";
+          const badge = mode === "Owner default" ? "default" : "verified";
+          return "<tr>" +
+            "<td>" + escapeHtml(l.dealerName || l.dealerId || "-") + "</td>" +
+            "<td>" + escapeHtml(l.carName || l.name || l.id) + "</td>" +
+            "<td>" + escapeHtml((l.contactName || "Owner") + " (" + role + ")") + "</td>" +
+            "<td>" + escapeHtml(l.phone || "-") + "</td>" +
+            "<td>" + escapeHtml(l.phone || "-") + "</td>" +
+            "<td>" + statusBadge(mode, badge) + "</td>" +
+            "</tr>";
+        }).join("");
+      }
+    }
+
+    if (ratingList) {
+      const byRating = dealers
+        .map((d) => ({ name: d.businessName || d.dealerName || d.id, rating: parseRating(d.rating) }))
+        .filter((d) => d.rating > 0)
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 5);
+      ratingList.innerHTML = byRating.length
+        ? byRating.map((d) => "<li><span>" + escapeHtml(d.name) + "</span><strong>" + d.rating.toFixed(1) + "</strong></li>").join("")
+        : '<li><span>No records</span><strong>-</strong></li>';
+    }
+
+    if (salesList) {
+      const bySales = dealers
+        .map((d) => ({ name: d.businessName || d.dealerName || d.id, sold: Number(d.carsSold || d.sales || 0) || 0 }))
+        .sort((a, b) => b.sold - a.sold)
+        .slice(0, 5);
+      salesList.innerHTML = bySales.length
+        ? bySales.map((d) => "<li><span>" + escapeHtml(d.name) + "</span><strong>" + escapeHtml(d.sold || "-") + "</strong></li>").join("")
+        : '<li><span>No records</span><strong>-</strong></li>';
+    }
+  }
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -802,6 +879,7 @@
     sessionStorage.setItem("gb_admin_session_email", email);
     const adminPill = document.getElementById("adminPill");
     if (adminPill) adminPill.textContent = "Admin: " + email;
+    await loadAdminData();
   });
 
   const logoutBtn = document.getElementById("adminLogoutBtn");
@@ -829,12 +907,37 @@
     });
   });
 
-  // Provide clear feedback for UI-first admin actions that are not wired yet.
-  document.querySelectorAll('.mini-btn, .actions .btn, .nav-right .btn-primary').forEach((btn) => {
-    if (btn.id === 'adminLogoutBtn') return;
-    btn.addEventListener('click', () => {
-      alert('This admin action is not wired to Firebase yet. It is tracked for backend phase implementation.');
-    });
+  document.addEventListener("click", async (event) => {
+    const appAction = event.target.getAttribute("data-app-action");
+    const dealerId = event.target.getAttribute("data-dealer-id");
+    const dealerAction = event.target.getAttribute("data-dealer-action");
+    const listingAction = event.target.getAttribute("data-listing-action");
+    const listingId = event.target.getAttribute("data-listing-id");
+    try {
+      if (appAction && dealerId) {
+        const status = appAction === "approve" ? "verified" : "rejected";
+        await updateDoc(doc(db, "dealerProfiles", dealerId), { verificationStatus: status, updatedAt: serverTimestamp() });
+        await loadAdminData();
+        return;
+      }
+      if (dealerAction && dealerId) {
+        const suspended = dealerAction === "suspend";
+        await updateDoc(doc(db, "dealerProfiles", dealerId), { suspended: suspended, updatedAt: serverTimestamp() });
+        await loadAdminData();
+        return;
+      }
+      if (listingAction && listingId) {
+        let nextStatus = "review";
+        if (listingAction === "publish") nextStatus = "live";
+        if (listingAction === "unpublish") nextStatus = "review";
+        if (listingAction === "remove") nextStatus = "removed";
+        await updateDoc(doc(db, "listings", listingId), { moderationStatus: nextStatus, updatedAt: serverTimestamp() });
+        await loadAdminData();
+        return;
+      }
+    } catch (error) {
+      alert("Action failed: " + (error && error.message ? error.message : "Unknown error"));
+    }
   });
 
 </script>

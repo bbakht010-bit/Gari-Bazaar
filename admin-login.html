@@ -48,7 +48,6 @@
 <script type="module">
   import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { app, ensureUserRecord, getUserRecord } from "./firebase-client.js";
-  const ADMIN_EMAIL = "bbuland7@gmail.com";
   const auth = getAuth(app);
   const form = document.getElementById("admin-login-form");
   const errorBox = document.getElementById("admin-login-error");
@@ -65,11 +64,6 @@
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const signedEmail = (credential.user.email || "").toLowerCase();
-      if (signedEmail !== ADMIN_EMAIL) {
-        await signOut(auth);
-        showError("This account is not authorized for admin access.");
-        return;
-      }
       await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
       const record = await getUserRecord(credential.user.uid);
       if (!record || record.role !== "admin") {

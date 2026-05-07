@@ -69,6 +69,24 @@
   .spec p { font-size: 12px; color: var(--gray-500); }
   .spec h4 { margin-top: 4px; font-size: 14px; }
   .description { margin-top: 18px; font-size: 15px; color: var(--gray-700); line-height: 1.7; }
+  .features-box {
+    margin-top: 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+  }
+  .features-box h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .features-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+    font-size: 13px;
+    color: var(--gray-700);
+  }
   aside { padding: 18px; }
   .dealer-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
   .dealer-logo {
@@ -93,6 +111,7 @@
     .hero-photo { height: 260px; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -101,63 +120,133 @@
 </nav>
 
 <main>
+  <p id="gb-detail-hint" style="grid-column:1/-1;font-size:14px;color:var(--gray-500);margin:-8px 0 4px;line-height:1.5;display:none;">For accurate specs and contact info, open this page from a live listing. Shared links without a <strong>listingId</strong> may be incomplete or outdated.</p>
   <section class="card gallery">
     <div class="hero-photo">
-      <img src="https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80" alt="Toyota Corolla Altis 2022">
+      <img src="" alt="Car image" style="display:none;">
     </div>
-    <div class="thumbs">
-      <div class="thumb"></div><div class="thumb"></div><div class="thumb"></div><div class="thumb"></div>
-    </div>
+    <div class="thumbs"></div>
     <div class="details">
-      <span class="pill">Verified Dealer Listing</span>
-      <h1>Toyota Corolla Altis 2022</h1>
-      <div class="price">52 Lakh <span>PKR</span></div>
+      <span class="pill">Dealer Listing</span>
+      <h1>—</h1>
+      <div class="price">—</div>
       <div class="spec-grid">
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-2"/></svg>Mileage</p>
-          <h4>21,000 km</h4>
+          <h4>—</h4>
         </div>
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M8 7V5m8 2V5"/></svg>Transmission</p>
-          <h4>Automatic</h4>
+          <h4>—</h4>
         </div>
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l8-8 8 8-8 8-8-8z"/></svg>Condition</p>
-          <h4>Used</h4>
+          <h4>—</h4>
         </div>
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2"/></svg>City</p>
-          <h4>Islamabad</h4>
+          <h4>—</h4>
         </div>
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h8l2 6H6l2-6z"/><path d="M10 12v6m4-6v6"/></svg>Fuel Type</p>
-          <h4>Petrol</h4>
+          <h4>—</h4>
         </div>
         <div class="spec">
           <p class="spec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Registration</p>
-          <h4>Islamabad</h4>
+          <h4>—</h4>
         </div>
       </div>
-      <p class="description">Clean and well-maintained Corolla Altis from a verified dealership. Inspection reports can be shared on request. Financing and exchange options are available after on-site visit.</p>
+      <p class="description"></p>
+      <p class="description" id="car-extra-details"></p>
+      <div class="features-box" id="car-features-section" style="display:none;">
+        <h3>Car Features</h3>
+        <div class="features-list" id="car-features-list"></div>
+      </div>
     </div>
   </section>
 
   <aside class="card">
     <div class="dealer-head">
-      <div class="dealer-logo"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Al-Haram Motors logo"></div>
+      <div class="dealer-logo"><img src="" alt="Dealer logo" style="display:none;"></div>
       <div>
-        <h3>Al-Haram Motors</h3>
-        <p>Islamabad</p>
+        <h3>—</h3>
+        <p>—</p>
       </div>
     </div>
-    <p class="rating">4.9 / 5.0 · 180+ reviews</p>
-    <p class="contact-meta">Contact Person: Ali (Sales Executive)<br>Phone: +92 311 1111111<br>Response time: under 15 minutes</p>
-    <a class="action wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20Altis%202022." target="_blank" rel="noopener noreferrer">WhatsApp Dealer</a>
-    <a class="action call" href="tel:+923111111111">Call Dealer</a>
+    <p class="rating">No reviews yet</p>
+    <p class="contact-meta"></p>
+    <a class="action wa" href="#" target="_blank" rel="noopener noreferrer">WhatsApp Dealer</a>
+    <a class="action call" href="#">Call Dealer</a>
     <a class="action profile" href="dealer-profile.html">View Dealer Profile</a>
   </aside>
 </main>
 <script>
+  function gbSafeImgUrl(u) {
+    var s = String(u || "").trim();
+    if (s.indexOf("https://") === 0) return s;
+    if (s.indexOf("data:image/") === 0 && s.indexOf(";base64,") > 0) return s;
+    return "";
+  }
+  function gbDigitsPhone(raw) {
+    return String(raw || "").replace(/\D/g, "");
+  }
+  function gbNormalizePkDigits(raw) {
+    var d = gbDigitsPhone(raw);
+    if (d.indexOf("92") === 0 && d.length >= 12) return d;
+    if (d.length === 10 && d.charAt(0) === "3") return "92" + d;
+    if (d.length === 11 && d.charAt(0) === "0") return "92" + d.slice(1);
+    return d;
+  }
+  function gbPhoneOk(raw) {
+    var d = gbNormalizePkDigits(raw);
+    return d.length >= 12 && d.indexOf("92") === 0;
+  }
+  function gbFormatPk(raw) {
+    var d = gbNormalizePkDigits(raw);
+    var local = d.replace(/^92/, "");
+    if (local.length !== 10) return d ? "+" + d : "";
+    return "+92 " + local.replace(/^(\d{3})(\d{7})$/, "$1 $2");
+  }
+  function gbBindCallActions(phoneRaw, carName) {
+    var d = gbNormalizePkDigits(phoneRaw);
+    var ok = gbPhoneOk(phoneRaw);
+    var wa = document.querySelector(".action.wa");
+    var call = document.querySelector(".action.call");
+    if (wa) {
+      wa.href = ok ? "https://wa.me/" + d + "?text=" + encodeURIComponent("Assalamualaikum, I am interested in " + (carName || "this vehicle") + ".") : "#";
+      wa.style.opacity = ok ? "" : "0.55";
+      wa.setAttribute("aria-disabled", ok ? "false" : "true");
+      wa.onclick = ok ? null : function (e) { e.preventDefault(); };
+    }
+    if (call) {
+      call.href = ok ? "tel:+" + d : "#";
+      call.style.opacity = ok ? "" : "0.55";
+      call.setAttribute("aria-disabled", ok ? "false" : "true");
+      call.onclick = ok ? null : function (e) { e.preventDefault(); };
+    }
+  }
+  function gbFillPrice(el, price) {
+    if (!el) return;
+    el.textContent = "";
+    el.appendChild(document.createTextNode(String(price) + " Lakh "));
+    var span = document.createElement("span");
+    span.textContent = "PKR";
+    el.appendChild(span);
+  }
+  function gbFillContactMeta(el, contactName, contactRole, phoneDisplay, responseTime) {
+    if (!el) return;
+    el.textContent = "";
+    el.appendChild(document.createTextNode("Contact Person: "));
+    el.appendChild(document.createTextNode(contactName + " (" + contactRole + ")"));
+    el.appendChild(document.createElement("br"));
+    el.appendChild(document.createTextNode("Phone: "));
+    el.appendChild(document.createTextNode(phoneDisplay || "Not listed"));
+    if (responseTime) {
+      el.appendChild(document.createElement("br"));
+      el.appendChild(document.createTextNode("Response time: "));
+      el.appendChild(document.createTextNode(responseTime));
+    }
+  }
   (function hydrateFromQuery() {
     const params = new URLSearchParams(window.location.search);
     const car = params.get('car');
@@ -168,34 +257,44 @@
     const transmission = params.get('transmission') || '-';
     const condition = params.get('condition') || '-';
     const city = params.get('city') || '-';
-    const dealer = params.get('dealer') || 'Verified Dealer';
-    const contactName = params.get('contactName') || 'Dealer';
-    const contactRole = params.get('contactRole') || 'Sales Executive';
-    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
-    const phone = phoneRaw || '923000000000';
-    const phoneDisplay = '+92 ' + phone.replace(/^92/, '').replace(/^(\d{3})(\d{7})$/, '$1 $2');
+    const modelYear = params.get('modelYear') || '-';
+    const fuelType = params.get('fuelType') || '-';
+    const engine = params.get('engine') || '-';
+    const color = params.get('color') || '-';
+    const registrationCity = params.get('registrationCity') || city;
+    const dealer = params.get('dealer') || '—';
+    const contactName = params.get('contactName') || '—';
+    const contactRole = params.get('contactRole') || '—';
+    const phone = gbDigitsPhone(params.get('phone'));
+    const phoneDisplay = gbPhoneOk(phone) ? gbFormatPk(phone) : '';
 
     const titleEl = document.querySelector('.details h1');
     const heroImg = document.querySelector('.hero-photo img');
     const heroImgAlt = car + ' image';
     if (titleEl) titleEl.textContent = car;
-    if (heroImg) heroImg.alt = heroImgAlt;
+    if (heroImg) {
+      heroImg.alt = heroImgAlt;
+      heroImg.removeAttribute("src");
+      heroImg.style.display = "none";
+    }
 
     const priceEl = document.querySelector('.details .price');
-    if (priceEl) priceEl.innerHTML = price + ' Lakh <span>PKR</span>';
+    gbFillPrice(priceEl, price);
 
     const specValues = document.querySelectorAll('.spec h4');
     if (specValues[0]) specValues[0].textContent = mileage;
     if (specValues[1]) specValues[1].textContent = transmission;
     if (specValues[2]) specValues[2].textContent = condition;
     if (specValues[3]) specValues[3].textContent = city;
-    if (specValues[4]) specValues[4].textContent = 'Petrol';
-    if (specValues[5]) specValues[5].textContent = city;
+    if (specValues[4]) specValues[4].textContent = fuelType;
+    if (specValues[5]) specValues[5].textContent = registrationCity;
 
     const description = document.querySelector('.description');
     if (description) {
       description.textContent = car + ' is available with ' + dealer + ' in ' + city + '. Contact ' + contactName + ' for inspection details, financing, and availability.';
     }
+    const extra = document.getElementById('car-extra-details');
+    if (extra) extra.textContent = 'Year: ' + modelYear + ' · Engine: ' + engine + ' · Color: ' + color;
 
     const dealerNameEl = document.querySelector('.dealer-head h3');
     const dealerCityEl = document.querySelector('.dealer-head p');
@@ -203,19 +302,11 @@
     if (dealerCityEl) dealerCityEl.textContent = city;
 
     const contactMeta = document.querySelector('.contact-meta');
-    if (contactMeta) {
-      contactMeta.innerHTML = 'Contact Person: ' + contactName + ' (' + contactRole + ')<br>Phone: ' + phoneDisplay + '<br>Response time: under 15 minutes';
-    }
+    gbFillContactMeta(contactMeta, contactName, contactRole, phoneDisplay, "");
+    gbBindCallActions(phone, car);
 
-    const waLink = document.querySelector('.action.wa');
-    const callLink = document.querySelector('.action.call');
-    if (waLink) {
-      const text = 'Assalamualaikum, I am interested in ' + car + '.';
-      waLink.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
-    }
-    if (callLink) {
-      callLink.href = 'tel:+' + phone;
-    }
+    var hintEl = document.getElementById("gb-detail-hint");
+    if (hintEl && !params.get("listingId")) hintEl.style.display = "block";
 
     const dealerProfileLink = document.querySelector('.action.profile');
     if (dealerProfileLink) {
@@ -268,7 +359,12 @@
     const params = new URLSearchParams(window.location.search);
     const listingId = (params.get("listingId") || "").trim();
     const dealerIdFromUrl = (params.get("dealerId") || "").trim();
-    if (!listingId && !dealerIdFromUrl) return;
+    var hintEl = document.getElementById("gb-detail-hint");
+    if (!listingId && !dealerIdFromUrl) {
+      if (hintEl) hintEl.style.display = "block";
+      return;
+    }
+    if (hintEl) hintEl.style.display = "none";
 
     const listing = listingId ? await fetchListingById(listingId) : null;
     const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
@@ -281,18 +377,56 @@
     const transmission = (listing && listing.transmission) || (params.get("transmission") || "-");
     const condition = (listing && listing.condition) || (params.get("condition") || "-");
     const city = (listing && listing.city) || (params.get("city") || "-");
-    const fuelType = (listing && listing.fuelType) || "Petrol";
+    const fuelType = (listing && listing.fuelType) || "-";
     const registrationCity = (listing && listing.registrationCity) || city;
-    const dealerName = (dealer && dealer.dealerName) || (listing && listing.dealerName) || (params.get("dealer") || "Verified Dealer");
-    const contactName = (dealer && dealer.contactName) || (listing && listing.contactName) || (params.get("contactName") || "Dealer");
-    const contactRole = (dealer && dealer.contactRole) || (listing && listing.contactRole) || (params.get("contactRole") || "Sales Executive");
-    const phone = ((dealer && dealer.phone) || (listing && listing.phone) || (params.get("phone") || "923000000000")).replace(/[^\d]/g, "");
-    const responseTime = (dealer && dealer.responseTime) || "under 15 minutes";
+    const modelYear = (listing && listing.modelYear) || "";
+    const engine = (listing && listing.engine) || "";
+    const color = (listing && listing.color) || "";
+    const dealerName = (dealer && dealer.dealerName) || (listing && listing.dealerName) || (params.get("dealer") || "—");
+    const contactName = (dealer && dealer.contactName) || (listing && listing.contactName) || (params.get("contactName") || "—");
+    const contactRole = (dealer && dealer.contactRole) || (listing && listing.contactRole) || (params.get("contactRole") || "—");
+    var phone = (dealer && dealer.phone) || (listing && listing.phone) || params.get("phone") || "";
+    phone = typeof gbDigitsPhone === "function" ? gbDigitsPhone(phone) : String(phone).replace(/\D/g, "");
+    const responseTime = (dealer && dealer.responseTime) || "";
+    const carImages = (listing && Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : []);
+    const coverImage = (listing && listing.coverImage) || carImages[0] || "";
+    const coverSafe = typeof gbSafeImgUrl === "function" ? gbSafeImgUrl(coverImage) : "";
 
     const titleEl = document.querySelector(".details h1");
     if (titleEl) titleEl.textContent = carName;
+    const heroImage = document.querySelector(".hero-photo img");
+    if (heroImage) {
+      if (coverSafe) {
+        heroImage.src = coverSafe;
+        heroImage.alt = carName ? carName + " cover image" : "Car cover image";
+        heroImage.style.display = "";
+      } else {
+        heroImage.removeAttribute("src");
+        heroImage.style.display = "none";
+      }
+    }
+    const thumbsWrap = document.querySelector(".thumbs");
+    if (thumbsWrap) {
+      thumbsWrap.textContent = "";
+      carImages.slice(0, 6).forEach(function (src) {
+        var safe = typeof gbSafeImgUrl === "function" ? gbSafeImgUrl(src) : "";
+        if (!safe) return;
+        var wrap = document.createElement("div");
+        wrap.className = "thumb";
+        wrap.style.overflow = "hidden";
+        var img = document.createElement("img");
+        img.src = safe;
+        img.alt = "Car image";
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+        img.style.display = "block";
+        wrap.appendChild(img);
+        thumbsWrap.appendChild(wrap);
+      });
+    }
     const priceEl = document.querySelector(".details .price");
-    if (priceEl) priceEl.innerHTML = price + " Lakh <span>PKR</span>";
+    if (typeof gbFillPrice === "function") gbFillPrice(priceEl, price);
 
     const specValues = document.querySelectorAll(".spec h4");
     if (specValues[0]) specValues[0].textContent = mileage;
@@ -304,6 +438,27 @@
 
     const descriptionEl = document.querySelector(".description");
     if (descriptionEl && listing && listing.description) descriptionEl.textContent = listing.description;
+    const extraEl = document.getElementById("car-extra-details");
+    if (extraEl) {
+      extraEl.textContent = "Year: " + (modelYear || "-") + " · Engine: " + (engine || "-") + " · Color: " + (color || "-");
+    }
+    const featureSection = document.getElementById("car-features-section");
+    const featureList = document.getElementById("car-features-list");
+    const features = listing && Array.isArray(listing.features) ? listing.features.filter(Boolean) : [];
+    if (featureSection && featureList) {
+      if (features.length) {
+        featureList.textContent = "";
+        features.forEach(function (feature) {
+          var row = document.createElement("div");
+          row.textContent = "• " + String(feature);
+          featureList.appendChild(row);
+        });
+        featureSection.style.display = "";
+      } else {
+        featureList.textContent = "";
+        featureSection.style.display = "none";
+      }
+    }
 
     const dealerNameEl = document.querySelector(".dealer-head h3");
     const dealerCityEl = document.querySelector(".dealer-head p");
@@ -311,15 +466,32 @@
     if (dealerCityEl) dealerCityEl.textContent = city;
 
     const contactMeta = document.querySelector(".contact-meta");
-    if (contactMeta) {
-      const nice = "+92 " + phone.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2");
-      contactMeta.innerHTML = "Contact Person: " + contactName + " (" + contactRole + ")<br>Phone: " + nice + "<br>Response time: " + responseTime;
+    if (typeof gbFillContactMeta === "function") {
+      var nice = typeof gbPhoneOk === "function" && gbPhoneOk(phone) && typeof gbFormatPk === "function" ? gbFormatPk(phone) : "";
+      gbFillContactMeta(contactMeta, contactName, contactRole, nice, responseTime);
+    }
+    if (typeof gbBindCallActions === "function") gbBindCallActions(phone, carName);
+    const ratingLine = document.querySelector(".rating");
+    if (ratingLine) {
+      const ratingValue = Number((dealer && dealer.rating) || 0);
+      const reviewsValue = Number((dealer && dealer.reviews) || 0);
+      ratingLine.textContent = (ratingValue > 0 && reviewsValue > 0)
+        ? ratingValue.toFixed(1) + " / 5.0 · " + reviewsValue + " reviews"
+        : "No reviews yet";
+    }
+    const dealerLogo = document.querySelector(".dealer-logo img");
+    if (dealerLogo) {
+      const logoUrl = (dealer && (dealer.profilePicture || dealer.logoUrl)) || "";
+      const logoSafe = typeof gbSafeImgUrl === "function" ? gbSafeImgUrl(logoUrl) : "";
+      if (logoSafe) {
+        dealerLogo.src = logoSafe;
+        dealerLogo.style.display = "";
+      } else {
+        dealerLogo.removeAttribute("src");
+        dealerLogo.style.display = "none";
+      }
     }
 
-    const waLink = document.querySelector(".action.wa");
-    if (waLink) waLink.href = "https://wa.me/" + phone + "?text=" + encodeURIComponent("Assalamualaikum, I am interested in " + carName + ".");
-    const callLink = document.querySelector(".action.call");
-    if (callLink) callLink.href = "tel:+" + phone;
     const profileLink = document.querySelector(".action.profile");
     if (profileLink) {
       const qs = new URLSearchParams({ dealerId: dealerId, dealer: dealerName, city: city, contactName: contactName, contactRole: contactRole, phone: phone });
@@ -327,5 +499,6 @@
     }
   })();
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

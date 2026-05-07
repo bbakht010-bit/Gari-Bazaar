@@ -40,16 +40,24 @@ export function normalizeDealerProfile(id, raw) {
     dealerName: pick(data, ["dealerName", "businessName", "name"]),
     city: pick(data, ["city"]),
     address: pick(data, ["address"]),
-    rating: pick(data, ["rating"], "4.8 / 5.0"),
-    contactName: pick(data, ["contactName", "ownerName"], "Dealer Team"),
-    contactRole: pick(data, ["contactRole"], "Sales Desk"),
-    phone: pick(data, ["phone", "whatsapp"], "923000000000"),
-    responseTime: pick(data, ["responseTime"], "under 15 minutes")
+    businessSince: pick(data, ["businessSince"]),
+    joinedAt: pick(data, ["createdAt", "joinedAt"]),
+    hours: pick(data, ["hours", "businessHours"]),
+    rating: pick(data, ["rating"], ""),
+    contactName: pick(data, ["contactName", "ownerName"]),
+    contactRole: pick(data, ["contactRole"]),
+    phone: pick(data, ["phone", "whatsapp"]),
+    responseTime: pick(data, ["responseTime"], ""),
+    profilePicture: pick(data, ["profilePicture", "logoUrl", "profilePhoto"], "")
   };
 }
 
 export function normalizeListing(id, raw) {
   const data = raw || {};
+  const carImages = Array.isArray(data.carImages)
+    ? data.carImages.map((img) => clean(img)).filter(Boolean)
+    : [];
+  const coverImage = pick(data, ["coverImage", "image"]);
   return {
     id: id || "",
     dealerId: pick(data, ["dealerId"]),
@@ -59,13 +67,21 @@ export function normalizeListing(id, raw) {
     transmission: pick(data, ["transmission"], "-"),
     condition: pick(data, ["condition"], "-"),
     city: pick(data, ["city"], "-"),
-    fuelType: pick(data, ["fuelType"], "Petrol"),
+    modelYear: pick(data, ["modelYear", "year"], ""),
+    fuelType: pick(data, ["fuelType"]),
+    engine: pick(data, ["engine"], ""),
+    color: pick(data, ["color"], ""),
     registrationCity: pick(data, ["registrationCity", "city"], "-"),
-    contactName: pick(data, ["contactName"], "Dealer"),
-    contactRole: pick(data, ["contactRole"], "Sales Executive"),
-    phone: pick(data, ["phone"], "923000000000"),
-    dealerName: pick(data, ["dealerName"], "Verified Dealer"),
-    description: pick(data, ["description"], "")
+    bodyType: pick(data, ["bodyType"], ""),
+    assembly: pick(data, ["assembly"], ""),
+    contactName: pick(data, ["contactName"]),
+    contactRole: pick(data, ["contactRole"]),
+    phone: pick(data, ["phone"]),
+    dealerName: pick(data, ["dealerName"]),
+    description: pick(data, ["description"], ""),
+    features: Array.isArray(data.features) ? data.features.map((f) => clean(f)).filter(Boolean) : [],
+    carImages: carImages,
+    coverImage: coverImage || (carImages[0] || "")
   };
 }
 

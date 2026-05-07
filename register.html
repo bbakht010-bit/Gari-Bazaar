@@ -512,6 +512,7 @@
     .sidebar { order: -1; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -585,15 +586,30 @@
           <label>Area / Sector <span>*</span></label>
           <input type="text" id="dealer-area" placeholder="e.g. G-11, Bahria Town">
         </div>
+        <div class="field">
+          <label>In Business Since <span>*</span></label>
+          <input type="number" id="dealer-business-since" min="1900" max="2100" placeholder="e.g. 2018">
+        </div>
         <div class="field span2">
           <label>Full Address <span>*</span></label>
           <input type="text" id="dealer-address" placeholder="Street address of your dealership">
         </div>
         <div class="field span2">
           <label>Dealership Description</label>
-          <textarea placeholder="Tell buyers about your dealership — what makes you different, how long you've been in business, specialties etc."></textarea>
+          <textarea id="dealer-description" placeholder="Tell buyers about your dealership — what makes you different, how long you've been in business, specialties etc."></textarea>
         </div>
       </div>
+      <label for="dealer-profile-picture" style="margin-left:34px; display:block; margin-top:14px; margin-bottom:8px; font-size:13px; font-weight:500; color:var(--gray-700);">
+        Dealer Profile Picture (Optional)
+      </label>
+      <label class="upload-area" for="dealer-profile-picture">
+        <div class="upload-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <h4>Upload Dealer Profile Picture</h4>
+        <p>JPG or PNG recommended</p>
+        <input type="file" id="dealer-profile-picture" accept=".jpg,.jpeg,.png,.webp">
+      </label>
     </div>
 
     <!-- SECTION 2: OWNER DETAILS -->
@@ -698,16 +714,16 @@
     <div class="form-section">
       <div class="section-title">
         <div class="section-num">4</div>
-        Choose Your Plan
+        Choose Your Plan (preference only)
       </div>
-      <div class="section-sub">You can upgrade anytime after registration</div>
+      <div class="section-sub">This records which tier you are interested in. <strong>In-app billing is not active yet</strong> — all approved dealers currently get the same access on the site. Growth and Pro prices below are <em>non-binding</em> estimates for when checkout launches.</div>
       <div class="plan-options">
 
         <label class="plan-option selected">
           <input type="radio" name="plan" value="free" checked>
           <div class="plan-info">
-            <h4>Starter — Free</h4>
-            <p>2 active listings, owner default contact</p>
+            <h4>Starter (current default)</h4>
+            <p>Standard access while the marketplace grows</p>
           </div>
           <div class="plan-price">Free</div>
         </label>
@@ -715,19 +731,19 @@
         <label class="plan-option">
           <input type="radio" name="plan" value="growth">
           <div class="plan-info">
-            <h4>Growth</h4>
-            <p>5 active listings, 3 employee accounts</p>
+            <h4>Growth (planned)</h4>
+            <p>Higher listing capacity — terms TBD when billing goes live</p>
           </div>
-          <div class="plan-price">2,500 PKR/mo</div>
+          <div class="plan-price">~2,500 PKR/mo est.</div>
         </label>
 
         <label class="plan-option">
           <input type="radio" name="plan" value="pro">
           <div class="plan-info">
-            <h4>Professional</h4>
-            <p>10 active listings, unlimited employees, priority listing</p>
+            <h4>Professional (planned)</h4>
+            <p>More listings and team tools — terms TBD when billing goes live</p>
           </div>
-          <div class="plan-price">5,000 PKR/mo</div>
+          <div class="plan-price">~5,000 PKR/mo est.</div>
         </label>
 
       </div>
@@ -844,9 +860,13 @@
 
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, upsertDealerProfile } from "./firebase-client.js";
+  import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db, ensureUserRecord, getDealerProfile, upsertDealerProfile, uploadDealerProfileImage } from "./firebase-client.js";
   let currentUser = null;
+  let currentDealerProfile = null;
+  let isProfileUpdateMode = false;
   const ownerEmailReadonly = document.getElementById('owner-email-readonly');
+  const submitBtn = document.querySelector('.submit-btn');
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -862,6 +882,40 @@
     localStorage.setItem('gb_dealer_uid', user.uid);
     localStorage.setItem('gb_dealer_email', user.email || '');
     if (ownerEmailReadonly) ownerEmailReadonly.value = user.email || '';
+
+    currentDealerProfile = await getDealerProfile(user.uid);
+    if (currentDealerProfile) {
+      const verificationStatus = String(currentDealerProfile.verificationStatus || "").toLowerCase();
+      isProfileUpdateMode = verificationStatus === "verified" || verificationStatus === "approved";
+      const dealerName = document.getElementById('dealer-name');
+      const dealerCity = document.getElementById('dealer-city');
+      const dealerArea = document.getElementById('dealer-area');
+      const dealerBusinessSince = document.getElementById('dealer-business-since');
+      const dealerAddress = document.getElementById('dealer-address');
+      const dealerDescription = document.getElementById('dealer-description');
+      const ownerName = document.getElementById('owner-name');
+      const ownerCnic = document.getElementById('owner-cnic');
+      const ownerPhone = document.getElementById('owner-phone');
+      const ownerWhatsapp = document.getElementById('owner-whatsapp');
+      const planInput = document.querySelector('input[name="plan"][value="' + (currentDealerProfile.plan || "") + '"]');
+      if (dealerName) dealerName.value = currentDealerProfile.businessName || "";
+      if (dealerCity) dealerCity.value = currentDealerProfile.city || "";
+      if (dealerArea) dealerArea.value = currentDealerProfile.area || "";
+      if (dealerBusinessSince) dealerBusinessSince.value = currentDealerProfile.businessSince || "";
+      if (dealerAddress) dealerAddress.value = currentDealerProfile.address || "";
+      if (dealerDescription) dealerDescription.value = currentDealerProfile.description || "";
+      if (ownerName) ownerName.value = currentDealerProfile.ownerName || "";
+      if (ownerCnic) ownerCnic.value = currentDealerProfile.ownerCnic || "";
+      if (ownerPhone) ownerPhone.value = currentDealerProfile.phone || "";
+      if (ownerWhatsapp) ownerWhatsapp.value = currentDealerProfile.whatsapp || "";
+      if (planInput) {
+        planInput.checked = true;
+        planInput.closest('.plan-option').click();
+      }
+      if (submitBtn && isProfileUpdateMode) {
+        submitBtn.textContent = 'Submit Change Request';
+      }
+    }
   });
 
   // Plan selection highlight
@@ -875,7 +929,6 @@
   // Toggle optional employee section
   const addEmployeeCheckbox = document.getElementById('add-employee-now');
   const employeeFields = document.getElementById('employee-fields');
-  const submitBtn = document.querySelector('.submit-btn');
 
   function clearFieldErrors() {
     document.querySelectorAll('.error-text').forEach((el) => el.remove());
@@ -905,6 +958,15 @@
     container.appendChild(error);
   }
 
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read selected file."));
+      reader.readAsDataURL(file);
+    });
+  }
+
   if (addEmployeeCheckbox && employeeFields) {
     addEmployeeCheckbox.addEventListener('change', function() {
       employeeFields.classList.toggle('show', this.checked);
@@ -932,6 +994,7 @@
       { id: 'dealer-name', message: 'Dealership name is required.' },
       { id: 'dealer-city', message: 'Please select your city.' },
       { id: 'dealer-area', message: 'Area/Sector is required.' },
+      { id: 'dealer-business-since', message: 'Business start year is required.' },
       { id: 'dealer-address', message: 'Full address is required.' },
       { id: 'owner-name', message: 'Owner full name is required.' },
       { id: 'owner-cnic', message: 'CNIC number is required.' },
@@ -953,11 +1016,11 @@
     const regUploadArea = document.getElementById('reg-upload-area');
     const photosUploadArea = document.getElementById('photos-upload-area');
 
-    if (regUpload && regUpload.files.length === 0) {
+    if (!isProfileUpdateMode && regUpload && regUpload.files.length === 0) {
       addBlockError(regUploadArea, 'Registration document is required.');
       if (!firstInvalid) firstInvalid = regUploadArea;
     }
-    if (photosUpload && photosUpload.files.length === 0) {
+    if (!isProfileUpdateMode && photosUpload && photosUpload.files.length === 0) {
       addBlockError(photosUploadArea, 'Please upload dealership photos.');
       if (!firstInvalid) firstInvalid = photosUploadArea;
     }
@@ -994,38 +1057,85 @@
       return;
     }
 
+    const businessSinceRaw = (document.getElementById('dealer-business-since') || { value: '' }).value.trim();
+    const businessSinceYear = Number(businessSinceRaw);
+    if (!Number.isInteger(businessSinceYear) || businessSinceYear < 1900 || businessSinceYear > 2100) {
+      const field = document.getElementById('dealer-business-since');
+      addFieldError(field, 'Enter a valid business start year (e.g. 2018).');
+      field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (typeof field.focus === 'function') setTimeout(() => field.focus({ preventScroll: true }), 250);
+      return;
+    }
+
     if (!currentUser) {
       alert('Your dealer session has expired. Please sign in again.');
       window.location.href = 'dealer-login.html';
       return;
     }
 
+    const existingProfile = currentDealerProfile || await getDealerProfile(currentUser.uid);
+    const existingStatus = String((existingProfile && existingProfile.verificationStatus) || "").toLowerCase();
+    const nextStatus = (existingStatus === "verified" || existingStatus === "approved") ? existingStatus : "pending";
+
+    const profilePictureInput = document.getElementById('dealer-profile-picture');
+    let profilePicture = existingProfile && existingProfile.profilePicture ? existingProfile.profilePicture : "";
+    const selectedProfilePic = profilePictureInput && profilePictureInput.files && profilePictureInput.files[0];
+    if (selectedProfilePic) {
+      try {
+        profilePicture = await uploadDealerProfileImage(currentUser.uid, selectedProfilePic);
+      } catch (_e) {
+        profilePicture = await fileToDataUrl(selectedProfilePic);
+      }
+    }
+
     const dealerProfile = {
       businessName: document.getElementById('dealer-name').value.trim(),
       city: document.getElementById('dealer-city').value,
       area: document.getElementById('dealer-area').value.trim(),
+      businessSince: String(businessSinceYear),
       address: document.getElementById('dealer-address').value.trim(),
-      description: (document.querySelector('textarea') || { value: '' }).value.trim(),
+      description: (document.getElementById('dealer-description') || { value: '' }).value.trim(),
       ownerName: document.getElementById('owner-name').value.trim(),
       ownerCnic: document.getElementById('owner-cnic').value.trim(),
       phone: document.getElementById('owner-phone').value.trim(),
       whatsapp: document.getElementById('owner-whatsapp').value.trim() || document.getElementById('owner-phone').value.trim(),
       email: currentUser.email || '',
+      profilePicture: profilePicture,
       plan: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
+      verificationStatus: nextStatus,
+      createdAt: (existingProfile && existingProfile.createdAt) || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    await upsertDealerProfile(currentUser.uid, dealerProfile);
-    localStorage.setItem('gb_dealer_profile_' + currentUser.uid, JSON.stringify(dealerProfile));
+    if (isProfileUpdateMode) {
+      const changeRequestSafe = { ...dealerProfile };
+      delete changeRequestSafe.verificationStatus;
+      delete changeRequestSafe.suspended;
+      delete changeRequestSafe.carsSold;
+      delete changeRequestSafe.soldHistory;
+      await addDoc(collection(db, "dealerChangeRequests"), {
+        dealerId: currentUser.uid,
+        dealerName: dealerProfile.businessName,
+        currentVerificationStatus: existingStatus || "verified",
+        status: "pending",
+        changes: changeRequestSafe,
+        submittedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+    } else {
+      await upsertDealerProfile(currentUser.uid, dealerProfile);
+      localStorage.setItem('gb_dealer_profile_' + currentUser.uid, JSON.stringify(dealerProfile));
+    }
 
-    this.textContent = 'Application Submitted!';
+    this.textContent = isProfileUpdateMode ? 'Change Request Submitted!' : 'Application Submitted!';
     this.style.background = '#166534';
     this.disabled = true;
     setTimeout(() => {
-      window.location.href = 'dealer-dashboard.html';
+      window.location.href = 'dealer-application-pending.html';
     }, 500);
   });
 
 </script>
+<script src="theme.js"></script>
 
 </body>
 </html>

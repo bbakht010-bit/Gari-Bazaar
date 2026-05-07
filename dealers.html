@@ -114,6 +114,7 @@
   }
   .empty.show { display: block; }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -203,10 +204,14 @@
 
       const name = clean(dealer.businessName || dealer.dealerName || dealer.id);
       const city = clean(dealer.city || "-");
-      const speciality = clean(dealer.speciality || dealer.specialty || "Verified dealership");
-      const rating = clean(dealer.rating || "4.8 / 5.0");
-      const phone = clean(dealer.phone || dealer.whatsapp || "").replace(/[^\d]/g, "") || "923000000000";
-      const contactName = clean(dealer.ownerName || "Dealer Team");
+      const speciality = clean(dealer.speciality || dealer.specialty || "—");
+      const numericRating = Number(dealer.rating || 0);
+      const rating = Number.isFinite(numericRating) && numericRating > 0
+        ? numericRating.toFixed(1) + " / 5.0"
+        : "No ratings yet";
+      const phone = clean(dealer.phone || dealer.whatsapp || "").replace(/[^\d]/g, "");
+      const hasPhone = phone.length >= 10;
+      const contactName = clean(dealer.ownerName || "Contact");
       const activeCars = listingCountByDealer.get(dealer.id) || 0;
       const search = [name, city, speciality, "active cars " + activeCars].join(" ").toLowerCase();
       const waText = encodeURIComponent("Assalam o Alaikum " + name + ", I want to sell my car through your dealership on GariBazaar.");
@@ -222,13 +227,17 @@
       cards.push(
         '<article class="dealer-card" data-search="' + esc(search) + '">' +
           '<div class="dealer-top">' +
-            '<div class="dealer-logo"><img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="' + esc(name) + ' logo"></div>' +
+            '<div class="dealer-logo">' + (dealer.profilePicture
+              ? '<img src="' + esc(clean(dealer.profilePicture)) + '" alt="' + esc(name) + ' logo">'
+              : "") + '</div>' +
             '<div><h3 class="dealer-name">' + esc(name) + '</h3><p class="dealer-city">' + esc(city) + '</p></div>' +
           '</div>' +
           '<p class="dealer-meta">Speciality: ' + esc(speciality) + '<br>Active Cars: ' + esc(activeCars) + '</p>' +
           '<p class="dealer-rate">' + esc(rating) + '</p>' +
           '<a class="card-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
-          '<a class="card-btn whatsapp-btn" href="https://wa.me/' + esc(phone) + '?text=' + waText + '" target="_blank" rel="noopener noreferrer">Sell My Car (WhatsApp)</a>' +
+          (hasPhone
+            ? '<a class="card-btn whatsapp-btn" href="https://wa.me/' + esc(phone) + '?text=' + waText + '" target="_blank" rel="noopener noreferrer">Sell My Car (WhatsApp)</a>'
+            : '<p class="dealer-meta" style="margin-top:8px;">WhatsApp not on file for this dealer.</p>') +
         '</article>'
       );
     });
@@ -274,5 +283,6 @@
     }
   });
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

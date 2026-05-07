@@ -173,6 +173,30 @@
   .legend-chip.sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
   .legend-chip.touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
   .legend-chip.repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .feature-group {
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+  }
+  .feature-group h4 {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--gray-800);
+  }
+  .feature-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+  }
   .damage-summary {
     margin-top: 6px;
     font-size: 12px;
@@ -203,10 +227,29 @@
     color: #9f1239; font-size: 12px; display: none;
   }
   .error.show { display: block; }
+  .error.success {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+  }
+  .collapsible-content { display: none; }
+  .collapsible-content.expanded { display: block; }
+  .inline-status {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 12px;
+    display: none;
+  }
+  .inline-status.show { display: block; }
 
   @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .layout { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: 1fr; } .pill { display: none; } }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -235,15 +278,24 @@
     <article class="card">
       <div class="section-title">
         <div><h2>Add Car</h2><p>Create listing and assign contact</p></div>
+        <button id="car-form-toggle" class="btn btn-outline" type="button">Add Car</button>
       </div>
-      <form id="car-form">
+      <div class="inline-status" id="car-form-status"></div>
+      <form id="car-form" class="collapsible-content">
         <div class="grid-2">
           <div class="field"><label>Car Name *</label><input id="car-name" type="text" placeholder="Toyota Corolla Altis 2022"></div>
           <div class="field"><label>Price (PKR Lakh) *</label><input id="car-price" type="number" min="0" step="0.1" inputmode="decimal" placeholder="52"></div>
           <div class="field"><label>Mileage *</label><input id="car-mileage" type="text" placeholder="21,000 km"></div>
+          <div class="field"><label>Model Year</label><input id="car-year" type="number" min="1980" max="2100" step="1" placeholder="2022"></div>
           <div class="field"><label>Transmission *</label><select id="car-trans"><option value="">Select</option><option>Automatic</option><option>Manual</option></select></div>
           <div class="field"><label>Condition *</label><select id="car-condition"><option value="">Select</option><option>New</option><option>Used</option></select></div>
           <div class="field"><label>City *</label><select id="car-city"><option value="">Select</option><option>Islamabad</option><option>Rawalpindi</option></select></div>
+          <div class="field"><label>Fuel Type</label><select id="car-fuel"><option value="">Select</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div>
+          <div class="field"><label>Engine</label><input id="car-engine" type="text" placeholder="e.g. 1800cc"></div>
+          <div class="field"><label>Exterior Color</label><select id="car-color"><option value="">Select</option><option>White</option><option>Black</option><option>Silver</option><option>Gray</option><option>Blue</option><option>Red</option><option>Green</option><option>Brown</option><option>Beige</option><option>Golden</option></select></div>
+          <div class="field"><label>Registration City</label><input id="car-registration-city" type="text" placeholder="e.g. Islamabad"></div>
+          <div class="field"><label>Body Type</label><select id="car-body-type"><option value="">Select</option><option>Sedan</option><option>Hatchback</option><option>SUV</option><option>Crossover</option><option>Pickup</option><option>Coupe</option></select></div>
+          <div class="field"><label>Assembly</label><select id="car-assembly"><option value="">Select</option><option>Local</option><option>Imported</option></select></div>
           <div class="field"><label>Paint Status *</label><select id="car-paint-status"><option value="">Select</option><option value="original">Original paint</option><option value="touched">Touch-up done</option><option value="sprayed">Sprayed</option><option value="mixed">Mixed condition</option></select></div>
           <div class="field full"><label>Assign Employee (Optional)</label><select id="car-assignee"><option value="">No employee selected (owner default)</option></select></div>
           <div class="field full">
@@ -267,9 +319,58 @@
             </div>
           </div>
           <div class="field full"><label>Body Notes (Visible to Buyer)</label><input id="car-body-note" type="text" placeholder="e.g. Hood sprayed, right door touched only"></div>
+          <div class="field full"><label>Description (Visible to Buyer)</label><input id="car-description" type="text" placeholder="Highlights, condition details, accessories, etc."></div>
+          <div class="field full">
+            <label>Car Features (Visible to Buyer)</label>
+            <div class="features-grid" id="car-features-grid">
+              <div class="feature-group">
+                <h4>Exterior</h4>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Front Fog Lights"> Front Fog Lights</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="DRLs"> DRLs</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Alloy Wheels"> Alloy Wheels</label>
+              </div>
+              <div class="feature-group">
+                <h4>Interior</h4>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Infotainment System"> Infotainment System</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Front Speakers"> Front Speakers</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Rear Speakers"> Rear Speakers</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Steering Switches"> Steering Switches</label>
+              </div>
+              <div class="feature-group">
+                <h4>Safety & Security</h4>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="ABS"> ABS</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Air Bags"> Air Bags</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Traction Control"> Traction Control</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Rear Camera"> Rear Camera</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Immobilizer Key"> Immobilizer Key</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Power Locks"> Power Locks</label>
+              </div>
+              <div class="feature-group">
+                <h4>Comfort & Convenience</h4>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Power Mirrors"> Power Mirrors</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Rear AC Vents"> Rear AC Vents</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Climate Control"> Climate Control</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Cruise Control"> Cruise Control</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Push Start"> Push Start</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Keyless Entry"> Keyless Entry</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Power Steering"> Power Steering</label>
+                <label class="feature-option"><input type="checkbox" class="car-feature-option" value="Air Conditioning"> Air Conditioning</label>
+              </div>
+            </div>
+          </div>
+          <div class="field full">
+            <label>Car Photos * (Buyer can view these in original quality)</label>
+            <input id="car-images" type="file" accept=".jpg,.jpeg,.png,.webp" multiple>
+            <p class="note" style="margin-top:4px;">You can select multiple photos at once. Photos are uploaded to Firebase Storage in high quality.</p>
+          </div>
+          <div class="field">
+            <label>Cover Photo Number *</label>
+            <input id="car-cover-index" type="number" min="1" step="1" value="1">
+          </div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" type="submit">Add Car</button>
+          <button id="car-submit-btn" class="btn btn-primary" type="submit">Add Car</button>
+          <button id="car-cancel-edit-btn" class="btn btn-outline" type="button" style="display:none;">Cancel Edit</button>
         </div>
         <div class="error" id="car-error"></div>
       </form>
@@ -279,6 +380,14 @@
       <div class="section-title">
         <div><h2>Add Employee</h2><p>Employees can handle assigned cars</p></div>
       </div>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Dealer Profile Picture</label>
+        <input id="dealer-profile-picture-input" type="file" accept=".jpg,.jpeg,.png,.webp">
+      </div>
+      <div class="actions" style="margin-bottom:10px;">
+        <button id="dealer-profile-picture-save" class="btn btn-outline" type="button">Update Profile Picture</button>
+      </div>
+      <div class="error" id="dealer-profile-picture-error"></div>
       <form id="employee-form">
         <div class="grid-2">
           <div class="field"><label>Name *</label><input id="emp-name" type="text" placeholder="Ali Raza"></div>
@@ -318,12 +427,22 @@
     </div>
     <div class="preview-grid" id="preview-grid"></div>
   </section>
+  <section class="card" style="margin-top:14px;">
+    <div class="section-title">
+      <div><h2>Sold Cars History</h2><p>Stored without photos. Visible to dealer only.</p></div>
+    </div>
+    <div class="list" id="sold-history-list"></div>
+  </section>
 </main>
 
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { auth, db, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
+  import { getDownloadURL, getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+  import { app, auth, db, FIREBASE_FUNCTIONS_REGION, uploadDealerProfileImage, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
+
+  const markListingSoldFn = httpsCallable(getFunctions(app, FIREBASE_FUNCTIONS_REGION), "markListingSold");
 
   let dealerUid = "";
   const authReady = new Promise((resolve) => {
@@ -340,6 +459,11 @@
       const liveProfile = await getDealerProfile(user.uid);
       if (!isDealerProfileComplete(liveProfile || null)) {
         window.location.href = "register.html";
+        return;
+      }
+      const verificationStatus = String((liveProfile && liveProfile.verificationStatus) || "pending").toLowerCase();
+      if (verificationStatus !== "verified" && verificationStatus !== "approved") {
+        window.location.href = "dealer-application-pending.html";
         return;
       }
       dealerUid = user.uid;
@@ -400,6 +524,8 @@
   const state = {
     employees: [],
     cars: [],
+    soldHistory: [],
+    editingCarId: "",
     inventoryQuery: '',
     suspended: !!(dealerProfile && dealerProfile.suspended)
   };
@@ -420,6 +546,7 @@
     right_quarter: 'R Quarter'
   };
   let currentPanelMarks = {};
+  const storage = getStorage(app);
 
   async function loadLiveState() {
     const freshProfile = await getDealerProfile(dealerUid);
@@ -432,6 +559,9 @@
           phone: String(emp.phone || '').replace(/\D/g, ''),
           whatsapp: String(emp.whatsapp || emp.phone || '').replace(/\D/g, '')
         }))
+      : [];
+    state.soldHistory = Array.isArray(freshProfile && freshProfile.soldHistory)
+      ? freshProfile.soldHistory
       : [];
 
     const listingSnap = await getDocs(collection(db, "listings"));
@@ -449,7 +579,18 @@
         city: String(car.city || dealerCity).trim(),
         paintStatus: String(car.paintStatus || 'original').trim(),
         bodyNote: String(car.bodyNote || '').trim(),
+        modelYear: String(car.modelYear || '').trim(),
+        fuelType: String(car.fuelType || '').trim(),
+        engine: String(car.engine || '').trim(),
+        color: String(car.color || '').trim(),
+        registrationCity: String(car.registrationCity || '').trim(),
+        bodyType: String(car.bodyType || '').trim(),
+        assembly: String(car.assembly || '').trim(),
+        description: String(car.description || '').trim(),
+        features: Array.isArray(car.features) ? car.features.map((f) => String(f || '').trim()).filter(Boolean) : [],
         panelMarks: car.panelMarks && typeof car.panelMarks === 'object' ? car.panelMarks : {},
+        carImages: Array.isArray(car.carImages) ? car.carImages.filter(Boolean) : [],
+        coverImage: String(car.coverImage || '').trim(),
         assigneeId: String(car.assignedEmployeeId || '').trim(),
         moderationStatus: String(car.moderationStatus || 'review').trim()
       }));
@@ -459,6 +600,29 @@
     await updateDoc(doc(db, "dealerProfiles", dealerUid), {
       employees: state.employees,
       updatedAt: serverTimestamp()
+    });
+  }
+
+  async function filesToStorageUrls(fileList, listingId) {
+    const files = Array.from(fileList || []);
+    const results = [];
+    for (const file of files) {
+      const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;
+      const imageRef = ref(storage, path);
+      await uploadBytes(imageRef, file, { contentType: file.type || "image/jpeg" });
+      const url = await getDownloadURL(imageRef);
+      if (url) results.push(url);
+    }
+    return results;
+  }
+
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read selected file."));
+      reader.readAsDataURL(file);
     });
   }
 
@@ -527,13 +691,115 @@
   }
 
   function setError(el, text) {
+    el.classList.remove('success');
     el.textContent = text;
     el.classList.add('show');
+  }
+  function setSuccess(el, text) {
+    el.textContent = text;
+    el.classList.add('show');
+    el.classList.add('success');
   }
   function clearError(el) {
     el.textContent = '';
     el.classList.remove('show');
+    el.classList.remove('success');
   }
+
+  const carForm = document.getElementById('car-form');
+  const carFormToggle = document.getElementById('car-form-toggle');
+  const carFormStatus = document.getElementById('car-form-status');
+  const carSubmitBtn = document.getElementById('car-submit-btn');
+  const carCancelEditBtn = document.getElementById('car-cancel-edit-btn');
+  function setCarFormExpanded(expanded) {
+    if (!carForm || !carFormToggle) return;
+    carForm.classList.toggle('expanded', !!expanded);
+    if (state.editingCarId) {
+      carFormToggle.textContent = expanded ? 'Close Edit Car' : 'Edit Car';
+    } else {
+      carFormToggle.textContent = expanded ? 'Close Add Car' : 'Add Car';
+    }
+  }
+  function setCarFormStatus(message) {
+    if (!carFormStatus) return;
+    if (!message) {
+      carFormStatus.textContent = '';
+      carFormStatus.classList.remove('show');
+      return;
+    }
+    carFormStatus.textContent = message;
+    carFormStatus.classList.add('show');
+  }
+  function updateCarFormModeUi() {
+    if (carSubmitBtn) carSubmitBtn.textContent = state.editingCarId ? 'Save Car Changes' : 'Add Car';
+    if (carCancelEditBtn) carCancelEditBtn.style.display = state.editingCarId ? '' : 'none';
+    setCarFormExpanded(carForm && carForm.classList.contains('expanded'));
+  }
+  function resetCarForm() {
+    if (carForm) carForm.reset();
+    currentPanelMarks = {};
+    renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
+    document.querySelectorAll('.car-feature-option').forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    state.editingCarId = "";
+    updateCarFormModeUi();
+  }
+  function beginCarEdit(car) {
+    if (!car || !carForm) return;
+    state.editingCarId = car.id;
+    document.getElementById('car-name').value = car.name || '';
+    document.getElementById('car-price').value = car.price || '';
+    document.getElementById('car-mileage').value = car.mileage || '';
+    document.getElementById('car-trans').value = car.transmission || '';
+    document.getElementById('car-condition').value = car.condition || '';
+    document.getElementById('car-city').value = car.city || '';
+    document.getElementById('car-year').value = car.modelYear || '';
+    document.getElementById('car-fuel').value = car.fuelType || '';
+    document.getElementById('car-engine').value = car.engine || '';
+    document.getElementById('car-color').value = car.color || '';
+    document.getElementById('car-registration-city').value = car.registrationCity || '';
+    document.getElementById('car-body-type').value = car.bodyType || '';
+    document.getElementById('car-assembly').value = car.assembly || '';
+    document.getElementById('car-paint-status').value = car.paintStatus || '';
+    document.getElementById('car-body-note').value = car.bodyNote || '';
+    document.getElementById('car-description').value = car.description || '';
+    const selectedFeatures = new Set(Array.isArray(car.features) ? car.features : []);
+    document.querySelectorAll('.car-feature-option').forEach((checkbox) => {
+      checkbox.checked = selectedFeatures.has(checkbox.value);
+    });
+    document.getElementById('car-assignee').value = car.assigneeId || '';
+    currentPanelMarks = { ...(car.panelMarks || {}) };
+    renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
+    const coverIndexInput = document.getElementById('car-cover-index');
+    const existingImages = Array.isArray(car.carImages) ? car.carImages : [];
+    const existingCover = car.coverImage || '';
+    const coverIdx = existingImages.length && existingCover
+      ? Math.max(1, existingImages.findIndex((img) => img === existingCover) + 1)
+      : 1;
+    if (coverIndexInput) coverIndexInput.value = String(coverIdx || 1);
+    const imgInput = document.getElementById('car-images');
+    if (imgInput) imgInput.value = "";
+    updateCarFormModeUi();
+    setCarFormExpanded(true);
+    setCarFormStatus('Editing "' + (car.name || 'Car') + '". Select new photos only if you want to replace existing photos.');
+  }
+  if (carFormToggle) {
+    carFormToggle.addEventListener('click', () => {
+      const isOpen = carForm && carForm.classList.contains('expanded');
+      setCarFormExpanded(!isOpen);
+      if (!isOpen) setCarFormStatus('');
+    });
+  }
+  if (carCancelEditBtn) {
+    carCancelEditBtn.addEventListener('click', () => {
+      resetCarForm();
+      setCarFormStatus('Edit cancelled.');
+      setCarFormExpanded(false);
+    });
+  }
+  updateCarFormModeUi();
+  setCarFormExpanded(false);
 
   function renderAssigneeOptions() {
     const select = document.getElementById('car-assignee');
@@ -586,14 +852,41 @@
       item.innerHTML =
         '<div class="item-main"><h4>' + car.name + ' · ' + car.price + ' Lakh</h4>' +
         '<p>' + car.city + ' · ' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
+        '<p>' + (car.modelYear || '-') + ' · ' + (car.fuelType || '-') + ' · ' + (car.engine || '-') + ' · ' + (car.color || '-') + '</p>' +
         '<p>Paint: ' + paintLabel(car.paintStatus) + (car.bodyNote ? ' · ' + car.bodyNote : '') + '</p>' +
         '<p>Contact: ' + contact.name + ' (' + contact.role + ')' + (managedByOwner ? ' · Owner default' : '') + '</p></div>' +
         '<div class="item-actions">' +
         '<select class="mini-btn" data-assign="' + car.id + '"><option value="">Owner default</option>' +
         state.employees.map((e) => '<option value="' + e.id + '"' + (e.id === car.assigneeId ? ' selected' : '') + '>' + e.name + '</option>').join('') +
         '</select>' +
+        '<button class="mini-btn" data-edit-car="' + car.id + '">Edit</button>' +
+        '<button class="mini-btn" data-sell-car="' + car.id + '">Mark Sold</button>' +
         '<button class="mini-btn" data-delete-car="' + car.id + '">Remove</button>' +
         '<span class="badge ' + (car.moderationStatus === 'live' ? 'verify' : 'emp') + '">' + (car.moderationStatus === 'live' ? 'Published' : 'Pending Admin') + '</span></div>';
+      root.appendChild(item);
+    });
+  }
+
+  function renderSoldHistory() {
+    const root = document.getElementById('sold-history-list');
+    if (!root) return;
+    root.innerHTML = '';
+    if (!state.soldHistory.length) {
+      root.innerHTML = '<p class="note">No sold cars recorded yet.</p>';
+      return;
+    }
+    const sorted = state.soldHistory.slice().sort((a, b) => {
+      const aTime = new Date(a.soldAt || 0).getTime();
+      const bTime = new Date(b.soldAt || 0).getTime();
+      return bTime - aTime;
+    });
+    sorted.forEach((entry) => {
+      const item = document.createElement('div');
+      item.className = 'item';
+      item.innerHTML =
+        '<div class="item-main"><h4>' + (entry.name || 'Car') + ' · ' + (entry.price || '-') + ' Lakh</h4>' +
+        '<p>' + (entry.city || '-') + ' · ' + (entry.mileage || '-') + ' · ' + (entry.transmission || '-') + ' · ' + (entry.condition || '-') + '</p>' +
+        '<p>Sold on: ' + (entry.soldAt ? new Date(entry.soldAt).toLocaleString() : '-') + '</p></div>';
       root.appendChild(item);
     });
   }
@@ -620,7 +913,7 @@
       card.className = 'preview-card';
       card.innerHTML =
         '<div class="preview-top">' +
-        '<span class="badge verify">Verified Dealer</span>' +
+        '<span class="badge verify">Live listing</span>' +
         '<span class="badge ' + (managedByOwner ? 'owner">Managed by Owner' : 'emp">Assigned to Advisor') + '</span></div>' +
         '<div class="preview-body"><h4>' + car.name + '</h4><div class="price">' + car.price + ' Lakh PKR</div>' +
         '<p class="meta">' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
@@ -650,6 +943,7 @@
     renderEmployees();
     renderCars();
     renderPreview();
+    renderSoldHistory();
     renderKpis();
     setSuspendedUi();
   }
@@ -682,6 +976,7 @@
     e.preventDefault();
     const err = document.getElementById('car-error');
     clearError(err);
+    setCarFormStatus('');
     await loadLiveState();
     renderAll();
     if (!requireActiveDealer(err)) return;
@@ -692,9 +987,20 @@
     const transmission = document.getElementById('car-trans').value;
     const condition = document.getElementById('car-condition').value;
     const city = document.getElementById('car-city').value;
+    const modelYear = document.getElementById('car-year').value.trim();
+    const fuelType = document.getElementById('car-fuel').value;
+    const engine = document.getElementById('car-engine').value.trim();
+    const color = document.getElementById('car-color').value.trim();
+    const registrationCity = document.getElementById('car-registration-city').value.trim();
+    const bodyType = document.getElementById('car-body-type').value;
+    const assembly = document.getElementById('car-assembly').value;
     const paintStatus = document.getElementById('car-paint-status').value;
     const bodyNote = document.getElementById('car-body-note').value.trim();
+    const description = document.getElementById('car-description').value.trim();
+    const features = Array.from(document.querySelectorAll('.car-feature-option:checked')).map((el) => el.value);
     const assigneeId = document.getElementById('car-assignee').value;
+    const carImagesInput = document.getElementById('car-images');
+    const carCoverIndexInput = document.getElementById('car-cover-index');
 
     if (!name || !price || !mileage || !transmission || !condition || !city || !paintStatus) {
       return setError(err, 'Please complete all required car fields.');
@@ -703,11 +1009,34 @@
     if (!Number.isFinite(numericPrice) || numericPrice < 0) {
       return setError(err, 'Price cannot be below 0.');
     }
+    const currentYear = new Date().getFullYear();
+    if (modelYear) {
+      const yearNum = Number(modelYear);
+      if (!Number.isInteger(yearNum) || yearNum < 1980 || yearNum > currentYear + 1) {
+        return setError(err, 'Model year must be between 1980 and ' + (currentYear + 1) + '.');
+      }
+    }
+    if (engine && !/^\d{3,5}\s*cc$/i.test(engine)) {
+      return setError(err, 'Engine format should look like 660cc, 1300cc, or 1800cc.');
+    }
+    const imageFiles = carImagesInput && carImagesInput.files ? carImagesInput.files : [];
+    const editingId = state.editingCarId || "";
+    const editingCar = editingId ? byId(state.cars, editingId) : null;
+    const existingImages = editingCar && Array.isArray(editingCar.carImages) ? editingCar.carImages : [];
+    const coverIndexRaw = carCoverIndexInput ? Number(carCoverIndexInput.value || "1") : 1;
+    const coverIndex = Number.isFinite(coverIndexRaw) ? Math.max(1, Math.floor(coverIndexRaw)) : 1;
+    const effectiveImageCount = imageFiles.length > 0 ? imageFiles.length : existingImages.length;
+    if (effectiveImageCount > 0 && coverIndex > effectiveImageCount) {
+      return setError(err, 'Cover photo number must be between 1 and total available photos.');
+    }
 
     const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
-    const listingId = crypto.randomUUID();
+    const listingId = editingId || crypto.randomUUID();
     try {
-      await setDoc(doc(db, "listings", listingId), {
+      const uploadedImages = imageFiles.length ? await filesToStorageUrls(imageFiles, listingId) : [];
+      const finalImages = uploadedImages.length ? uploadedImages : existingImages;
+      const coverImage = finalImages[Math.max(0, coverIndex - 1)] || finalImages[0] || "";
+      const payload = {
         dealerId: dealerUid,
         dealerName: dealerName,
         carName: name,
@@ -716,23 +1045,43 @@
         transmission,
         condition,
         city,
+        modelYear: modelYear || "",
+        fuelType: fuelType || "",
+        engine: engine || "",
+        color: color || "",
+        registrationCity: registrationCity || city || "",
+        bodyType: bodyType || "",
+        assembly: assembly || "",
         paintStatus,
         bodyNote,
+        description,
+        features,
         panelMarks: { ...currentPanelMarks },
         assignedEmployeeId: assigneeId || "",
         contactName: contact.name,
         contactRole: contact.role,
         phone: contact.phone,
-        moderationStatus: "review",
-        createdAt: serverTimestamp(),
+        carImages: finalImages,
+        coverImage: coverImage,
+        moderationStatus: "live",
         updatedAt: serverTimestamp()
-      });
-      e.target.reset();
-      currentPanelMarks = {};
-      renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);
+      };
+      if (editingId) {
+        await updateDoc(doc(db, "listings", listingId), payload);
+      } else {
+        await setDoc(doc(db, "listings", listingId), {
+          ...payload,
+          createdAt: serverTimestamp()
+        });
+      }
+      resetCarForm();
       await loadLiveState();
       renderAll();
+      setSuccess(err, editingId ? 'Car updated successfully.' : 'Car added successfully.');
+      setCarFormStatus(editingId ? 'Car updated successfully.' : 'Car added successfully.');
+      setCarFormExpanded(false);
     } catch (error) {
+      setCarFormExpanded(true);
       setError(err, 'Could not save listing: ' + (error && error.message ? error.message : 'Unknown error'));
     }
   });
@@ -770,13 +1119,39 @@
   });
 
   document.getElementById('car-list').addEventListener('click', async (e) => {
+    const editId = e.target.getAttribute('data-edit-car');
     const id = e.target.getAttribute('data-delete-car');
-    if (!id) return;
+    const soldId = e.target.getAttribute('data-sell-car');
+    if (!id && !soldId && !editId) return;
     const err = document.getElementById('car-error');
     clearError(err);
     await loadLiveState();
     renderAll();
     if (!requireActiveDealer(err)) return;
+    if (editId) {
+      const car = byId(state.cars, editId);
+      if (!car) return;
+      beginCarEdit(car);
+      return;
+    }
+    if (soldId) {
+      const car = byId(state.cars, soldId);
+      if (!car) return;
+      try {
+        await markListingSoldFn({ listingId: soldId });
+        await loadLiveState();
+        renderAll();
+      } catch (error) {
+        const msg =
+          error && error.code === "functions/not-found"
+            ? "Listing not found (it may have already been removed)."
+            : error && error.message
+              ? error.message
+              : "Unknown error";
+        setError(err, "Could not mark car as sold: " + msg);
+      }
+      return;
+    }
     try {
       await deleteDoc(doc(db, "listings", id));
       await loadLiveState();
@@ -821,6 +1196,45 @@
     });
   }
 
+  const dealerProfilePictureInput = document.getElementById('dealer-profile-picture-input');
+  const dealerProfilePictureSave = document.getElementById('dealer-profile-picture-save');
+  const dealerProfilePictureError = document.getElementById('dealer-profile-picture-error');
+  if (dealerProfilePictureSave) {
+    dealerProfilePictureSave.addEventListener('click', async () => {
+      clearError(dealerProfilePictureError);
+      await loadLiveState();
+      renderAll();
+      if (!requireActiveDealer(dealerProfilePictureError)) return;
+      const file = dealerProfilePictureInput && dealerProfilePictureInput.files ? dealerProfilePictureInput.files[0] : null;
+      if (!file) {
+        setError(dealerProfilePictureError, 'Please select an image first.');
+        return;
+      }
+      try {
+        dealerProfilePictureSave.disabled = true;
+        dealerProfilePictureSave.textContent = 'Updating...';
+        let profilePicture = "";
+        try {
+          profilePicture = await uploadDealerProfileImage(dealerUid, file);
+        } catch (_storageErr) {
+          profilePicture = await fileToDataUrl(file);
+        }
+        await updateDoc(doc(db, "dealerProfiles", dealerUid), {
+          profilePicture: profilePicture,
+          updatedAt: serverTimestamp()
+        });
+        if (dealerProfile) dealerProfile.profilePicture = profilePicture;
+        if (dealerProfilePictureInput) dealerProfilePictureInput.value = "";
+        setError(dealerProfilePictureError, 'Profile picture updated successfully.');
+      } catch (error) {
+        setError(dealerProfilePictureError, 'Could not update profile picture: ' + (error && error.message ? error.message : 'Unknown error'));
+      } finally {
+        dealerProfilePictureSave.disabled = false;
+        dealerProfilePictureSave.textContent = 'Update Profile Picture';
+      }
+    });
+  }
+
   const panelGrid = document.getElementById('car-panel-grid');
   if (panelGrid) {
     panelGrid.addEventListener('click', (event) => {
@@ -857,5 +1271,6 @@
   renderAll();
 
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

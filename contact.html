@@ -59,6 +59,7 @@
   .hint { font-size: 13px; color: var(--gray-500); margin-top: 16px; line-height: 1.5; }
   .hint a { color: var(--green-main); font-weight: 600; }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -70,7 +71,7 @@
 
 <section class="hero">
   <h1>Contact us</h1>
-  <p>Questions about listings, dealer registration, or partnerships? Send us a message. (Form opens your email client until we add a backend.)</p>
+  <p>Questions about listings, dealer registration, or partnerships? Use the form below to open a draft in your email app and send it to our team.</p>
 </section>
 
 <main class="content">
@@ -83,7 +84,7 @@
       <textarea id="body" name="body" required placeholder="How can we help?"></textarea>
       <button type="submit" class="submit">Send via email</button>
     </form>
-    <p class="hint">Dealer support: use <a href="mailto:support@garibazaar.pk">support@garibazaar.pk</a> (replace with your real address when live). For urgent showroom issues, mention your registered business name.</p>
+    <p class="hint">Dealer support: <a href="mailto:support@garibazaar.pk">support@garibazaar.pk</a>. For faster help, include your registered business name and the email you use to log in.</p>
   </div>
 </main>
 
@@ -123,5 +124,6 @@ document.getElementById('contactForm').addEventListener('submit', function (e) {
   window.location.href = 'mailto:support@garibazaar.pk?subject=' + subj + '&body=' + body;
 });
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

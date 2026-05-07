@@ -888,6 +888,7 @@
     .footer-grid { grid-template-columns: 1fr; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -903,10 +904,10 @@
     <button id="listingsBackBtn" type="button" class="btn-nav-soft">Back</button>
     <a href="index.html" class="btn-nav-soft">Home</a>
     <div id="navBuyerLinks" class="nav-buyer-links">
-      <a href="buyer-login.html">Sign in</a>
+      <a href="buyer-login.html">Sign In</a>
     </div>
     <a id="navProfileLink" href="buyer-profile.html" class="btn-primary" style="display:none;">My Profile</a>
-    <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
+    <a href="dealer-login.html" class="btn-outline">Dealer Access</a>
   </div>
 </nav>
 
@@ -1044,34 +1045,34 @@
     <div class="filter-group">
       <h4>Condition</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="New"> New</span><span class="count">5</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="Used"> Used</span><span class="count">7</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="New"> New</span><span id="countConditionNew" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-condition" value="Used"> Used</span><span id="countConditionUsed" class="count">0</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>Transmission</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Automatic"> Automatic</span><span class="count">8</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Manual"> Manual</span><span class="count">4</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Automatic"> Automatic</span><span id="countTransAutomatic" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-trans" value="Manual"> Manual</span><span id="countTransManual" class="count">0</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>City</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Islamabad"> Islamabad</span><span class="count">6</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Rawalpindi"> Rawalpindi</span><span class="count">6</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Islamabad"> Islamabad</span><span id="countCityIslamabad" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-city" value="Rawalpindi"> Rawalpindi</span><span id="countCityRawalpindi" class="count">0</span></label></li>
       </ul>
     </div>
 
     <div class="filter-group">
       <h4>Price Range</h4>
       <ul class="option-list">
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="u30"> Under 30 Lakh</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="30-60"> 30 - 60 Lakh</span><span class="count">4</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="60-100"> 60 - 100 Lakh</span><span class="count">3</span></label></li>
-        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="100p"> 100+ Lakh</span><span class="count">2</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="u30"> Under 30 Lakh</span><span id="countPriceU30" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="30-60"> 30 - 60 Lakh</span><span id="countPrice30to60" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="60-100"> 60 - 100 Lakh</span><span id="countPrice60to100" class="count">0</span></label></li>
+        <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="100p"> 100+ Lakh</span><span id="countPrice100p" class="count">0</span></label></li>
       </ul>
     </div>
   </aside>
@@ -1093,286 +1094,7 @@
       </div>
     </div>
 
-    <div class="car-grid">
-      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="1">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <span class="owner-pill">Managed by Owner</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Toyota Corolla Altis 2022</h4>
-          <div class="car-price">52 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Al-Haram Motors — Islamabad</p>
-          <p class="contact-meta">Contact: Ali (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>21,000 km</span><span>Automatic</span>
-            <span>Used</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923111111111?text=Assalamualaikum%20Ali%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20Altis%202022." target="_blank" rel="noopener noreferrer">WhatsApp Ali</a>
-            <a class="contact-link call" href="tel:+923111111111">Call Ali</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="2">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <span class="owner-pill">Managed by Owner</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Honda Civic Oriel 2024</h4>
-          <div class="car-price">79 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">City Motors — Rawalpindi</p>
-          <p class="contact-meta">Contact: Saad (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>0 km</span><span>Automatic</span>
-            <span>New</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923122222222?text=Assalamualaikum%20Saad%2C%20I%20am%20interested%20in%20Honda%20Civic%20Oriel%202024." target="_blank" rel="noopener noreferrer">WhatsApp Saad</a>
-            <a class="contact-link call" href="tel:+923122222222">Call Saad</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Hatchback" data-assembly="Local" data-stock-index="3a">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <span class="owner-pill">Managed by Owner</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Suzuki Alto VXR 2023</h4>
-          <div class="car-price">23 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Prime Autos — Rawalpindi</p>
-          <p class="contact-meta">Contact: Usman (Owner - Default)</p>
-          <div class="mini-specs">
-            <span>13,200 km</span><span>Manual</span>
-            <span>Used</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923133333333?text=Assalamualaikum%20Usman%2C%20I%20am%20interested%20in%20Suzuki%20Alto%20VXR%202023." target="_blank" rel="noopener noreferrer">WhatsApp Usman</a>
-            <a class="contact-link call" href="tel:+923133333333">Call Usman</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Imported" data-stock-index="3b">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Hyundai Tucson AWD 2024</h4>
-          <div class="car-price">114 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Skyline Motors — Islamabad</p>
-          <p class="contact-meta">Contact: Hamza (Owner - Default)</p>
-          <div class="mini-specs">
-            <span>0 km</span><span>Automatic</span>
-            <span>New</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923144444444?text=Assalamualaikum%20Hamza%2C%20I%20am%20interested%20in%20Hyundai%20Tucson%20AWD%202024." target="_blank" rel="noopener noreferrer">WhatsApp Hamza</a>
-            <a class="contact-link call" href="tel:+923144444444">Call Hamza</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Local" data-stock-index="4">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Kia Sportage Alpha 2023</h4>
-          <div class="car-price">88 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Capital Wheels — Islamabad</p>
-          <p class="contact-meta">Contact: Daniyal (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>8,900 km</span><span>Automatic</span>
-            <span>Used</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923155555555?text=Assalamualaikum%20Daniyal%2C%20I%20am%20interested%20in%20Kia%20Sportage%20Alpha%202023." target="_blank" rel="noopener noreferrer">WhatsApp Daniyal</a>
-            <a class="contact-link call" href="tel:+923155555555">Call Daniyal</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="5">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Toyota Yaris ATIV 2022</h4>
-          <div class="car-price">43 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Metro Motors — Rawalpindi</p>
-          <p class="contact-meta">Contact: Ahsan (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>25,400 km</span><span>Automatic</span>
-            <span>Used</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923166666666?text=Assalamualaikum%20Ahsan%2C%20I%20am%20interested%20in%20Toyota%20Yaris%20ATIV%202022." target="_blank" rel="noopener noreferrer">WhatsApp Ahsan</a>
-            <a class="contact-link call" href="tel:+923166666666">Call Ahsan</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="6">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Honda City 1.2L 2021</h4>
-          <div class="car-price">41 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Green Auto Mall — Islamabad</p>
-          <p class="contact-meta">Contact: Bilal (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>36,000 km</span><span>Manual</span>
-            <span>Used</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923177777777?text=Assalamualaikum%20Bilal%2C%20I%20am%20interested%20in%20Honda%20City%201.2L%202021." target="_blank" rel="noopener noreferrer">WhatsApp Bilal</a>
-            <a class="contact-link call" href="tel:+923177777777">Call Bilal</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Hatchback" data-assembly="Local" data-stock-index="7">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Suzuki Swift GLX 2024</h4>
-          <div class="car-price">49 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">BlueLine Cars — Rawalpindi</p>
-          <p class="contact-meta">Contact: Ahmed (Owner - Default)</p>
-          <div class="mini-specs">
-            <span>0 km</span><span>Automatic</span>
-            <span>New</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923188888888?text=Assalamualaikum%20Ahmed%2C%20I%20am%20interested%20in%20Suzuki%20Swift%20GLX%202024." target="_blank" rel="noopener noreferrer">WhatsApp Ahmed</a>
-            <a class="contact-link call" href="tel:+923188888888">Call Ahmed</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Local" data-stock-index="8">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Toyota Fortuner Sigma 2021</h4>
-          <div class="car-price">145 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Titan Auto House — Islamabad</p>
-          <p class="contact-meta">Contact: Zain (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>42,500 km</span><span>Automatic</span>
-            <span>Used</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923199999999?text=Assalamualaikum%20Zain%2C%20I%20am%20interested%20in%20Toyota%20Fortuner%20Sigma%202021." target="_blank" rel="noopener noreferrer">WhatsApp Zain</a>
-            <a class="contact-link call" href="tel:+923199999999">Call Zain</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="SUV" data-assembly="Imported" data-stock-index="9">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>MG HS Essence 2023</h4>
-          <div class="car-price">102 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Royal Drive — Islamabad</p>
-          <p class="contact-meta">Contact: Salman (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>14,300 km</span><span>Automatic</span>
-            <span>Used</span><span>Islamabad</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923211111111?text=Assalamualaikum%20Salman%2C%20I%20am%20interested%20in%20MG%20HS%20Essence%202023." target="_blank" rel="noopener noreferrer">WhatsApp Salman</a>
-            <a class="contact-link call" href="tel:+923211111111">Call Salman</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Sedan" data-assembly="Local" data-stock-index="10">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Hyundai Elantra GLS 2024</h4>
-          <div class="car-price">74 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">North Star Motors — Rawalpindi</p>
-          <p class="contact-meta">Contact: Farhan (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>0 km</span><span>Automatic</span>
-            <span>New</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923222222222?text=Assalamualaikum%20Farhan%2C%20I%20am%20interested%20in%20Hyundai%20Elantra%20GLS%202024." target="_blank" rel="noopener noreferrer">WhatsApp Farhan</a>
-            <a class="contact-link call" href="tel:+923222222222">Call Farhan</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="car-card" tabindex="0" data-body="Crossover" data-assembly="Local" data-stock-index="11">
-        <div class="car-photo">
-          <span class="verified-pill">Verified Dealer</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Honda BR-V i-VTEC 2022</h4>
-          <div class="car-price">61 Lakh <span>PKR</span></div>
-        </div>
-        <div class="car-expanded">
-          <p class="dealer-line">Primeway Autos — Rawalpindi</p>
-          <p class="contact-meta">Contact: Rehan (Sales Executive)</p>
-          <div class="mini-specs">
-            <span>27,600 km</span><span>Automatic</span>
-            <span>Used</span><span>Rawalpindi</span>
-          </div>
-          <div class="contact-actions">
-            <a class="contact-link wa" href="https://wa.me/923233333333?text=Assalamualaikum%20Rehan%2C%20I%20am%20interested%20in%20Honda%20BR-V%20i-VTEC%202022." target="_blank" rel="noopener noreferrer">WhatsApp Rehan</a>
-            <a class="contact-link call" href="tel:+923233333333">Call Rehan</a>
-          </div>
-        </div>
-      </article>
-    </div>
+    <div class="car-grid"></div>
     <div class="browse-all-note" id="browseAllNote">
       <p id="browseAllText">Looking for more options from other cities? Browse all available cars.</p>
       <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Browse More Cars</button>
@@ -1389,7 +1111,7 @@
     <div class="footer-col">
       <h4>For Buyers</h4>
       <ul>
-        <li><a href="buyer-login.html">Buyer sign in</a></li>
+        <li><a href="buyer-login.html">Buyer Sign In</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
         <li><a href="listings.html">Search by City</a></li>
@@ -1402,7 +1124,7 @@
       <ul>
         <li><a href="dealer-login.html">Dealer Access</a></li>
         <li><a href="index.html#pricing">Pricing Plans</a></li>
-        <li><a href="dealer-login.html">Dealer Login</a></li>
+        <li><a href="dealer-login.html">Dealer Access</a></li>
         <li><a href="index.html#how">How It Works</a></li>
       </ul>
     </div>
@@ -1579,6 +1301,58 @@
     const cleaned = first.textContent.replace(/,/g, '');
     const m = cleaned.match(/(\d+)\s*km/i);
     return m ? parseInt(m[1], 10) : null;
+  }
+
+  function setCount(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(value);
+  }
+
+  function updateSidebarCounts() {
+    const allCards = Array.from(document.querySelectorAll('.car-card'));
+    const counts = {
+      conditionNew: 0,
+      conditionUsed: 0,
+      transAutomatic: 0,
+      transManual: 0,
+      cityIslamabad: 0,
+      cityRawalpindi: 0,
+      priceU30: 0,
+      price30to60: 0,
+      price60to100: 0,
+      price100p: 0
+    };
+
+    allCards.forEach((card) => {
+      const specs = card.querySelectorAll('.mini-specs span');
+      const transmission = normalize(specs[1] ? specs[1].textContent : '');
+      const condition = normalize(specs[2] ? specs[2].textContent : '');
+      const city = normalize(specs[3] ? specs[3].textContent : '');
+      const pk = parseCardPricePk(card);
+      const lakh = pk == null ? null : pk / 100000;
+
+      if (condition === 'new') counts.conditionNew += 1;
+      if (condition === 'used') counts.conditionUsed += 1;
+      if (transmission === 'automatic') counts.transAutomatic += 1;
+      if (transmission === 'manual') counts.transManual += 1;
+      if (city === 'islamabad') counts.cityIslamabad += 1;
+      if (city === 'rawalpindi') counts.cityRawalpindi += 1;
+      if (lakh != null && lakh <= 30) counts.priceU30 += 1;
+      if (lakh != null && lakh > 30 && lakh <= 60) counts.price30to60 += 1;
+      if (lakh != null && lakh > 60 && lakh <= 100) counts.price60to100 += 1;
+      if (lakh != null && lakh > 100) counts.price100p += 1;
+    });
+
+    setCount('countConditionNew', counts.conditionNew);
+    setCount('countConditionUsed', counts.conditionUsed);
+    setCount('countTransAutomatic', counts.transAutomatic);
+    setCount('countTransManual', counts.transManual);
+    setCount('countCityIslamabad', counts.cityIslamabad);
+    setCount('countCityRawalpindi', counts.cityRawalpindi);
+    setCount('countPriceU30', counts.priceU30);
+    setCount('countPrice30to60', counts.price30to60);
+    setCount('countPrice60to100', counts.price60to100);
+    setCount('countPrice100p', counts.price100p);
   }
 
   function mileageBandMatches(km, bandLabel) {
@@ -1852,6 +1626,7 @@
     if (cityOptions.includes(prefillCity)) citySelect.value = prefillCity;
   }
   runListingsSearch();
+  updateSidebarCounts();
 
   cards.forEach((card) => {
     card.addEventListener('click', () => {
@@ -1898,50 +1673,7 @@
   });
 
   attachCardLinks();
-
-  const listingCarImages = [
-    'https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1617469767053-d3b523a0b982?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1616788494672-ec7ca25fdda9?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1584345604476-8ec5f452d1f2?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1523983388277-336a66bf9bcd?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&w=1200&q=80'
-  ];
-
-  const listingDealerLogos = [
-    'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80',
-    'https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=300&q=80',
-    'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=300&q=80',
-    'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?auto=format&fit=crop&w=300&q=80'
-  ];
-
-  document.querySelectorAll('.car-photo').forEach((slot, index) => {
-    const image = document.createElement('img');
-    image.src = listingCarImages[index % listingCarImages.length];
-    image.alt = 'Car listing image';
-    image.loading = 'lazy';
-    const svg = slot.querySelector('svg');
-    if (svg) {
-      svg.replaceWith(image);
-    } else if (!slot.querySelector('img')) {
-      slot.appendChild(image);
-    }
-  });
-
-  document.querySelectorAll('.dealer-line').forEach((line, index) => {
-    if (line.querySelector('img')) return;
-    const logo = document.createElement('img');
-    logo.src = listingDealerLogos[index % listingDealerLogos.length];
-    logo.alt = 'Dealer logo';
-    logo.loading = 'lazy';
-    line.prepend(logo);
-  });
+  updateSidebarCounts();
 
 </script>
 
@@ -2004,27 +1736,37 @@
       carGrid.innerHTML = '<p class="note">No live approved listings available right now. Approve dealers and publish listings from admin panel.</p>';
       if (typeof refreshCardCaches === "function") refreshCardCaches();
       if (typeof runListingsSearch === "function") runListingsSearch();
+      if (typeof updateSidebarCounts === "function") updateSidebarCounts();
       return;
     }
 
     carGrid.innerHTML = liveListings.map((entry, index) => {
       const listing = entry.listing;
       const dealer = entry.dealer || {};
-      const dealerName = clean(listing.dealerName || dealer.businessName || dealer.dealerName || "Verified Dealer");
+      const dealerName = clean(listing.dealerName || dealer.businessName || dealer.dealerName || "Dealer");
       const city = clean(listing.city || dealer.city || "-");
-      const contactName = clean(listing.contactName || dealer.ownerName || "Dealer Team");
-      const contactRole = clean(listing.contactRole || "Sales Desk");
+      const contactName = clean(listing.contactName || dealer.ownerName || "Contact");
+      const contactRole = clean(listing.contactRole || "—");
       const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
-      const phoneDigits = phoneRaw.replace(/[^\d]/g, "") || "923000000000";
+      const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
+      const hasPhone = phoneDigits.length >= 10;
       const title = clean(listing.carName || listing.name || "Untitled Listing");
       const mileage = clean(listing.mileage || "-");
       const transmission = clean(listing.transmission || "-");
       const condition = clean(listing.condition || "Used");
+      const modelYear = clean(listing.modelYear || "");
+      const fuelType = clean(listing.fuelType || "");
+      const engine = clean(listing.engine || "");
+      const color = clean(listing.color || "");
+      const registrationCity = clean(listing.registrationCity || city);
       const priceLakh = toLakh(listing.priceLakh || listing.price);
       const bodyType = clean(listing.bodyType || "Any");
       const assembly = clean(listing.assembly || "Any");
       const listingId = clean(listing.id || [slugify(title), slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
       const dealerId = clean(entry.dealerId || [slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
+      const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
+      const coverImage = clean(listing.coverImage || carImages[0] || "");
+      const coverForImg = /^https?:\/\//.test(coverImage) || coverImage.indexOf("data:image/") === 0 ? coverImage : "";
       const waText = encodeURIComponent("Assalamualaikum " + contactName + ", I am interested in " + title + ".");
       const detailParams = new URLSearchParams({
         listingId,
@@ -2034,11 +1776,17 @@
         mileage,
         transmission,
         condition,
+        modelYear,
+        fuelType,
+        engine,
+        color,
+        registrationCity,
         city,
         dealer: dealerName,
         contactName,
         contactRole,
-        phone: phoneDigits
+        phone: phoneDigits,
+        coverImage: coverImage
       });
       const dealerParams = new URLSearchParams({
         dealerId,
@@ -2052,8 +1800,10 @@
       return (
         '<article class="car-card" tabindex="0" data-body="' + esc(bodyType) + '" data-assembly="' + esc(assembly) + '" data-stock-index="' + esc(index + 1) + '">' +
           '<div class="car-photo">' +
-            '<span class="verified-pill">Verified Dealer</span>' +
-            '<img src="https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80" alt="Car listing image" loading="lazy">' +
+            '<span class="verified-pill">Verified listing</span>' +
+            (coverForImg
+              ? '<img src="' + esc(coverForImg) + '" alt="Car listing image" loading="lazy">'
+              : '<div class="meta" style="padding:14px;">No photo uploaded</div>') +
           '</div>' +
           '<div class="car-main">' +
             '<h4>' + esc(title) + '</h4>' +
@@ -2065,9 +1815,12 @@
             '<div class="mini-specs">' +
               "<span>" + esc(mileage) + "</span><span>" + esc(transmission) + "</span><span>" + esc(condition) + "</span><span>" + esc(city) + "</span>" +
             "</div>" +
+            '<p class="contact-meta">' + esc((modelYear || "-") + ' · ' + (fuelType || "-") + ' · ' + (engine || "-") + ' · ' + (color || "-")) + '</p>' +
             '<div class="contact-actions">' +
-              '<a class="contact-link wa" href="https://wa.me/' + esc(phoneDigits) + "?text=" + waText + '" target="_blank" rel="noopener noreferrer">WhatsApp ' + esc(contactName) + "</a>" +
-              '<a class="contact-link call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>" +
+              (hasPhone
+                ? '<a class="contact-link wa" href="https://wa.me/' + esc(phoneDigits) + "?text=" + waText + '" target="_blank" rel="noopener noreferrer">WhatsApp ' + esc(contactName) + "</a>" +
+                  '<a class="contact-link call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>"
+                : '<span class="contact-meta" style="display:block;">Phone not listed for this car.</span>') +
             "</div>" +
             '<a class="action-link detail-btn" href="car-detail.html?' + esc(detailParams.toString()) + '">Show Car Details</a>' +
             '<a class="action-link dealer-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
@@ -2078,6 +1831,7 @@
 
     if (typeof refreshCardCaches === "function") refreshCardCaches();
     if (typeof runListingsSearch === "function") runListingsSearch();
+    if (typeof updateSidebarCounts === "function") updateSidebarCounts();
   }
 
   renderLiveListings().catch((error) => {
@@ -2116,6 +1870,7 @@
     }
   });
 </script>
+<script src="theme.js"></script>
 
 </body>
 </html>

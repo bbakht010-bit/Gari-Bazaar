@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isDealerUser() {
+      return isSignedIn() &&
+        exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "dealer";
+    }
+
+    match /listings/{dealerId}/{listingId}/{fileName} {
+      allow read: if true;
+      allow write: if isDealerUser() &&
+        request.auth.uid == dealerId &&
+        request.resource.size < 12 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+
+    match /dealers/{dealerId}/profile/{fileName} {
+      allow read: if true;
+      allow write: if isDealerUser() &&
+        request.auth.uid == dealerId &&
+        request.resource.size < 6 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*');
+    }
+  }
+}

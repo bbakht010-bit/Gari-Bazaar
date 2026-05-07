@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+  background: #0b1220 !important;
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] nav,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .kpi,
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .step,
+html[data-theme="dark"] .setting,
+html[data-theme="dark"] .dealer-card,
+html[data-theme="dark"] .car-card,
+html[data-theme="dark"] .plan-card,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .upload-area,
+html[data-theme="dark"] .search-wrapper,
+html[data-theme="dark"] .top-filter-area,
+html[data-theme="dark"] .page-hero,
+html[data-theme="dark"] .hero,
+html[data-theme="dark"] footer {
+  background: #111827 !important;
+  color: #e5e7eb !important;
+  border-color: #2b3444 !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .thumb,
+html[data-theme="dark"] .spec,
+html[data-theme="dark"] .stat,
+html[data-theme="dark"] .item,
+html[data-theme="dark"] .field input,
+html[data-theme="dark"] .field select,
+html[data-theme="dark"] .field textarea {
+  background: #0f172a !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
+}
+
+html[data-theme="dark"] a:not(.btn-primary):not(.btn-hero-primary):not(.wa):not(.btn-home) {
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] .logo,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] p,
+html[data-theme="dark"] li,
+html[data-theme="dark"] label,
+html[data-theme="dark"] td,
+html[data-theme="dark"] th,
+html[data-theme="dark"] span,
+html[data-theme="dark"] strong {
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .tag,
+html[data-theme="dark"] .pill,
+html[data-theme="dark"] .badge,
+html[data-theme="dark"] .status {
+  border-color: #374151 !important;
+}
+
+#gb-theme-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  border: 1px solid #1f2937;
+  background: #111827;
+  color: #f9fafb;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] #gb-theme-toggle {
+  border-color: #374151;
+  background: #0f172a;
+}

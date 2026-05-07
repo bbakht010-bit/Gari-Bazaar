@@ -198,6 +198,7 @@
     padding: 0;
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -269,15 +270,26 @@
       if (legacyRaw) {
         try {
           const legacy = JSON.parse(legacyRaw);
-          await upsertDealerProfile(user.uid, legacy);
-          profile = legacy;
+          delete legacy.verificationStatus;
+          delete legacy.suspended;
+          delete legacy.carsSold;
+          delete legacy.soldHistory;
+          await upsertDealerProfile(user.uid, {
+            ...legacy,
+            verificationStatus: "pending",
+            suspended: false
+          });
+          profile = await getDealerProfile(user.uid);
         } catch (_error) {}
       }
     }
     if (profile) {
       localStorage.setItem("gb_dealer_profile_" + user.uid, JSON.stringify(profile));
     }
-    return isDealerProfileComplete(profile) ? "dealer-dashboard.html" : "register.html";
+    if (!isDealerProfileComplete(profile)) return "register.html";
+    const status = String((profile && profile.verificationStatus) || "pending").toLowerCase();
+    if (status === "verified" || status === "approved") return "dealer-dashboard.html";
+    return "dealer-application-pending.html";
   }
 
   form.addEventListener("submit", async function (event) {
@@ -388,5 +400,6 @@
   });
 
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

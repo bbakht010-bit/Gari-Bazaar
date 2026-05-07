@@ -969,6 +969,20 @@
     font-size: 18px; margin-bottom: 36px;
   }
 
+  .featured-subline {
+    margin-top: 8px;
+    color: var(--gray-600);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 680px;
+  }
+  .featured-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   /* FOOTER */
   footer {
     background: var(--gray-900);
@@ -1020,8 +1034,10 @@
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .search-bar { flex-direction: column; }
     .search-bar select { border-right: none; border-bottom: 1px solid var(--gray-200); }
+    .featured-actions { justify-content: flex-start; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -1032,14 +1048,13 @@
     <li><a href="listings.html">Browse Cars</a></li>
     <li><a href="dealers.html">Dealers</a></li>
     <li><a href="#how">How it Works</a></li>
-    <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-cta">
     <div id="navBuyerLinks" class="nav-buyer-links">
-      <a id="navBuyerSignIn" href="buyer-login.html">Sign in</a>
+      <a id="navBuyerSignIn" href="buyer-login.html">Sign In</a>
     </div>
     <a id="navProfileLink" class="nav-profile-link" href="buyer-profile.html">My Profile</a>
-    <a href="dealer-login.html" class="btn-outline">Dealer Login</a>
+    <a href="dealer-login.html" class="btn-outline">Dealer Access</a>
   </div>
 </nav>
 
@@ -1059,20 +1074,20 @@
   <p class="hero-note">Need quick help? Use WhatsApp support for direct assistance.</p>
   <div class="hero-stats">
     <div class="stat">
-      <div class="stat-number">120+</div>
+      <div class="stat-number" id="heroVerifiedDealers">0</div>
       <div class="stat-label">Verified Dealers</div>
     </div>
     <div class="stat">
-      <div class="stat-number">1,400+</div>
+      <div class="stat-number" id="heroCarsListed">0</div>
       <div class="stat-label">Cars Listed</div>
     </div>
     <div class="stat">
-      <div class="stat-number">2</div>
-      <div class="stat-label">Major Cities</div>
+      <div class="stat-number" id="heroBuyersCount">0</div>
+      <div class="stat-label">Registered Buyers</div>
     </div>
     <div class="stat">
-      <div class="stat-number">100%</div>
-      <div class="stat-label">Verified Only</div>
+      <div class="stat-number" id="heroCitiesCount">0</div>
+      <div class="stat-label">Major Cities</div>
     </div>
   </div>
 </section>
@@ -1130,54 +1145,21 @@
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing-section" id="pricing">
-  <h2>Simple Dealer Pricing</h2>
-  <p>Start free and scale as your dealership grows. No hidden fees.</p>
-  <div class="pricing-grid">
 
-    <div class="plan-card">
-      <div class="plan-name">Starter</div>
-      <div class="plan-price">Free <small>forever</small></div>
-      <div class="plan-desc">Perfect to get started on GariBazaar</div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> 2 car listings</li>
-        <li><span class="check">✓</span> 1 employee account</li>
-        <li><span class="check">✓</span> WhatsApp contact</li>
-        <li><span class="check">✓</span> Dealer profile page</li>
-      </ul>
-      <button class="plan-btn plan-btn-outline">Get Started Free</button>
+<section class="section" id="featured-home">
+  <div class="section-header">
+    <div>
+      <h2>Featured Cars</h2>
+      <p>Random live picks from verified dealers</p>
+      <p class="featured-subline">Buy with confidence: every featured listing is tied to a real dealer profile with direct call and WhatsApp contact.</p>
     </div>
-
-    <div class="plan-card popular">
-      <div class="popular-badge">Most Popular</div>
-      <div class="plan-name">Growth</div>
-      <div class="plan-price">2,500 <small>PKR/mo</small></div>
-      <div class="plan-desc">For active dealerships listing more cars</div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> 5 car listings</li>
-        <li><span class="check">✓</span> 3 employee accounts</li>
-        <li><span class="check">✓</span> In-app chat + WhatsApp</li>
-        <li><span class="check">✓</span> Rating & review system</li>
-        <li><span class="check">✓</span> Analytics dashboard</li>
-      </ul>
-      <button class="plan-btn plan-btn-filled">Choose Growth</button>
+    <div class="featured-actions">
+      <a href="dealers.html" class="btn-outline">Explore Dealers</a>
+      <a href="listings.html" class="btn-outline">View All Cars</a>
     </div>
-
-    <div class="plan-card">
-      <div class="plan-name">Professional</div>
-      <div class="plan-price">5,000 <small>PKR/mo</small></div>
-      <div class="plan-desc">For large dealerships with full teams</div>
-      <ul class="plan-features">
-        <li><span class="check">✓</span> 10 car listings</li>
-        <li><span class="check">✓</span> Unlimited employees</li>
-        <li><span class="check">✓</span> Priority placement</li>
-        <li><span class="check">✓</span> Full management system</li>
-        <li><span class="check">✓</span> Dedicated support</li>
-      </ul>
-      <button class="plan-btn plan-btn-outline">Choose Pro</button>
-    </div>
-
+  </div>
+  <div class="car-grid" id="featuredCarsGrid">
+    <p class="note">Featured cars will appear here when live listings are available.</p>
   </div>
 </section>
 
@@ -1201,7 +1183,7 @@
     <div class="footer-col">
       <h4>For Buyers</h4>
       <ul>
-        <li><a href="buyer-login.html">Buyer sign in</a></li>
+        <li><a href="buyer-login.html">Buyer Sign In</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
         <li><a href="listings.html">Search by City</a></li>
@@ -1213,8 +1195,8 @@
       <h4>For Dealers</h4>
       <ul>
         <li><a href="dealer-login.html">Dealer Access</a></li>
-        <li><a href="index.html#pricing">Pricing Plans</a></li>
-        <li><a href="dealer-login.html">Dealer Login</a></li>
+        <li><a href="register.html">Pricing Plans (During Apply)</a></li>
+        <li><a href="dealer-login.html">Dealer Access</a></li>
         <li><a href="index.html#how">How It Works</a></li>
       </ul>
     </div>
@@ -1267,11 +1249,181 @@
 
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
   import { auth, getBuyerProfile } from "./firebase-client.js";
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
   const heroGreeting = document.getElementById("heroGreeting");
+  const heroVerifiedDealers = document.getElementById("heroVerifiedDealers");
+  const heroCarsListed = document.getElementById("heroCarsListed");
+  const heroBuyersCount = document.getElementById("heroBuyersCount");
+  const heroCitiesCount = document.getElementById("heroCitiesCount");
+  const featuredCarsGrid = document.getElementById("featuredCarsGrid");
+
+  let liveDealers = [];
+  let liveListings = [];
+  let liveUsers = [];
+
+  function esc(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function toLakh(value) {
+    const n = parseFloat(String(value || "").replace(/[^\d.]/g, ""));
+    if (!Number.isFinite(n)) return "-";
+    if (n > 100000) return (n / 100000).toFixed(1).replace(/\.0$/, "");
+    return n.toFixed(1).replace(/\.0$/, "");
+  }
+
+  function shuffle(list) {
+    const arr = list.slice();
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+    return arr;
+  }
+
+  function renderHeroStats() {
+    const verifiedDealers = liveDealers.filter((d) => {
+      const status = String(d.verificationStatus || "").toLowerCase();
+      return (status === "verified" || status === "approved") && !d.suspended;
+    });
+    const liveDealerIds = new Set(verifiedDealers.map((d) => String(d.id)));
+    const activeListings = liveListings.filter((l) => {
+      const moderation = String(l.moderationStatus || "live").toLowerCase();
+      return moderation === "live" && liveDealerIds.has(String(l.dealerId || ""));
+    });
+    const buyers = liveUsers.filter((u) => String(u.role || "").toLowerCase() === "buyer");
+    const citySet = new Set(
+      activeListings
+        .map((l) => String(l.city || "").trim())
+        .filter(Boolean)
+    );
+
+    if (heroVerifiedDealers) heroVerifiedDealers.textContent = String(verifiedDealers.length);
+    if (heroCarsListed) heroCarsListed.textContent = String(activeListings.length);
+    if (heroBuyersCount) heroBuyersCount.textContent = String(buyers.length);
+    if (heroCitiesCount) heroCitiesCount.textContent = String(citySet.size);
+  }
+
+  function renderFeaturedCars() {
+    if (!featuredCarsGrid) return;
+    const verifiedDealerIds = new Set(
+      liveDealers
+        .filter((d) => {
+          const status = String(d.verificationStatus || "").toLowerCase();
+          return (status === "verified" || status === "approved") && !d.suspended;
+        })
+        .map((d) => String(d.id))
+    );
+
+    const liveCars = liveListings.filter((l) => {
+      const moderation = String(l.moderationStatus || "live").toLowerCase();
+      return moderation === "live" && verifiedDealerIds.has(String(l.dealerId || ""));
+    });
+
+    if (!liveCars.length) {
+      featuredCarsGrid.innerHTML = '<p class="note">No live featured cars available right now.</p>';
+      return;
+    }
+
+    const picks = shuffle(liveCars).slice(0, 4);
+    featuredCarsGrid.innerHTML = picks.map((listing) => {
+      const dealer = liveDealers.find((d) => String(d.id) === String(listing.dealerId || "")) || {};
+      const title = clean(listing.carName || listing.name || "Untitled Listing");
+      const dealerName = clean(listing.dealerName || dealer.businessName || dealer.dealerName || "Dealer");
+      const city = clean(listing.city || dealer.city || "-");
+      const mileage = clean(listing.mileage || "-");
+      const transmission = clean(listing.transmission || "-");
+      const condition = clean(listing.condition || "-");
+      const price = toLakh(listing.priceLakh || listing.price);
+      const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
+      const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
+      const hasPhone = phoneDigits.length >= 10;
+      const contactName = clean(listing.contactName || dealer.ownerName || "Contact");
+      const contactRole = clean(listing.contactRole || "—");
+      const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
+      const coverImage = clean(listing.coverImage || carImages[0] || "");
+      const coverForImg = /^https?:\/\//.test(coverImage) || coverImage.indexOf("data:image/") === 0 ? coverImage : "";
+      const detailParams = new URLSearchParams({
+        listingId: String(listing.id || ""),
+        dealerId: String(listing.dealerId || ""),
+        car: title,
+        price: price,
+        mileage: mileage,
+        transmission: transmission,
+        condition: condition,
+        city: city,
+        dealer: dealerName,
+        contactName,
+        contactRole,
+        phone: phoneDigits
+      });
+      const dealerParams = new URLSearchParams({
+        dealerId: String(listing.dealerId || ""),
+        dealer: dealerName,
+        city: city,
+        contactName,
+        contactRole,
+        phone: phoneDigits
+      });
+      return (
+        '<article class="car-card" tabindex="0">' +
+          '<div class="car-img">' +
+            (coverForImg
+              ? '<img src="' + esc(coverForImg) + '" alt="' + esc(title) + '">'
+              : '<span style="font-size:14px;color:#6b7280;">No photo</span>') +
+          '</div>' +
+          '<div class="car-body">' +
+            '<div class="car-badges"><span class="badge badge-verified">Live</span><span class="badge ' + (condition.toLowerCase() === "new" ? 'badge-new' : 'badge-used') + '">' + esc(condition || "Used") + '</span></div>' +
+            '<h3 class="car-name">' + esc(title) + '</h3>' +
+            '<p class="car-dealer">' + esc(dealerName) + ' · ' + esc(city) + '</p>' +
+            '<div class="car-specs"><span class="spec">' + esc(mileage) + '</span><span class="spec">' + esc(transmission) + '</span></div>' +
+            '<div class="car-footer"><div class="car-price">' + esc(price) + ' <span>Lakh</span></div><a class="contact-btn" href="car-detail.html?' + esc(detailParams.toString()) + '">View</a></div>' +
+            '<div class="car-expanded">' +
+              '<p class="expanded-meta">Contact: ' + esc(contactName) + ' (' + esc(contactRole) + ')</p>' +
+              '<div class="expanded-actions">' +
+                (hasPhone
+                  ? '<a class="expanded-link wa" target="_blank" rel="noopener noreferrer" href="https://wa.me/' + esc(phoneDigits) + '?text=' + encodeURIComponent("Assalamualaikum, I am interested in " + title + ".") + '">WhatsApp</a>' +
+                    '<a class="expanded-link call" href="tel:+' + esc(phoneDigits) + '">Call</a>'
+                  : '<span class="expanded-meta">Phone not on listing</span>') +
+              '</div>' +
+              '<a class="expanded-link profile" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">Dealer Profile</a>' +
+            '</div>' +
+          '</div>' +
+        '</article>'
+      );
+    }).join("");
+  }
+
+  onSnapshot(collection(db, "dealerProfiles"), (snap) => {
+    liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    renderHeroStats();
+    renderFeaturedCars();
+  });
+  onSnapshot(collection(db, "listings"), (snap) => {
+    liveListings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    renderHeroStats();
+    renderFeaturedCars();
+  });
+  onSnapshot(collection(db, "users"), (snap) => {
+    liveUsers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    renderHeroStats();
+  });
 
   async function updateHeroGreeting(user) {
     if (!heroGreeting) return;
@@ -1323,5 +1475,6 @@
     }
   });
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

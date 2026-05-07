@@ -1,0 +1,11 @@
+{
+  "name": "gari-bazaar",
+  "private": true,
+  "scripts": {
+    "deploy:rules": "firebase deploy --only firestore:rules,storage",
+    "deploy": "firebase deploy"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.29.1"
+  }
+}

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Under Review - GariBazaar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-dark: #0a4a2a;
+      --green-mid: #166534;
+      --green-main: #15803d;
+      --gold: #ca8a04;
+      --gray-200: #e5e7eb;
+      --gray-600: #4b5563;
+      --gray-900: #111827;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+      color: var(--gray-900);
+    }
+    nav {
+      height: 70px;
+      border-bottom: 1px solid var(--gray-200);
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+    }
+    .logo {
+      text-decoration: none;
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--green-mid);
+    }
+    .logo span { color: var(--gold); }
+    .wrap {
+      min-height: calc(100vh - 70px);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 620px;
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+      padding: 26px;
+      text-align: center;
+    }
+    .icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: var(--green-mid);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 4vw, 40px);
+      margin-bottom: 12px;
+    }
+    p {
+      color: var(--gray-600);
+      line-height: 1.7;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    .status-line {
+      margin-top: 8px;
+      margin-bottom: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--gray-200);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--gray-900);
+      background: #f9fafb;
+    }
+    .status-badge {
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: #ffedd5;
+      color: #9a3412;
+    }
+    .status-badge.approved {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status-badge.rejected {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .btn-row {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 11px 15px;
+      min-width: 120px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-home {
+      background: var(--green-main);
+      color: #fff;
+      border: 1px solid var(--green-main);
+    }
+    .btn-home:hover { background: var(--green-mid); }
+    .btn-logout {
+      background: #fff;
+      color: var(--green-main);
+      border: 1.5px solid var(--green-main);
+    }
+    .btn-logout:hover { background: #f0fdf4; }
+  </style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+  </nav>
+  <main class="wrap">
+    <section class="card">
+      <div class="icon">✓</div>
+      <h1>Thank You for Applying</h1>
+      <p>Your dealership application has been submitted successfully.</p>
+      <p>Our team will review it as soon as possible. Until approval, dealer dashboard access stays locked.</p>
+      <div class="status-line">
+        <span>Current status:</span>
+        <span id="applicationStatusBadge" class="status-badge">Pending</span>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn-home" href="index.html">Home</a>
+        <button id="logoutBtn" class="btn btn-logout" type="button">Log Out</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { db } from "./firebase-client.js";
+    import { auth, getDealerProfile } from "./firebase-client.js";
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    const statusBadge = document.getElementById("applicationStatusBadge");
+    let stopProfileListener = null;
+
+    function setStatusBadge(status) {
+      if (!statusBadge) return;
+      const value = String(status || "pending").toLowerCase();
+      statusBadge.classList.remove("approved", "rejected");
+      if (value === "verified" || value === "approved") {
+        statusBadge.textContent = "Approved";
+        statusBadge.classList.add("approved");
+      } else if (value === "rejected") {
+        statusBadge.textContent = "Rejected";
+        statusBadge.classList.add("rejected");
+      } else {
+        statusBadge.textContent = "Pending";
+      }
+    }
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "dealer-login.html";
+      });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (typeof stopProfileListener === "function") {
+        stopProfileListener();
+        stopProfileListener = null;
+      }
+      if (!user) {
+        window.location.href = "dealer-login.html";
+        return;
+      }
+
+      const profile = await getDealerProfile(user.uid);
+      setStatusBadge(profile && profile.verificationStatus);
+
+      stopProfileListener = onSnapshot(doc(db, "dealerProfiles", user.uid), (snap) => {
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const status = String(data.verificationStatus || "pending").toLowerCase();
+        setStatusBadge(status);
+        if (status === "verified" || status === "approved") {
+          window.location.href = "dealer-dashboard.html";
+        }
+      });
+    });
+  </script>
+  <script src="theme.js"></script>
+</body>
+</html>

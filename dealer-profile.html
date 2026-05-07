@@ -163,6 +163,7 @@
     .dealer-gallery { grid-template-columns: 1fr 1fr; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <nav>
@@ -174,7 +175,7 @@
   <div class="hero-inner">
     <div>
       <div class="hero-title">
-        <img class="hero-logo" src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=300&q=80" alt="Dealer logo">
+        <img class="hero-logo" src="" alt="Dealer logo">
         <h1>Al-Haram Motors</h1>
       </div>
       <p>Trusted dealership in Islamabad with verified inventory and transparent buyer support.</p>
@@ -186,17 +187,17 @@
 <main>
   <section class="card">
     <h2>Dealer Overview</h2>
-    <p class="line">Location: I-8 Markaz, Islamabad<br>Established: 2018<br>Speciality: Sedans and family cars</p>
-    <p class="rating">4.9 / 5.0 · Based on 182 reviews</p>
+    <p class="line">Location and dealership details are loaded from live profile data.</p>
+    <p class="rating"></p>
     <div class="tags">
       <span class="tag">Verified Documents</span>
       <span class="tag">Owner Active</span>
-      <span class="tag">Fast Responses</span>
+      <span class="tag">Live Inventory</span>
     </div>
     <div class="stats">
-      <article class="stat"><h3>182</h3><p>Reviews</p></article>
-      <article class="stat"><h3>12</h3><p>Active Cars</p></article>
-      <article class="stat"><h3>234</h3><p>Cars Sold</p></article>
+      <article class="stat"><h3>0</h3><p>Reviews</p></article>
+      <article class="stat"><h3>0</h3><p>Active Cars</p></article>
+      <article class="stat"><h3>0</h3><p>Cars Sold</p></article>
     </div>
     <div class="dealer-gallery">
       <div class="dealer-photo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
@@ -207,7 +208,7 @@
 
   <aside class="card">
     <h2>Contact Dealer</h2>
-    <p class="line">Primary Contact: Ali (Sales Executive)<br>Phone: +92 311 1111111<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM</p>
+    <p class="line">Primary contact details are loaded from live profile data.</p>
     <div class="actions">
       <a class="action wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20want%20to%20inquire%20about%20your%20cars." target="_blank" rel="noopener noreferrer">WhatsApp</a>
       <a class="action call" href="tel:+923111111111">Call Now</a>
@@ -220,246 +221,59 @@
       <input id="dealerProfileSearchInput" type="text" placeholder="Search this dealer inventory">
       <button id="dealerProfileSearchBtn" type="button">Search</button>
     </div>
-    <div class="cars-grid" id="dealerCarsGrid">
-      <article class="car-card" data-listing-id="toyota-corolla-altis-2022-al-haram-motors-islamabad" data-search="Toyota Corolla Altis 2022 Islamabad 21000 Automatic Used Ali Sales Executive">
-        <div class="car-photo">
-          <span class="car-pill">Verified</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Toyota Corolla Altis 2022</h4>
-          <p class="meta">Islamabad · 21,000 km · Automatic</p>
-          <p class="price">52 Lakh PKR</p>
-        </div>
-        <div class="car-expanded">
-          <p>Assigned Contact: Ali (Sales Executive)</p>
-          <p>Condition: Used · Response time: ~15 min</p>
-          <div class="card-actions">
-            <a class="card-btn wa" href="https://wa.me/923111111111?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Toyota%20Corolla%20Altis%202022." target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a class="card-btn call" href="tel:+923111111111">Call Ali</a>
-          </div>
-          <a href="car-detail.html" class="details-btn">Show Car Details</a>
-        </div>
-      </article>
-
-      <article class="car-card" data-listing-id="honda-civic-oriel-2024-city-motors-rawalpindi" data-search="Honda Civic Oriel 2024 Rawalpindi 0 Automatic New Saad Sales Executive">
-        <div class="car-photo">
-          <span class="car-pill">Verified</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Honda Civic Oriel 2024</h4>
-          <p class="meta">Rawalpindi · 0 km · Automatic</p>
-          <p class="price">79 Lakh PKR</p>
-        </div>
-        <div class="car-expanded">
-          <p>Assigned Contact: Saad (Sales Executive)</p>
-          <p>Condition: New · Response time: ~10 min</p>
-          <div class="card-actions">
-            <a class="card-btn wa" href="https://wa.me/923122222222?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Honda%20Civic%20Oriel%202024." target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a class="card-btn call" href="tel:+923122222222">Call Saad</a>
-          </div>
-          <a href="car-detail.html" class="details-btn">Show Car Details</a>
-        </div>
-      </article>
-
-      <article class="car-card" data-listing-id="toyota-yaris-ativ-2022-metro-motors-rawalpindi" data-search="Toyota Yaris ATIV 2022 Islamabad 25400 Automatic Used Hamza Owner">
-        <div class="car-photo">
-          <span class="car-pill">Verified</span>
-          <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
-        </div>
-        <div class="car-main">
-          <h4>Toyota Yaris ATIV 2022</h4>
-          <p class="meta">Islamabad · 25,400 km · Automatic</p>
-          <p class="price">43 Lakh PKR</p>
-        </div>
-        <div class="car-expanded">
-          <p>Assigned Contact: Owner Default (Hamza)</p>
-          <p>Condition: Used · Response time: ~20 min</p>
-          <div class="card-actions">
-            <a class="card-btn wa" href="https://wa.me/923000000001?text=Assalamualaikum%2C%20I%20am%20interested%20in%20Toyota%20Yaris%20ATIV%202022." target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a class="card-btn call" href="tel:+923000000001">Call Hamza</a>
-          </div>
-          <a href="car-detail.html" class="details-btn">Show Car Details</a>
-        </div>
-      </article>
-    </div>
+    <div class="cars-grid" id="dealerCarsGrid"></div>
   </section>
 </main>
-<script>
-  (function hydrateDealerFromQuery() {
-    const params = new URLSearchParams(window.location.search);
-    const dealer = params.get('dealer');
-    if (!dealer) return;
-    const city = params.get('city') || 'Pakistan';
-    const contactName = params.get('contactName') || 'Dealer';
-    const contactRole = params.get('contactRole') || 'Sales Executive';
-    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
-    const phone = phoneRaw || '923000000000';
-    const phoneDisplay = '+92 ' + phone.replace(/^92/, '').replace(/^(\d{3})(\d{7})$/, '$1 $2');
-
-    const heroTitle = document.querySelector('.hero-title h1');
-    const heroDesc = document.querySelector('.hero p');
-    if (heroTitle) heroTitle.textContent = dealer;
-    if (heroDesc) heroDesc.textContent = 'Trusted dealership in ' + city + ' with verified inventory and transparent buyer support.';
-
-    const overviewLine = document.querySelector('.card .line');
-    if (overviewLine) {
-      overviewLine.innerHTML = 'Location: Main Market, ' + city + '<br>Established: 2018<br>Speciality: Verified cars';
-    }
-
-    const contactCardLine = document.querySelector('aside.card .line');
-    if (contactCardLine) {
-      contactCardLine.innerHTML = 'Primary Contact: ' + contactName + ' (' + contactRole + ')<br>Phone: ' + phoneDisplay + '<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM';
-    }
-
-    const waBtn = document.querySelector('aside.card .action.wa');
-    const callBtn = document.querySelector('aside.card .action.call');
-    if (waBtn) {
-      const text = 'Assalamualaikum, I want to inquire about your cars.';
-      waBtn.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
-    }
-    if (callBtn) {
-      callBtn.href = 'tel:+' + phone;
-    }
-  })();
-
-  (function attachDealerCarDetailLinks() {
-    const params = new URLSearchParams(window.location.search);
-    const dealer = params.get('dealer') || (document.querySelector('.hero-title h1') || {}).textContent || '';
-    const defaultCity = params.get('city') || '';
-    const contactName = params.get('contactName') || 'Dealer';
-    const contactRole = params.get('contactRole') || 'Sales Executive';
-    const phoneRaw = (params.get('phone') || '').replace(/[^\d]/g, '');
-    const phone = phoneRaw || '923000000000';
-
-    document.querySelectorAll('#dealerCarsGrid .car-card').forEach((card) => {
-      const car = ((card.querySelector('.car-main h4') || {}).textContent || '').trim();
-      const meta = ((card.querySelector('.car-main .meta') || {}).textContent || '').trim();
-      const metaParts = meta.split('·').map((p) => p.trim());
-      const city = metaParts[0] || defaultCity;
-      const mileage = metaParts[1] || '';
-      const transmission = metaParts[2] || '';
-      const priceText = ((card.querySelector('.car-main .price') || {}).textContent || '');
-      const priceMatch = priceText.match(/([\d.,]+)\s*lakh/i);
-      const price = priceMatch ? priceMatch[1].replace(/,/g, '') : '';
-      const conditionLine = ((card.querySelector('.car-expanded p:nth-child(2)') || {}).textContent || '');
-      const conditionMatch = conditionLine.match(/Condition:\s*([^·]+)/i);
-      const condition = conditionMatch ? conditionMatch[1].trim() : '';
-
-      const link = card.querySelector('.details-btn');
-      if (!link) return;
-      const detailParams = new URLSearchParams({
-        car: car,
-        price: price,
-        mileage: mileage,
-        transmission: transmission,
-        condition: condition,
-        city: city,
-        dealer: dealer,
-        contactName: contactName,
-        contactRole: contactRole,
-        phone: phone
-      });
-      link.href = 'car-detail.html?' + detailParams.toString();
-    });
-  })();
-
-  const dealerProfileSearchInput = document.getElementById('dealerProfileSearchInput');
-  const dealerProfileSearchBtn = document.getElementById('dealerProfileSearchBtn');
-  const dealerCarsGrid = document.getElementById('dealerCarsGrid');
-
-  function runDealerProfileSearch() {
-    if (!dealerProfileSearchInput || !dealerCarsGrid) return;
-    const query = dealerProfileSearchInput.value.trim().toLowerCase();
-    dealerCarsGrid.querySelectorAll('.car-card').forEach((card) => {
-      const haystack = (card.getAttribute('data-search') || '').toLowerCase();
-      card.style.display = !query || haystack.includes(query) ? '' : 'none';
-    });
-  }
-
-  if (dealerProfileSearchInput && dealerProfileSearchBtn) {
-    dealerProfileSearchInput.addEventListener('input', runDealerProfileSearch);
-    dealerProfileSearchInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        runDealerProfileSearch();
-      }
-    });
-    dealerProfileSearchBtn.addEventListener('click', runDealerProfileSearch);
-  }
-
-  const dealerGalleryImages = [
-    'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=900&q=80',
-    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=80'
-  ];
-
-  const dealerProfileCarImages = [
-    'https://images.unsplash.com/photo-1549399542-7e82138bc4f8?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=80'
-  ];
-
-  document.querySelectorAll('.dealer-gallery .dealer-photo').forEach((slot, index) => {
-    const image = document.createElement('img');
-    image.src = dealerGalleryImages[index % dealerGalleryImages.length];
-    image.alt = 'Dealership photo';
-    image.loading = 'lazy';
-    slot.innerHTML = '';
-    slot.appendChild(image);
-  });
-
-  document.querySelectorAll('.cars-grid .car-photo').forEach((slot, index) => {
-    const image = document.createElement('img');
-    image.src = dealerProfileCarImages[index % dealerProfileCarImages.length];
-    image.alt = 'Listed car photo';
-    image.loading = 'lazy';
-    const svg = slot.querySelector('svg');
-    if (svg) {
-      svg.replaceWith(image);
-    } else if (!slot.querySelector('img')) {
-      slot.appendChild(image);
-    }
-  });
-
-  (function addQuickNav() {
-    var pathNorm = window.location.pathname.replace(/\\/g, '/');
-    var segs = pathNorm.split('/').filter(Boolean);
-    var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
-    if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
-    if (document.getElementById('gb-quick-nav')) return;
-    const hostNav = document.querySelector('nav');
-    if (!hostNav) return;
-    if (hostNav.querySelector('.back-link, .nav-back')) return;
-    if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
-    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
-    const nav = document.createElement('div');
-    nav.id = 'gb-quick-nav';
-    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.textContent = 'Back';
-    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
-    back.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
-    });
-    const home = document.createElement('a');
-    home.href = 'index.html';
-    home.textContent = 'Home';
-    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
-    nav.appendChild(back);
-    nav.appendChild(home);
-    mountPoint.appendChild(nav);
-  })();
-</script>
 <script type="module">
-  import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
+  import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
+  import { buildDealerId, fetchDealerProfileById } from "./marketplace-firestore.js";
+
+  const dealerProfileSearchInput = document.getElementById("dealerProfileSearchInput");
+  const dealerProfileSearchBtn = document.getElementById("dealerProfileSearchBtn");
+  const dealerCarsGrid = document.getElementById("dealerCarsGrid");
+
+  function esc(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function clean(value) {
+    return String(value || "").trim();
+  }
+
+  function normalizeStatus(status) {
+    return String(status || "").toLowerCase();
+  }
+
+  function formatJoinedDate(value) {
+    if (!value) return "Not available";
+    if (typeof value === "string") {
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? value : d.toLocaleDateString();
+    }
+    if (value.toDate) {
+      try {
+        return value.toDate().toLocaleDateString();
+      } catch (_error) {
+        return "Not available";
+      }
+    }
+    return String(value);
+  }
 
   (async function hydrateDealerFromFirestoreId() {
     const params = new URLSearchParams(window.location.search);
-    const dealerId = (params.get("dealerId") || "").trim();
+    let dealerId = (params.get("dealerId") || "").trim();
+    if (!dealerId) {
+      const dealerName = params.get("dealer") || "";
+      const dealerCity = params.get("city") || "";
+      dealerId = buildDealerId(dealerName, dealerCity);
+    }
     if (!dealerId) return;
     const dealer = await fetchDealerProfileById(dealerId);
     if (!dealer) return;
@@ -468,55 +282,144 @@
     const heroDesc = document.querySelector(".hero p");
     if (heroTitle) heroTitle.textContent = dealer.dealerName || "Dealer";
     if (heroDesc) heroDesc.textContent = "Trusted dealership in " + (dealer.city || "Pakistan") + " with verified inventory and transparent buyer support.";
+    const heroLogo = document.querySelector(".hero-logo");
+    if (heroLogo) {
+      if (dealer.profilePicture) {
+        heroLogo.src = dealer.profilePicture;
+        heroLogo.style.display = "";
+      } else {
+        heroLogo.removeAttribute("src");
+        heroLogo.style.display = "none";
+      }
+    }
+
+    const overviewLine = document.querySelector("main .card .line");
+    if (overviewLine) {
+      const city = clean(dealer.city || "Pakistan");
+      const address = clean(dealer.address || dealer.area || "Not provided");
+      const speciality = clean(dealer.speciality || dealer.specialty || "Not specified");
+      const businessSince = clean(dealer.businessSince || "Not available");
+      const joinedDate = formatJoinedDate(dealer.joinedAt);
+      overviewLine.innerHTML =
+        "Location: " + esc(address) + ", " + esc(city) +
+        "<br>In Business Since: " + esc(businessSince) +
+        "<br>Joined GariBazaar: " + esc(joinedDate) +
+        "<br>Speciality: " + esc(speciality);
+    }
 
     const contactCardLine = document.querySelector("aside.card .line");
     if (contactCardLine) {
-      const nice = "+92 " + dealer.phone.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2");
-      contactCardLine.innerHTML = "Primary Contact: " + dealer.contactName + " (" + dealer.contactRole + ")<br>Phone: " + nice + "<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM";
+      const digits = clean(dealer.phone).replace(/[^\d]/g, "");
+      const nice = digits ? "+92 " + digits.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2") : "Not provided";
+      contactCardLine.innerHTML =
+        "Primary Contact: " + esc(dealer.contactName) + " (" + esc(dealer.contactRole) + ")<br>Phone: " + esc(nice) +
+        "<br>" + esc(clean(dealer.hours || dealer.businessHours || "Hours not listed on profile."));
     }
 
     const waBtn = document.querySelector("aside.card .action.wa");
-    if (waBtn) waBtn.href = "https://wa.me/" + dealer.phone + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
+    if (waBtn) waBtn.href = "https://wa.me/" + clean(dealer.phone).replace(/[^\d]/g, "") + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
     const callBtn = document.querySelector("aside.card .action.call");
-    if (callBtn) callBtn.href = "tel:+" + dealer.phone;
+    if (callBtn) callBtn.href = "tel:+" + clean(dealer.phone).replace(/[^\d]/g, "");
 
-    const cards = document.querySelectorAll("#dealerCarsGrid .car-card");
-    for (const card of cards) {
-      const listingId = (card.getAttribute("data-listing-id") || "").trim();
-      if (!listingId) continue;
-      const listing = await fetchListingById(listingId);
-      if (!listing) continue;
+    const statNumbers = document.querySelectorAll(".stats .stat h3");
+    const liveListingsSnap = await getDocs(query(collection(db, "listings"), where("dealerId", "==", dealerId)));
+    const allListings = liveListingsSnap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    const activeListings = allListings.filter((l) => normalizeStatus(l.moderationStatus || "live") === "live");
 
-      const title = card.querySelector(".car-main h4");
-      const meta = card.querySelector(".car-main .meta");
-      const price = card.querySelector(".car-main .price");
-      if (title) title.textContent = listing.carName;
-      if (meta) meta.textContent = listing.city + " · " + listing.mileage + " · " + listing.transmission;
-      if (price) price.textContent = listing.priceLakh + " Lakh PKR";
+    if (statNumbers[0]) statNumbers[0].textContent = String(Number(dealer.reviews || 0) || 0);
+    if (statNumbers[1]) statNumbers[1].textContent = String(activeListings.length);
+    if (statNumbers[2]) {
+      const soldCount = Number(dealer.carsSold || dealer.sales || 0) || 0;
+      statNumbers[2].textContent = String(soldCount);
+    }
+    const ratingLine = document.querySelector(".rating");
+    if (ratingLine) {
+      const ratingValue = Number(dealer.rating || 0);
+      const reviewsValue = Number(dealer.reviews || 0) || 0;
+      ratingLine.textContent = (ratingValue > 0 && reviewsValue > 0)
+        ? ratingValue.toFixed(1) + " / 5.0 · Based on " + reviewsValue + " reviews"
+        : "No reviews yet";
+    }
 
-      const conditionLine = card.querySelector(".car-expanded p:nth-child(2)");
-      if (conditionLine) conditionLine.textContent = "Condition: " + listing.condition + " · Response time: ~15 min";
-
-      const detailBtn = card.querySelector(".details-btn");
-      if (detailBtn) {
-        const qs = new URLSearchParams({
-          listingId: listing.id,
-          dealerId: dealerId,
-          car: listing.carName,
-          price: listing.priceLakh,
-          mileage: listing.mileage,
-          transmission: listing.transmission,
-          condition: listing.condition,
-          city: listing.city,
-          dealer: dealer.dealerName,
-          contactName: dealer.contactName,
-          contactRole: dealer.contactRole,
-          phone: dealer.phone
-        });
-        detailBtn.href = "car-detail.html?" + qs.toString();
+    if (dealerCarsGrid) {
+      if (!activeListings.length) {
+        dealerCarsGrid.innerHTML = '<p class="line">No active listings for this dealer right now.</p>';
+      } else {
+        dealerCarsGrid.innerHTML = activeListings.map((listing) => {
+          const carName = clean(listing.carName || listing.name || "Untitled Listing");
+          const city = clean(listing.city || dealer.city || "-");
+          const mileage = clean(listing.mileage || "-");
+          const transmission = clean(listing.transmission || "-");
+          const condition = clean(listing.condition || "-");
+          const price = clean(listing.priceLakh || listing.price || "-");
+          const contactName = clean(listing.contactName || dealer.contactName || "Dealer");
+          const contactRole = clean(listing.contactRole || dealer.contactRole || "Sales Desk");
+          const phoneDigits = clean(listing.phone || dealer.phone || "").replace(/[^\d]/g, "");
+          const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
+          const coverImage = clean(listing.coverImage || carImages[0] || dealer.profilePicture || "");
+          const search = [carName, city, mileage, transmission, condition, contactName, contactRole].join(" ").toLowerCase();
+          const detailQs = new URLSearchParams({
+            listingId: listing.id,
+            dealerId: dealerId,
+            car: carName,
+            price: price,
+            mileage: mileage,
+            transmission: transmission,
+            condition: condition,
+            city: city,
+            dealer: dealer.dealerName,
+            contactName: contactName,
+            contactRole: contactRole,
+            phone: phoneDigits
+          });
+          return (
+            '<article class="car-card" data-search="' + esc(search) + '">' +
+              '<div class="car-photo">' +
+                '<span class="car-pill">Verified</span>' +
+                (coverImage
+                  ? '<img src="' + esc(coverImage) + '" alt="Listed car photo" loading="lazy">'
+                  : '<div class="meta" style="padding:14px;">No photo uploaded</div>') +
+              '</div>' +
+              '<div class="car-main">' +
+                "<h4>" + esc(carName) + "</h4>" +
+                '<p class="meta">' + esc(city) + " · " + esc(mileage) + " · " + esc(transmission) + "</p>" +
+                '<p class="price">' + esc(price) + " Lakh PKR</p>" +
+              "</div>" +
+              '<div class="car-expanded">' +
+                "<p>Assigned Contact: " + esc(contactName) + " (" + esc(contactRole) + ")</p>" +
+                "<p>Condition: " + esc(condition) + " · Response time: ~15 min</p>" +
+                '<div class="card-actions">' +
+                  '<a class="card-btn wa" href="https://wa.me/' + esc(phoneDigits) + '?text=' + encodeURIComponent("Assalamualaikum, I am interested in " + carName + ".") + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
+                  '<a class="card-btn call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>" +
+                "</div>" +
+                '<a href="car-detail.html?' + esc(detailQs.toString()) + '" class="details-btn">Show Car Details</a>' +
+              "</div>" +
+            "</article>"
+          );
+        }).join("");
       }
+    }
+
+    function runDealerProfileSearch() {
+      if (!dealerProfileSearchInput || !dealerCarsGrid) return;
+      const queryText = dealerProfileSearchInput.value.trim().toLowerCase();
+      dealerCarsGrid.querySelectorAll(".car-card").forEach((card) => {
+        const haystack = (card.getAttribute("data-search") || "").toLowerCase();
+        card.style.display = !queryText || haystack.includes(queryText) ? "" : "none";
+      });
+    }
+    if (dealerProfileSearchInput && dealerProfileSearchBtn) {
+      dealerProfileSearchInput.addEventListener("input", runDealerProfileSearch);
+      dealerProfileSearchBtn.addEventListener("click", runDealerProfileSearch);
+      dealerProfileSearchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          runDealerProfileSearch();
+        }
+      });
     }
   })();
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

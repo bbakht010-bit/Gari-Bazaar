@@ -247,12 +247,19 @@
   })();
 
   (function attachDealerProfileLinks() {
+    const slugify = (value) =>
+      String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
     allDealersGrid.querySelectorAll('.dealer-card').forEach((card) => {
       const nameEl = card.querySelector('.dealer-name');
       const cityEl = card.querySelector('.dealer-city');
       const profileLink = card.querySelector('.card-btn:not(.whatsapp-btn)');
       if (!nameEl || !cityEl || !profileLink) return;
       const params = new URLSearchParams({
+        dealerId: [slugify(nameEl.textContent), slugify(cityEl.textContent)].filter(Boolean).join('-'),
         dealer: nameEl.textContent.trim(),
         city: cityEl.textContent.trim(),
         contactName: 'Dealer Team',
@@ -295,6 +302,8 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
+    if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
     nav.id = 'gb-quick-nav';

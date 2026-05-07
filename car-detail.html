@@ -238,6 +238,8 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
+    if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
     nav.id = 'gb-quick-nav';
@@ -257,6 +259,72 @@
     nav.appendChild(back);
     nav.appendChild(home);
     mountPoint.appendChild(nav);
+  })();
+</script>
+<script type="module">
+  import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
+
+  (async function hydrateFromFirestoreIds() {
+    const params = new URLSearchParams(window.location.search);
+    const listingId = (params.get("listingId") || "").trim();
+    const dealerIdFromUrl = (params.get("dealerId") || "").trim();
+    if (!listingId && !dealerIdFromUrl) return;
+
+    const listing = listingId ? await fetchListingById(listingId) : null;
+    const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
+    const dealer = dealerId ? await fetchDealerProfileById(dealerId) : null;
+    if (!listing && !dealer) return;
+
+    const carName = (listing && listing.carName) || (params.get("car") || "");
+    const price = (listing && listing.priceLakh) || (params.get("price") || "0");
+    const mileage = (listing && listing.mileage) || (params.get("mileage") || "-");
+    const transmission = (listing && listing.transmission) || (params.get("transmission") || "-");
+    const condition = (listing && listing.condition) || (params.get("condition") || "-");
+    const city = (listing && listing.city) || (params.get("city") || "-");
+    const fuelType = (listing && listing.fuelType) || "Petrol";
+    const registrationCity = (listing && listing.registrationCity) || city;
+    const dealerName = (dealer && dealer.dealerName) || (listing && listing.dealerName) || (params.get("dealer") || "Verified Dealer");
+    const contactName = (dealer && dealer.contactName) || (listing && listing.contactName) || (params.get("contactName") || "Dealer");
+    const contactRole = (dealer && dealer.contactRole) || (listing && listing.contactRole) || (params.get("contactRole") || "Sales Executive");
+    const phone = ((dealer && dealer.phone) || (listing && listing.phone) || (params.get("phone") || "923000000000")).replace(/[^\d]/g, "");
+    const responseTime = (dealer && dealer.responseTime) || "under 15 minutes";
+
+    const titleEl = document.querySelector(".details h1");
+    if (titleEl) titleEl.textContent = carName;
+    const priceEl = document.querySelector(".details .price");
+    if (priceEl) priceEl.innerHTML = price + " Lakh <span>PKR</span>";
+
+    const specValues = document.querySelectorAll(".spec h4");
+    if (specValues[0]) specValues[0].textContent = mileage;
+    if (specValues[1]) specValues[1].textContent = transmission;
+    if (specValues[2]) specValues[2].textContent = condition;
+    if (specValues[3]) specValues[3].textContent = city;
+    if (specValues[4]) specValues[4].textContent = fuelType;
+    if (specValues[5]) specValues[5].textContent = registrationCity;
+
+    const descriptionEl = document.querySelector(".description");
+    if (descriptionEl && listing && listing.description) descriptionEl.textContent = listing.description;
+
+    const dealerNameEl = document.querySelector(".dealer-head h3");
+    const dealerCityEl = document.querySelector(".dealer-head p");
+    if (dealerNameEl) dealerNameEl.textContent = dealerName;
+    if (dealerCityEl) dealerCityEl.textContent = city;
+
+    const contactMeta = document.querySelector(".contact-meta");
+    if (contactMeta) {
+      const nice = "+92 " + phone.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2");
+      contactMeta.innerHTML = "Contact Person: " + contactName + " (" + contactRole + ")<br>Phone: " + nice + "<br>Response time: " + responseTime;
+    }
+
+    const waLink = document.querySelector(".action.wa");
+    if (waLink) waLink.href = "https://wa.me/" + phone + "?text=" + encodeURIComponent("Assalamualaikum, I am interested in " + carName + ".");
+    const callLink = document.querySelector(".action.call");
+    if (callLink) callLink.href = "tel:+" + phone;
+    const profileLink = document.querySelector(".action.profile");
+    if (profileLink) {
+      const qs = new URLSearchParams({ dealerId: dealerId, dealer: dealerName, city: city, contactName: contactName, contactRole: contactRole, phone: phone });
+      profileLink.href = "dealer-profile.html?" + qs.toString();
+    }
   })();
 </script>
 </body>

@@ -85,8 +85,11 @@
 <script>
 (function addQuickNav() {
   if (document.getElementById('gb-quick-nav')) return;
-  const mountPoint = document.querySelector('nav .nav-right') || document.querySelector('nav');
-  if (!mountPoint) return;
+  const hostNav = document.querySelector('nav');
+  if (!hostNav) return;
+  if (hostNav.querySelector('.back-link, .nav-back')) return;
+  if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
+  const mountPoint = hostNav;
   const nav = document.createElement('div');
   nav.id = 'gb-quick-nav';
   nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';

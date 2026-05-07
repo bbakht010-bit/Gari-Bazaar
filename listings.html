@@ -149,6 +149,27 @@
   }
 
   .btn-primary:hover { background: var(--green-mid); }
+  .btn-nav-soft {
+    padding: 9px 14px;
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+    background: #fff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-nav-soft:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
 
   .page-hero {
     margin-top: 70px;
@@ -871,6 +892,8 @@
     <li><a href="dealers.html">Top Dealers</a></li>
   </ul>
   <div class="nav-cta">
+    <button id="listingsBackBtn" type="button" class="btn-nav-soft">Back</button>
+    <a href="index.html" class="btn-nav-soft">Home</a>
     <div id="navBuyerLinks" class="nav-buyer-links">
       <a href="buyer-login.html">Sign in</a>
       <a href="buyer-signup.html" class="join">Join</a>
@@ -1427,6 +1450,13 @@
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
+  function slugify(value) {
+    return compactWhitespace(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   function parseDealerLine(text) {
     const clean = compactWhitespace(text);
     const parts = clean.split('—').map((p) => compactWhitespace(p));
@@ -1478,8 +1508,12 @@
       const contact = parseContactMeta(contactMetaText);
       const phone = extractPhoneFromCard(card);
       const price = parsePriceLakh(card);
+      const dealerId = [slugify(dealer), slugify(city)].filter(Boolean).join('-');
+      const listingId = [slugify(title), slugify(dealer), slugify(city)].filter(Boolean).join('-');
 
       const commonParams = new URLSearchParams({
+        listingId: listingId,
+        dealerId: dealerId,
         car: title,
         price: price,
         mileage: mileage,
@@ -1499,6 +1533,7 @@
       const dealerLink = card.querySelector('.dealer-btn');
       if (dealerLink) {
         const dealerParams = new URLSearchParams({
+          dealerId: dealerId,
           dealer: dealer,
           city: city,
           contactName: contact.name,
@@ -1780,6 +1815,13 @@
   if (applyFiltersBtn) applyFiltersBtn.addEventListener('click', runListingsSearch);
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
   if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', browseMoreCars);
+  const listingsBackBtn = document.getElementById('listingsBackBtn');
+  if (listingsBackBtn) {
+    listingsBackBtn.addEventListener('click', () => {
+      if (window.history.length > 1) window.history.back();
+      else window.location.href = 'index.html';
+    });
+  }
 
   ['priceMin', 'priceMax', 'year', 'mileage', 'transmission', 'bodyType', 'assembly'].forEach((id) => {
     const el = document.getElementById(id);
@@ -1890,34 +1932,6 @@
     line.prepend(logo);
   });
 
-  (function addQuickNav() {
-    var pathNorm = window.location.pathname.replace(/\\/g, '/');
-    var segs = pathNorm.split('/').filter(Boolean);
-    var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
-    if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
-    if (document.getElementById('gb-quick-nav')) return;
-    const hostNav = document.querySelector('nav');
-    if (!hostNav) return;
-    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
-    const nav = document.createElement('div');
-    nav.id = 'gb-quick-nav';
-    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.textContent = 'Back';
-    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
-    back.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
-    });
-    const home = document.createElement('a');
-    home.href = 'index.html';
-    home.textContent = 'Home';
-    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
-    nav.appendChild(back);
-    nav.appendChild(home);
-    mountPoint.appendChild(nav);
-  })();
 </script>
 
 <script type="module">

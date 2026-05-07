@@ -347,31 +347,6 @@
     }
   });
 
-  (function addQuickNav() {
-    if (document.getElementById("gb-quick-nav")) return;
-    const hostNav = document.querySelector("nav");
-    if (!hostNav) return;
-    if (hostNav.querySelector('.back-link, .nav-back')) return;
-    const mountPoint = hostNav.querySelector(".nav-cta, .nav-right") || hostNav;
-    const nav = document.createElement("div");
-    nav.id = "gb-quick-nav";
-    nav.style.cssText = "display:flex;gap:8px;align-items:center;margin-left:10px;";
-    const back = document.createElement("button");
-    back.type = "button";
-    back.textContent = "Back";
-    back.style.cssText = "border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;";
-    back.addEventListener("click", () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = "index.html";
-    });
-    const home = document.createElement("a");
-    home.href = "index.html";
-    home.textContent = "Home";
-    home.style.cssText = "text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;";
-    nav.appendChild(back);
-    nav.appendChild(home);
-    mountPoint.appendChild(nav);
-  })();
 </script>
 </body>
 </html>

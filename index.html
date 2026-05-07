@@ -1044,7 +1044,6 @@
   <p>GariBazaar connects you with verified, government-registered car dealerships across Pakistan. No middlemen, no fake listings — just real dealers.</p>
   <div class="hero-buttons">
     <a href="listings.html" class="btn-hero-primary">Browse Verified Cars</a>
-    <a href="dealers.html" class="btn-hero-secondary">Browse Dealers</a>
     <a href="dealers.html?sell=1" class="btn-hero-secondary">Want to sell your car? Explore dealers now</a>
   </div>
   <p class="hero-note">Need quick help? Use WhatsApp support for direct assistance.</p>
@@ -1525,6 +1524,13 @@
     return String(value || '').replace(/\s+/g, ' ').trim();
   }
 
+  function slugify(value) {
+    return compactWhitespace(value)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
   function parseDealerLine(text) {
     const clean = compactWhitespace(text);
     const parts = clean.split('—').map((part) => compactWhitespace(part));
@@ -1576,8 +1582,12 @@
       const meta = parseExpandedMeta((card.querySelector('.expanded-meta') || {}).textContent || '');
       const phone = extractPhoneFromCard(card) || '923000000000';
       const price = parsePriceLakh(card);
+      const dealerId = [slugify(dealer), slugify(cityFromDealer)].filter(Boolean).join('-');
+      const listingId = [slugify(car), slugify(dealer), slugify(cityFromDealer)].filter(Boolean).join('-');
 
       const detailParams = new URLSearchParams({
+        listingId: listingId,
+        dealerId: dealerId,
         car: car,
         price: price,
         mileage: mileage,
@@ -1590,6 +1600,7 @@
         phone: phone
       });
       const dealerParams = new URLSearchParams({
+        dealerId: dealerId,
         dealer: dealer,
         city: cityFromDealer,
         contactName: meta.contactName,
@@ -1609,6 +1620,7 @@
       const name = compactWhitespace((card.querySelector('.dealer-name') || {}).textContent || '');
       const city = compactWhitespace((card.querySelector('.dealer-city') || {}).textContent || '');
       const params = new URLSearchParams({
+        dealerId: [slugify(name), slugify(city)].filter(Boolean).join('-'),
         dealer: name,
         city: city,
         contactName: 'Dealer Team',
@@ -1703,34 +1715,6 @@
     slot.appendChild(img);
   });
 
-  (function addQuickNav() {
-    var pathNorm = window.location.pathname.replace(/\\/g, '/');
-    var segs = pathNorm.split('/').filter(Boolean);
-    var lastSeg = segs.length ? segs[segs.length - 1].toLowerCase() : '';
-    if (pathNorm === '/' || pathNorm === '' || lastSeg === 'index.html') return;
-    if (document.getElementById('gb-quick-nav')) return;
-    const hostNav = document.querySelector('nav');
-    if (!hostNav) return;
-    const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
-    const nav = document.createElement('div');
-    nav.id = 'gb-quick-nav';
-    nav.style.cssText = 'display:flex;gap:8px;align-items:center;margin-left:10px;';
-    const back = document.createElement('button');
-    back.type = 'button';
-    back.textContent = 'Back';
-    back.style.cssText = 'border:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#f3f4f6;color:#374151;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1;';
-    back.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
-    });
-    const home = document.createElement('a');
-    home.href = 'index.html';
-    home.textContent = 'Home';
-    home.style.cssText = 'text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;background:#15803d;color:#ffffff;font-family:DM Sans,sans-serif;line-height:1;';
-    nav.appendChild(back);
-    nav.appendChild(home);
-    mountPoint.appendChild(nav);
-  })();
 </script>
 
 <script type="module">
@@ -1790,6 +1774,95 @@
       updateHeroGreeting(null);
     }
   });
+</script>
+<script type="module">
+  import { collection, getDocs, limit, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
+  import { buildDealerId, buildListingId, normalizeListing } from "./marketplace-firestore.js";
+
+  function compactWhitespace(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  async function hydrateFeaturedFromFirestore() {
+    const grid = document.getElementById("featuredCarsGrid");
+    if (!grid) return;
+    try {
+      const snap = await getDocs(query(collection(db, "listings"), limit(4)));
+      if (snap.empty) return;
+      const docs = snap.docs.map((d) => normalizeListing(d.id, d.data()));
+      const cards = Array.from(grid.querySelectorAll(".car-card"));
+      docs.forEach((item, index) => {
+        const card = cards[index];
+        if (!card) return;
+        const dealerId = item.dealerId || buildDealerId(item.dealerName, item.city);
+        const listingId = item.id || buildListingId(item.carName, item.dealerName, item.city);
+
+        const carNameEl = card.querySelector(".car-name");
+        const dealerEl = card.querySelector(".car-dealer");
+        const priceEl = card.querySelector(".car-price");
+        const specs = card.querySelectorAll(".car-specs .spec");
+        const metaEl = card.querySelector(".expanded-meta");
+        const detailLink = card.querySelector(".expanded-link.detail");
+        const profileLink = card.querySelector(".expanded-link.profile");
+        const contactBtn = card.querySelector(".contact-btn");
+        const callLink = card.querySelector(".expanded-link.call");
+        const waLink = card.querySelector(".expanded-link.wa");
+
+        if (carNameEl) carNameEl.textContent = item.carName;
+        if (dealerEl) dealerEl.textContent = item.dealerName + " — " + item.city;
+        if (priceEl) priceEl.innerHTML = item.priceLakh + " Lakh <span>PKR</span>";
+        if (specs[0]) specs[0].textContent = item.fuelType || "Petrol";
+        if (specs[1]) specs[1].textContent = item.mileage;
+        if (specs[2]) specs[2].textContent = item.transmission;
+        if (metaEl) metaEl.textContent = "Assigned: " + item.contactName + " (" + item.contactRole + ") · Response: under 15 min";
+
+        const detailParams = new URLSearchParams({
+          listingId: listingId,
+          dealerId: dealerId,
+          car: item.carName,
+          price: item.priceLakh,
+          mileage: item.mileage,
+          transmission: item.transmission,
+          condition: item.condition,
+          city: item.city,
+          dealer: item.dealerName,
+          contactName: item.contactName,
+          contactRole: item.contactRole,
+          phone: item.phone
+        });
+        const profileParams = new URLSearchParams({
+          dealerId: dealerId,
+          dealer: item.dealerName,
+          city: item.city,
+          contactName: item.contactName,
+          contactRole: item.contactRole,
+          phone: item.phone
+        });
+
+        const detailHref = "car-detail.html?" + detailParams.toString();
+        const profileHref = "dealer-profile.html?" + profileParams.toString();
+        if (detailLink) detailLink.href = detailHref;
+        if (profileLink) profileLink.href = profileHref;
+        if (contactBtn) {
+          contactBtn.onclick = function (event) {
+            event.stopPropagation();
+            window.location.href = detailHref;
+          };
+        }
+        if (callLink) callLink.href = "tel:+" + compactWhitespace(item.phone).replace(/[^\d]/g, "");
+        if (waLink) waLink.href = "https://wa.me/" + compactWhitespace(item.phone).replace(/[^\d]/g, "") + "?text=" + encodeURIComponent("Assalamualaikum, I am interested in " + item.carName + ".");
+
+        const searchText = [item.carName, item.dealerName, item.city, item.fuelType, item.transmission, item.condition].join(" ");
+        card.setAttribute("data-search", searchText);
+        card.setAttribute("data-car-detail-href", detailHref);
+      });
+    } catch (_error) {
+      // Keep static fallback cards when Firestore data is unavailable.
+    }
+  }
+
+  hydrateFeaturedFromFirestore();
 </script>
 
 </body>

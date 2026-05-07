@@ -221,7 +221,7 @@
       <button id="dealerProfileSearchBtn" type="button">Search</button>
     </div>
     <div class="cars-grid" id="dealerCarsGrid">
-      <article class="car-card" data-search="Toyota Corolla Altis 2022 Islamabad 21000 Automatic Used Ali Sales Executive">
+      <article class="car-card" data-listing-id="toyota-corolla-altis-2022-al-haram-motors-islamabad" data-search="Toyota Corolla Altis 2022 Islamabad 21000 Automatic Used Ali Sales Executive">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -242,7 +242,7 @@
         </div>
       </article>
 
-      <article class="car-card" data-search="Honda Civic Oriel 2024 Rawalpindi 0 Automatic New Saad Sales Executive">
+      <article class="car-card" data-listing-id="honda-civic-oriel-2024-city-motors-rawalpindi" data-search="Honda Civic Oriel 2024 Rawalpindi 0 Automatic New Saad Sales Executive">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -263,7 +263,7 @@
         </div>
       </article>
 
-      <article class="car-card" data-search="Toyota Yaris ATIV 2022 Islamabad 25400 Automatic Used Hamza Owner">
+      <article class="car-card" data-listing-id="toyota-yaris-ativ-2022-metro-motors-rawalpindi" data-search="Toyota Yaris ATIV 2022 Islamabad 25400 Automatic Used Hamza Owner">
         <div class="car-photo">
           <span class="car-pill">Verified</span>
           <svg viewBox="0 0 80 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="48" fill="#f3f4f6"/><path d="M12 32h56M16 32l6-12h36l6 12" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="34" r="4" fill="#9ca3af"/><circle cx="56" cy="34" r="4" fill="#9ca3af"/></svg>
@@ -431,6 +431,8 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
+    if (hostNav.querySelector('.back-link, .nav-back')) return;
+    if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
     nav.id = 'gb-quick-nav';
@@ -450,6 +452,70 @@
     nav.appendChild(back);
     nav.appendChild(home);
     mountPoint.appendChild(nav);
+  })();
+</script>
+<script type="module">
+  import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
+
+  (async function hydrateDealerFromFirestoreId() {
+    const params = new URLSearchParams(window.location.search);
+    const dealerId = (params.get("dealerId") || "").trim();
+    if (!dealerId) return;
+    const dealer = await fetchDealerProfileById(dealerId);
+    if (!dealer) return;
+
+    const heroTitle = document.querySelector(".hero-title h1");
+    const heroDesc = document.querySelector(".hero p");
+    if (heroTitle) heroTitle.textContent = dealer.dealerName || "Dealer";
+    if (heroDesc) heroDesc.textContent = "Trusted dealership in " + (dealer.city || "Pakistan") + " with verified inventory and transparent buyer support.";
+
+    const contactCardLine = document.querySelector("aside.card .line");
+    if (contactCardLine) {
+      const nice = "+92 " + dealer.phone.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2");
+      contactCardLine.innerHTML = "Primary Contact: " + dealer.contactName + " (" + dealer.contactRole + ")<br>Phone: " + nice + "<br>Hours: Mon-Sat, 10:00 AM - 8:00 PM";
+    }
+
+    const waBtn = document.querySelector("aside.card .action.wa");
+    if (waBtn) waBtn.href = "https://wa.me/" + dealer.phone + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
+    const callBtn = document.querySelector("aside.card .action.call");
+    if (callBtn) callBtn.href = "tel:+" + dealer.phone;
+
+    const cards = document.querySelectorAll("#dealerCarsGrid .car-card");
+    for (const card of cards) {
+      const listingId = (card.getAttribute("data-listing-id") || "").trim();
+      if (!listingId) continue;
+      const listing = await fetchListingById(listingId);
+      if (!listing) continue;
+
+      const title = card.querySelector(".car-main h4");
+      const meta = card.querySelector(".car-main .meta");
+      const price = card.querySelector(".car-main .price");
+      if (title) title.textContent = listing.carName;
+      if (meta) meta.textContent = listing.city + " · " + listing.mileage + " · " + listing.transmission;
+      if (price) price.textContent = listing.priceLakh + " Lakh PKR";
+
+      const conditionLine = card.querySelector(".car-expanded p:nth-child(2)");
+      if (conditionLine) conditionLine.textContent = "Condition: " + listing.condition + " · Response time: ~15 min";
+
+      const detailBtn = card.querySelector(".details-btn");
+      if (detailBtn) {
+        const qs = new URLSearchParams({
+          listingId: listing.id,
+          dealerId: dealerId,
+          car: listing.carName,
+          price: listing.priceLakh,
+          mileage: listing.mileage,
+          transmission: listing.transmission,
+          condition: listing.condition,
+          city: listing.city,
+          dealer: dealer.dealerName,
+          contactName: dealer.contactName,
+          contactRole: dealer.contactRole,
+          phone: dealer.phone
+        });
+        detailBtn.href = "car-detail.html?" + qs.toString();
+      }
+    }
   })();
 </script>
 </body>

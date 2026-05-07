@@ -10,21 +10,33 @@
     --green-dark: #0a4a2a;
     --green-mid: #166534;
     --green-main: #15803d;
+    --green-light: #22c55e;
     --green-faint: #f0fdf4;
+    --mint: #dcfce7;
+    --gold: #ca8a04;
+    --gold-soft: #fef3c7;
     --white: #ffffff;
+    --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
     --gray-600: #4b5563;
+    --gray-700: #374151;
     --gray-900: #111827;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'DM Sans', sans-serif;
     color: var(--gray-900);
-    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    background:
+      radial-gradient(circle at 5% 5%, rgba(34,197,94,0.16), transparent 32%),
+      radial-gradient(circle at 95% 12%, rgba(202,138,4,0.14), transparent 28%),
+      linear-gradient(135deg, #f8fafc, #ecfdf5);
     min-height: 100vh;
   }
   nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     height: 70px;
     border-bottom: 1px solid var(--gray-200);
     background: rgba(255,255,255,0.95);
@@ -41,8 +53,21 @@
     color: var(--green-mid);
     text-decoration: none;
   }
-  .logo span { color: #ca8a04; }
-  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .logo span { color: var(--gold); }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--gray-600);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .nav-links a:hover { color: var(--green-mid); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .btn {
     border: 1px solid var(--gray-200);
     background: #fff;
@@ -54,38 +79,111 @@
     color: var(--gray-600);
     cursor: pointer;
   }
+  .btn:hover { background: var(--gray-50); }
   .btn-primary {
     border: none;
     background: var(--green-main);
     color: white;
   }
+  .btn-primary:hover { background: var(--green-mid); }
+  .btn-soft {
+    border: 1px solid #bbf7d0;
+    background: var(--green-faint);
+    color: var(--green-mid);
+  }
+  .btn-soft:hover { background: var(--mint); }
   .wrap {
-    min-height: calc(100vh - 70px);
+    max-width: 1120px;
+    margin: 22px auto 40px;
+    padding: 0 5%;
     display: grid;
-    place-items: center;
-    padding: 24px;
+    grid-template-columns: 320px 1fr;
+    gap: 18px;
   }
   .card {
-    width: 100%;
-    max-width: 520px;
     background: var(--white);
     border: 1px solid var(--gray-200);
     border-radius: 16px;
-    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+    box-shadow: 0 14px 34px rgba(10,74,42,0.1);
     overflow: hidden;
   }
+  .profile-sidebar {
+    position: sticky;
+    top: 92px;
+    height: fit-content;
+  }
   .card-head {
-    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    background:
+      linear-gradient(135deg, var(--green-dark), var(--green-mid) 55%, var(--green-main));
     color: #fff;
-    padding: 24px;
+    padding: 22px;
   }
   .card-head h1 {
     font-family: 'Playfair Display', serif;
     font-size: 30px;
     line-height: 1.2;
   }
-  .card-head p { margin-top: 8px; font-size: 14px; color: rgba(255,255,255,0.85); }
+  .card-head p {
+    margin-top: 8px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+  }
+  .mini-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
   .card-body { padding: 20px; }
+  .profile-avatar {
+    width: 112px;
+    height: 112px;
+    border-radius: 999px;
+    border: 3px solid #bbf7d0;
+    background: linear-gradient(145deg, #f7fff9, #e8fdf1);
+    object-fit: cover;
+    display: block;
+    margin: 2px auto 12px;
+  }
+  .avatar-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 12px;
+  }
+  .summary-name {
+    text-align: center;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+  .summary-sub {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .summary-list {
+    margin-top: 14px;
+    border-top: 1px solid #d1fae5;
+    padding-top: 12px;
+    display: grid;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--gray-700);
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .summary-row strong { color: var(--gray-900); font-weight: 700; }
+  .summary-row:nth-child(odd) {
+    background: #f7fff9;
+    border: 1px solid #dcfce7;
+    border-radius: 8px;
+    padding: 6px 8px;
+  }
   .field { margin-bottom: 12px; }
   .field label {
     display: block;
@@ -94,38 +192,42 @@
     color: #1f2937;
     font-weight: 700;
   }
-  .field input, .field select {
+  .field input, .field select, .field textarea {
     width: 100%;
     border: 1.5px solid var(--gray-200);
     border-radius: 10px;
     padding: 11px 12px;
     font-size: 14px;
     outline: none;
-    background: #fff;
+    background: #ffffff;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
-  .field input:focus, .field select:focus {
+  .field textarea {
+    min-height: 88px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
     border-color: var(--green-main);
     box-shadow: 0 0 0 3px rgba(21,128,61,0.1);
+    background: #fcfffd;
   }
-  .profile-avatar {
-    width: 96px;
-    height: 96px;
-    border-radius: 999px;
-    border: 2px solid var(--gray-200);
-    background: var(--gray-100);
-    object-fit: cover;
-    display: block;
-    margin: 2px auto 10px;
-  }
-  .avatar-note {
-    text-align: center;
-    font-size: 12px;
+  .field input:disabled {
+    background: var(--gray-50);
     color: var(--gray-600);
-    margin-bottom: 12px;
+    cursor: not-allowed;
   }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .actions-row {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
   .msg {
-    margin-top: 10px;
+    margin-top: 12px;
     border-radius: 10px;
     padding: 10px 11px;
     font-size: 12px;
@@ -135,34 +237,84 @@
   .msg.show { display: block; }
   .msg.success { border: 1px solid #bbf7d0; background: var(--green-faint); color: var(--green-mid); }
   .msg.error { border: 1px solid #fecdd3; background: #fff1f2; color: #9f1239; }
+  .helper-note {
+    margin-top: 10px;
+    color: #166534;
+    font-size: 12px;
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    border-radius: 8px;
+    padding: 8px 9px;
+  }
+  @media (max-width: 980px) {
+    .wrap { grid-template-columns: 1fr; }
+    .profile-sidebar { position: static; }
+  }
+  @media (max-width: 780px) {
+    .nav-links { display: none; }
+    .row { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 <nav>
   <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="listings.html">Browse Cars</a></li>
+    <li><a href="dealers.html">Dealers</a></li>
+    <li><a href="buyer-profile.html">My Profile</a></li>
+  </ul>
   <div class="nav-actions">
+    <a class="btn" href="listings.html">More Options</a>
     <button id="profile-logout" class="btn">Log out</button>
   </div>
 </nav>
 
 <main class="wrap">
+  <aside class="card profile-sidebar">
+    <div class="card-head">
+      <h2 class="mini-head">My Profile</h2>
+      <p>Your buyer details appear here after login.</p>
+    </div>
+    <div class="card-body">
+      <img id="profileAvatarPreview" class="profile-avatar" alt="Profile picture preview">
+      <h3 class="summary-name" id="summaryFullName">Buyer</h3>
+      <p class="summary-sub" id="summaryEmail">Not signed in</p>
+      <div class="summary-list">
+        <div class="summary-row"><span>Phone</span><strong id="summaryPhone">-</strong></div>
+        <div class="summary-row"><span>City</span><strong id="summaryCity">-</strong></div>
+        <div class="summary-row"><span>Gender</span><strong id="summaryGender">-</strong></div>
+        <div class="summary-row"><span>Date of birth</span><strong id="summaryDob">-</strong></div>
+      </div>
+      <p class="helper-note">This card is fetched from your Firebase buyer profile.</p>
+    </div>
+  </aside>
+
   <section class="card">
     <div class="card-head">
-      <h1>Your buyer profile</h1>
-      <p>Complete your profile once, and edit it any time.</p>
+      <h1>Edit Buyer Profile</h1>
+      <p>Inspired by PakWheels profile style, now connected to your Firebase data.</p>
     </div>
     <div class="card-body">
       <form id="buyer-profile-form">
-        <img id="profileAvatarPreview" class="profile-avatar" alt="Profile picture preview">
         <div class="field">
           <label for="profilePicture">Profile picture</label>
           <input id="profilePicture" type="file" accept="image/png,image/jpeg,image/webp">
         </div>
         <p class="avatar-note">Upload JPG, PNG, or WEBP. Recommended square image.</p>
-        <div class="field">
-          <label for="fullName">Full name</label>
-          <input id="fullName" type="text" placeholder="Your name" required>
+
+        <div class="row">
+          <div class="field">
+            <label for="fullName">Full name</label>
+            <input id="fullName" type="text" placeholder="Your full name" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" disabled>
+          </div>
         </div>
+
         <div class="row">
           <div class="field">
             <label for="phone">Phone</label>
@@ -181,7 +333,37 @@
             </select>
           </div>
         </div>
-        <button id="profile-save" class="btn btn-primary" type="submit">Save profile</button>
+
+        <div class="row">
+          <div class="field">
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input id="dateOfBirth" type="date">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="address">Address</label>
+          <input id="address" type="text" placeholder="Street / area / sector">
+        </div>
+
+        <div class="field">
+          <label for="about">About You</label>
+          <textarea id="about" placeholder="Tell dealers about your preferences (family car, budget range, etc.)"></textarea>
+        </div>
+
+        <div class="actions-row">
+          <button id="profile-save" class="btn btn-primary" type="submit">Save profile</button>
+          <a href="index.html" class="btn btn-soft">Back to dashboard</a>
+        </div>
         <div id="profile-msg" class="msg"></div>
       </form>
     </div>
@@ -198,6 +380,22 @@
   const avatarInput = document.getElementById("profilePicture");
   const avatarPreview = document.getElementById("profileAvatarPreview");
 
+  const summaryFullName = document.getElementById("summaryFullName");
+  const summaryEmail = document.getElementById("summaryEmail");
+  const summaryPhone = document.getElementById("summaryPhone");
+  const summaryCity = document.getElementById("summaryCity");
+  const summaryGender = document.getElementById("summaryGender");
+  const summaryDob = document.getElementById("summaryDob");
+
+  const fullNameInput = document.getElementById("fullName");
+  const emailInput = document.getElementById("email");
+  const phoneInput = document.getElementById("phone");
+  const cityInput = document.getElementById("city");
+  const genderInput = document.getElementById("gender");
+  const dateOfBirthInput = document.getElementById("dateOfBirth");
+  const addressInput = document.getElementById("address");
+  const aboutInput = document.getElementById("about");
+
   function showMessage(text, isError) {
     msg.className = "msg show " + (isError ? "error" : "success");
     msg.textContent = text;
@@ -207,16 +405,48 @@
     return /^03\d{2}[-\s]?\d{7}$/.test(phone);
   }
 
-  function fillForm(profile) {
-    document.getElementById("fullName").value = profile.fullName || "";
-    document.getElementById("phone").value = profile.phone || "";
-    document.getElementById("city").value = profile.city || "";
-    avatarPreview.src = profile.profilePicture || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.fullName || "Buyer") + "&background=ecfdf5&color=166534&size=160";
+  function defaultAvatar(name) {
+    return "https://ui-avatars.com/api/?name=" + encodeURIComponent(name || "Buyer") + "&background=ecfdf5&color=166534&size=180";
+  }
+
+  function safeValue(value, fallback) {
+    const output = String(value || "").trim();
+    return output || fallback;
+  }
+
+  function updateSummary(profile, userEmail) {
+    const name = safeValue(profile && profile.fullName, "Buyer");
+    const email = safeValue(userEmail || (profile && profile.email), "No email");
+    const phone = safeValue(profile && profile.phone, "-");
+    const city = safeValue(profile && profile.city, "-");
+    const gender = safeValue(profile && profile.gender, "-");
+    const dobRaw = safeValue(profile && profile.dateOfBirth, "");
+    const dob = dobRaw ? dobRaw : "-";
+
+    summaryFullName.textContent = name;
+    summaryEmail.textContent = email;
+    summaryPhone.textContent = phone;
+    summaryCity.textContent = city;
+    summaryGender.textContent = gender;
+    summaryDob.textContent = dob;
+  }
+
+  function fillForm(profile, user) {
+    fullNameInput.value = profile.fullName || user.displayName || "";
+    emailInput.value = user.email || profile.email || "";
+    phoneInput.value = profile.phone || "";
+    cityInput.value = profile.city || "";
+    genderInput.value = profile.gender || "";
+    dateOfBirthInput.value = profile.dateOfBirth || "";
+    addressInput.value = profile.address || "";
+    aboutInput.value = profile.about || "";
+    avatarPreview.src = profile.profilePicture || defaultAvatar(profile.fullName || user.displayName || "Buyer");
   }
 
   let currentUser = null;
   let isExistingProfile = false;
   let pendingProfilePicture = "";
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "buyer-login.html";
@@ -227,13 +457,27 @@
       await ensureUserRecord(user.uid, user.email, "buyer");
       const profile = await getBuyerProfile(user.uid);
       if (!profile) {
-        avatarPreview.src = "https://ui-avatars.com/api/?name=Buyer&background=ecfdf5&color=166534&size=160";
+        const basic = {
+          fullName: user.displayName || "",
+          phone: "",
+          city: "",
+          gender: "",
+          dateOfBirth: "",
+          address: "",
+          about: "",
+          profilePicture: "",
+          email: user.email || ""
+        };
+        fillForm(basic, user);
+        pendingProfilePicture = "";
+        updateSummary(basic, user.email || "");
         return;
       }
       isExistingProfile = true;
       pendingProfilePicture = profile.profilePicture || "";
-      fillForm(profile);
-    } catch (error) {
+      fillForm(profile, user);
+      updateSummary(profile, user.email || "");
+    } catch (_error) {
       showMessage("Saved profile data is invalid. Please save again.", true);
     }
   });
@@ -250,7 +494,7 @@
     const reader = new FileReader();
     reader.onload = () => {
       pendingProfilePicture = String(reader.result || "");
-      avatarPreview.src = pendingProfilePicture;
+      avatarPreview.src = pendingProfilePicture || defaultAvatar(fullNameInput.value || "Buyer");
     };
     reader.readAsDataURL(file);
   });
@@ -258,9 +502,14 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!currentUser) return;
-    const fullName = document.getElementById("fullName").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const city = document.getElementById("city").value.trim();
+    const fullName = fullNameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    const city = cityInput.value.trim();
+    const gender = genderInput.value.trim();
+    const dateOfBirth = dateOfBirthInput.value.trim();
+    const address = addressInput.value.trim();
+    const about = aboutInput.value.trim();
+
     if (!fullName || !phone || !city) {
       showMessage("Full name, phone, and city are required.", true);
       return;
@@ -269,20 +518,30 @@
       showMessage("Phone must be in format 03xx-xxxxxxx (or 03xxxxxxxxx).", true);
       return;
     }
-    const wasExistingProfile = isExistingProfile;
-    const profile = {
-      fullName: fullName,
-      phone: phone,
-      city: city,
-      profilePicture: pendingProfilePicture || avatarPreview.src || "",
-      email: currentUser.email || "",
-      updatedAt: new Date().toISOString()
-    };
-    await upsertBuyerProfile(currentUser.uid, profile);
-    isExistingProfile = true;
-    showMessage("Profile saved successfully.", false);
-    if (!wasExistingProfile) {
-      window.location.href = "index.html";
+
+    try {
+      const wasExistingProfile = isExistingProfile;
+      const profile = {
+        fullName: fullName,
+        phone: phone,
+        city: city,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        address: address,
+        about: about,
+        profilePicture: pendingProfilePicture || avatarPreview.src || defaultAvatar(fullName),
+        email: currentUser.email || "",
+        updatedAt: new Date().toISOString()
+      };
+      await upsertBuyerProfile(currentUser.uid, profile);
+      isExistingProfile = true;
+      updateSummary(profile, currentUser.email || "");
+      showMessage("Profile saved successfully and synced with Firebase.", false);
+      if (!wasExistingProfile) {
+        window.location.href = "index.html";
+      }
+    } catch (_error) {
+      showMessage("Could not save profile right now. Please try again.", true);
     }
   });
 
@@ -292,7 +551,7 @@
       localStorage.removeItem("gb_last_signed_in_uid");
       localStorage.removeItem("gb_last_signed_in_email");
       window.location.href = "index.html";
-    } catch (error) {
+    } catch (_error) {
       showMessage("Could not log out. Please try again.", true);
     }
   });

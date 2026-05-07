@@ -214,7 +214,7 @@
   <div class="nav-right">
     <span id="dealerDashboardPill" class="pill">Dealer Dashboard</span>
     <a class="btn btn-outline" href="listings.html">View Listings Page</a>
-    <a class="btn btn-primary" href="admin.html">Open Admin</a>
+    <a class="btn btn-primary" href="register.html">Update Dealer Profile</a>
   </div>
 </nav>
 
@@ -320,8 +320,39 @@
   </section>
 </main>
 
-<script>
-  const dealerUid = localStorage.getItem('gb_dealer_uid');
+<script type="module">
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
+
+  let dealerUid = "";
+  const authReady = new Promise((resolve) => {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "dealer-login.html";
+        return;
+      }
+      const record = await getUserRecord(user.uid);
+      if (!record || record.role !== "dealer") {
+        window.location.href = "dealer-login.html";
+        return;
+      }
+      const liveProfile = await getDealerProfile(user.uid);
+      if (!isDealerProfileComplete(liveProfile || null)) {
+        window.location.href = "register.html";
+        return;
+      }
+      dealerUid = user.uid;
+      localStorage.setItem("gb_dealer_uid", user.uid);
+      localStorage.setItem("gb_dealer_email", user.email || "");
+      localStorage.setItem("gb_dealer_profile_" + user.uid, JSON.stringify(liveProfile || {}));
+      resolve();
+    });
+  });
+
+  await authReady;
+
+  const fallbackDealerUid = localStorage.getItem('gb_dealer_uid');
+  if (!dealerUid && fallbackDealerUid) dealerUid = fallbackDealerUid;
   if (!dealerUid) {
     window.location.href = 'dealer-login.html';
   }
@@ -349,7 +380,7 @@
     window.location.href = 'register.html';
   }
 
-  const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1';
+  const STORAGE_KEY = 'garibazaar_dealer_dashboard_v1_' + dealerUid;
   const ownerContact = {
     name: (dealerProfile && dealerProfile.ownerName) || 'Owner',
     role: 'Owner',

@@ -20,6 +20,11 @@ function trim(value) {
   return String(value || "").trim();
 }
 
+function normalizeUserRole(role) {
+  const cleanRole = trim(role).toLowerCase();
+  return cleanRole === "dealer" ? "dealer" : "buyer";
+}
+
 export { app, auth, db };
 
 export async function getUserRecord(uid) {
@@ -34,7 +39,7 @@ export async function ensureUserRecord(uid, email, defaultRole) {
   if (!snap.exists()) {
     const payload = {
       email: trim(email).toLowerCase(),
-      role: defaultRole,
+      role: normalizeUserRole(defaultRole),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };

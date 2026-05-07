@@ -782,24 +782,38 @@
   </section>
 </main>
 
-<script>
-  (function requireAdminSession() {
-    const allowed = 'bbuland7@gmail.com';
-    const active = (sessionStorage.getItem('gb_admin_session_email') || '').toLowerCase();
-    if (active !== allowed) {
-      window.location.href = 'admin-login.html';
+<script type="module">
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, getUserRecord } from "./firebase-client.js";
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "admin-login.html";
       return;
     }
-    const adminPill = document.getElementById('adminPill');
-    if (adminPill) adminPill.textContent = 'Admin: ' + active;
-    const logoutBtn = document.getElementById('adminLogoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
-        sessionStorage.removeItem('gb_admin_session_email');
-        window.location.href = 'admin-login.html';
-      });
+    const email = (user.email || "").toLowerCase();
+    const record = await getUserRecord(user.uid);
+    if (!record || record.role !== "admin") {
+      await signOut(auth);
+      window.location.href = "admin-login.html";
+      return;
     }
-  })();
+
+    sessionStorage.setItem("gb_admin_session_email", email);
+    const adminPill = document.getElementById("adminPill");
+    if (adminPill) adminPill.textContent = "Admin: " + email;
+  });
+
+  const logoutBtn = document.getElementById("adminLogoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function () {
+      sessionStorage.removeItem("gb_admin_session_email");
+      localStorage.removeItem("gb_last_signed_in_uid");
+      localStorage.removeItem("gb_last_signed_in_email");
+      await signOut(auth);
+      window.location.href = "admin-login.html";
+    });
+  }
 
   const tabButtons = document.querySelectorAll('.tab-btn');
   const panels = document.querySelectorAll('.panel');
@@ -812,6 +826,14 @@
       button.classList.add('active');
       const panel = document.getElementById(target);
       if (panel) panel.classList.add('active');
+    });
+  });
+
+  // Provide clear feedback for UI-first admin actions that are not wired yet.
+  document.querySelectorAll('.mini-btn, .actions .btn, .nav-right .btn-primary').forEach((btn) => {
+    if (btn.id === 'adminLogoutBtn') return;
+    btn.addEventListener('click', () => {
+      alert('This admin action is not wired to Firebase yet. It is tracked for backend phase implementation.');
     });
   });
 

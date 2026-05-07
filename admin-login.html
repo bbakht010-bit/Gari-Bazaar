@@ -47,7 +47,7 @@
 </main>
 <script type="module">
   import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { app, ensureUserRecord, setUserRole } from "./firebase-client.js";
+  import { app, ensureUserRecord, getUserRecord } from "./firebase-client.js";
   const ADMIN_EMAIL = "bbuland7@gmail.com";
   const auth = getAuth(app);
   const form = document.getElementById("admin-login-form");
@@ -70,9 +70,12 @@
         showError("This account is not authorized for admin access.");
         return;
       }
-      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "admin");
-      if (record.role !== "admin") {
-        await setUserRole(credential.user.uid, "admin");
+      await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      const record = await getUserRecord(credential.user.uid);
+      if (!record || record.role !== "admin") {
+        await signOut(auth);
+        showError("Admin role is missing for this account.");
+        return;
       }
       sessionStorage.setItem("gb_admin_session_email", signedEmail);
       window.location.href = "admin.html";

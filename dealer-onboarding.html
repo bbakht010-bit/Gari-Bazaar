@@ -55,44 +55,7 @@
   </section>
 </main>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  const firebaseConfig = { apiKey:"AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE", authDomain:"gari-bazaar.firebaseapp.com", projectId:"gari-bazaar", storageBucket:"gari-bazaar.firebasestorage.app", messagingSenderId:"296364565325", appId:"1:296364565325:web:59a017564b7dd55c9d0d04", measurementId:"G-7LT0S01NPP" };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const form = document.getElementById("dealer-onboarding-form");
-  const errorBox = document.getElementById("dealer-onboarding-error");
-  let currentUser = null;
-  function profileKey(uid) { return "gb_dealer_profile_" + uid; }
-  onAuthStateChanged(auth, (user) => {
-    if (!user) { window.location.href = "dealer-login.html"; return; }
-    currentUser = user;
-    localStorage.setItem("gb_dealer_uid", user.uid);
-    localStorage.setItem("gb_dealer_email", user.email || "");
-    const existing = localStorage.getItem(profileKey(user.uid));
-    if (existing) { window.location.href = "dealer-dashboard.html"; }
-  });
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (!currentUser) return;
-    errorBox.classList.remove("show");
-    const profile = {
-      businessName: document.getElementById("businessName").value.trim(),
-      ownerName: document.getElementById("ownerName").value.trim(),
-      phone: document.getElementById("phone").value.trim(),
-      whatsapp: document.getElementById("whatsapp").value.trim(),
-      city: document.getElementById("city").value,
-      email: currentUser.email || "",
-      updatedAt: new Date().toISOString()
-    };
-    if (!profile.businessName || !profile.ownerName || !profile.phone || !profile.whatsapp || !profile.city) {
-      errorBox.textContent = "Please fill all required fields.";
-      errorBox.classList.add("show");
-      return;
-    }
-    localStorage.setItem(profileKey(currentUser.uid), JSON.stringify(profile));
-    window.location.href = "dealer-dashboard.html";
-  });
+  window.location.href = "register.html";
 </script>
 </body>
 </html>

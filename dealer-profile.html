@@ -143,7 +143,7 @@
     transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.2s ease;
   }
   .car-card:hover .car-expanded {
-    max-height: 250px; opacity: 1; padding: 12px;
+    max-height: 340px; opacity: 1; padding: 12px;
   }
   .car-expanded p { font-size: 12px; color: var(--gray-700); margin-bottom: 7px; line-height: 1.5; }
   .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
@@ -246,6 +246,14 @@
     return String(value || "").trim();
   }
 
+  function normalizePkPhone(raw) {
+    const digits = String(raw || "").replace(/[^\d]/g, "");
+    if (digits.startsWith("92") && digits.length >= 12) return digits;
+    if (digits.length === 11 && digits.startsWith("0")) return "92" + digits.slice(1);
+    if (digits.length === 10 && digits.startsWith("3")) return "92" + digits;
+    return digits;
+  }
+
   function normalizeStatus(status) {
     return String(status || "").toLowerCase();
   }
@@ -309,7 +317,7 @@
 
     const contactCardLine = document.querySelector("aside.card .line");
     if (contactCardLine) {
-      const digits = clean(dealer.phone).replace(/[^\d]/g, "");
+      const digits = normalizePkPhone(clean(dealer.phone));
       const nice = digits ? "+92 " + digits.replace(/^92/, "").replace(/^(\d{3})(\d{7})$/, "$1 $2") : "Not provided";
       contactCardLine.innerHTML =
         "Primary Contact: " + esc(dealer.contactName) + " (" + esc(dealer.contactRole) + ")<br>Phone: " + esc(nice) +
@@ -317,9 +325,9 @@
     }
 
     const waBtn = document.querySelector("aside.card .action.wa");
-    if (waBtn) waBtn.href = "https://wa.me/" + clean(dealer.phone).replace(/[^\d]/g, "") + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
+    if (waBtn) waBtn.href = "https://wa.me/" + normalizePkPhone(clean(dealer.phone)) + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
     const callBtn = document.querySelector("aside.card .action.call");
-    if (callBtn) callBtn.href = "tel:+" + clean(dealer.phone).replace(/[^\d]/g, "");
+    if (callBtn) callBtn.href = "tel:+" + normalizePkPhone(clean(dealer.phone));
     const gallery = document.querySelector(".dealer-gallery");
     if (gallery) {
       const photos = Array.isArray(dealer.dealershipPhotos) ? dealer.dealershipPhotos.filter(Boolean).slice(0, 6) : [];
@@ -363,7 +371,7 @@
           const price = clean(listing.priceLakh || listing.price || "-");
           const contactName = clean(listing.contactName || dealer.contactName || "Dealer");
           const contactRole = clean(listing.contactRole || dealer.contactRole || "Sales Desk");
-          const phoneDigits = clean(listing.phone || dealer.phone || "").replace(/[^\d]/g, "");
+          const phoneDigits = normalizePkPhone(clean(listing.phone || dealer.phone || ""));
           const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
           const coverImage = clean(listing.coverImage || carImages[0] || dealer.profilePicture || "");
           const search = [carName, city, mileage, transmission, condition, contactName, contactRole].join(" ").toLowerCase();

@@ -630,7 +630,7 @@
   .car-card:hover .car-expanded,
   .car-card:focus-within .car-expanded,
   .car-card.expanded .car-expanded {
-    max-height: 230px;
+    max-height: 330px;
     opacity: 1;
     padding: 12px 18px 16px;
   }
@@ -1286,6 +1286,14 @@
     return n.toFixed(1).replace(/\.0$/, "");
   }
 
+  function normalizePkPhone(raw) {
+    const digits = String(raw || "").replace(/[^\d]/g, "");
+    if (digits.indexOf("92") === 0 && digits.length >= 12) return digits;
+    if (digits.length === 11 && digits.charAt(0) === "0") return "92" + digits.slice(1);
+    if (digits.length === 10 && digits.charAt(0) === "3") return "92" + digits;
+    return digits;
+  }
+
   function shuffle(list) {
     const arr = list.slice();
     for (let i = arr.length - 1; i > 0; i -= 1) {
@@ -1352,8 +1360,8 @@
       const condition = clean(listing.condition || "-");
       const price = toLakh(listing.priceLakh || listing.price);
       const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
-      const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
-      const hasPhone = phoneDigits.length >= 10;
+      const phoneDigits = normalizePkPhone(phoneRaw);
+      const hasPhone = phoneDigits.length >= 12 && phoneDigits.indexOf("92") === 0;
       const contactName = clean(listing.contactName || dealer.ownerName || "Contact");
       const contactRole = clean(listing.contactRole || "—");
       const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];

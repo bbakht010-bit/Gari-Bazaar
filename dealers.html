@@ -180,6 +180,14 @@
     return clean(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
 
+  function normalizePkPhone(raw) {
+    const digits = String(raw || "").replace(/[^\d]/g, "");
+    if (digits.startsWith("92") && digits.length >= 12) return digits;
+    if (digits.length === 11 && digits.startsWith("0")) return "92" + digits.slice(1);
+    if (digits.length === 10 && digits.startsWith("3")) return "92" + digits;
+    return digits;
+  }
+
   async function renderLiveDealers() {
     const [dealerSnap, listingSnap] = await Promise.all([
       getDocs(collection(db, "dealerProfiles")),
@@ -209,8 +217,8 @@
       const rating = Number.isFinite(numericRating) && numericRating > 0
         ? numericRating.toFixed(1) + " / 5.0"
         : "No ratings yet";
-      const phone = clean(dealer.phone || dealer.whatsapp || "").replace(/[^\d]/g, "");
-      const hasPhone = phone.length >= 10;
+      const phone = normalizePkPhone(clean(dealer.phone || dealer.whatsapp || ""));
+      const hasPhone = phone.length >= 12 && phone.startsWith("92");
       const contactName = clean(dealer.ownerName || "Contact");
       const activeCars = listingCountByDealer.get(dealer.id) || 0;
       const search = [name, city, speciality, "active cars " + activeCars].join(" ").toLowerCase();

@@ -663,7 +663,7 @@
   .car-card:hover .car-expanded,
   .car-card:focus-within .car-expanded,
   .car-card.expanded .car-expanded {
-    max-height: 260px;
+    max-height: 360px;
     opacity: 1;
     padding: 12px 14px 14px;
   }
@@ -690,6 +690,17 @@
     color: var(--gray-600);
     font-size: 13px;
     margin-bottom: 10px;
+  }
+  .bodywork-chip {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .mini-specs {
@@ -1705,6 +1716,35 @@
     return n.toFixed(1).replace(/\.0$/, "");
   }
 
+  function normalizePkPhone(raw) {
+    const digits = String(raw || "").replace(/[^\d]/g, "");
+    if (digits.startsWith("92") && digits.length >= 12) return digits;
+    if (digits.length === 11 && digits.startsWith("0")) return "92" + digits.slice(1);
+    if (digits.length === 10 && digits.startsWith("3")) return "92" + digits;
+    return digits;
+  }
+
+  function paintLabel(value) {
+    const v = String(value || "").toLowerCase();
+    if (v === "original") return "Original paint";
+    if (v === "touched") return "Touch-up done";
+    if (v === "sprayed") return "Sprayed";
+    if (v === "mixed") return "Mixed condition";
+    return "Not specified";
+  }
+
+  function bodyworkSummary(listing) {
+    const marks = listing && listing.panelMarks && typeof listing.panelMarks === "object"
+      ? Object.values(listing.panelMarks)
+      : [];
+    const sprayed = marks.filter((m) => String(m || "").toLowerCase() === "sprayed").length;
+    const touched = marks.filter((m) => String(m || "").toLowerCase() === "touched").length;
+    const repaired = marks.filter((m) => String(m || "").toLowerCase() === "repaired").length;
+    const hasDetail = sprayed || touched || repaired || clean(listing && listing.bodyNote) || clean(listing && listing.paintStatus);
+    if (!hasDetail) return "";
+    return "Body: " + paintLabel(listing && listing.paintStatus) + " · S" + sprayed + " T" + touched + " R" + repaired;
+  }
+
   async function renderLiveListings() {
     const carGrid = document.querySelector(".car-grid");
     if (!carGrid) return;
@@ -1748,8 +1788,8 @@
       const contactName = clean(listing.contactName || dealer.ownerName || "Contact");
       const contactRole = clean(listing.contactRole || "—");
       const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
-      const phoneDigits = phoneRaw.replace(/[^\d]/g, "");
-      const hasPhone = phoneDigits.length >= 10;
+      const phoneDigits = normalizePkPhone(phoneRaw);
+      const hasPhone = phoneDigits.length >= 12 && phoneDigits.startsWith("92");
       const title = clean(listing.carName || listing.name || "Untitled Listing");
       const mileage = clean(listing.mileage || "-");
       const transmission = clean(listing.transmission || "-");
@@ -1762,6 +1802,7 @@
       const priceLakh = toLakh(listing.priceLakh || listing.price);
       const bodyType = clean(listing.bodyType || "Any");
       const assembly = clean(listing.assembly || "Any");
+      const bodywork = bodyworkSummary(listing);
       const listingId = clean(listing.id || [slugify(title), slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
       const dealerId = clean(entry.dealerId || [slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
       const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
@@ -1812,6 +1853,7 @@
           '<div class="car-expanded">' +
             '<p class="dealer-line">' + esc(dealerName) + " — " + esc(city) + "</p>" +
             '<p class="contact-meta">Contact: ' + esc(contactName) + " (" + esc(contactRole) + ")</p>" +
+            (bodywork ? '<span class="bodywork-chip">' + esc(bodywork) + '</span>' : '') +
             '<div class="mini-specs">' +
               "<span>" + esc(mileage) + "</span><span>" + esc(transmission) + "</span><span>" + esc(condition) + "</span><span>" + esc(city) + "</span>" +
             "</div>" +

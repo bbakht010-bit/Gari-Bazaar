@@ -87,6 +87,40 @@
     font-size: 13px;
     color: var(--gray-700);
   }
+  .bodywork-box {
+    margin-top: 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+  }
+  .bodywork-box h3 { font-size: 16px; margin-bottom: 8px; }
+  .bodywork-summary { font-size: 13px; color: var(--gray-700); line-height: 1.6; }
+  .bodywork-note { margin-top: 6px; font-size: 13px; color: var(--gray-700); }
+  .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .panel-cell {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--gray-700);
+    background: #fff;
+  }
+  .panel-cell.mark-none {
+    background: #f9fafb;
+    color: var(--gray-500);
+    border-color: var(--gray-200);
+  }
+  .panel-cell.mark-sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+  .panel-cell.mark-touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
+  .panel-cell.mark-repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
   aside { padding: 18px; }
   .dealer-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
   .dealer-logo {
@@ -161,6 +195,12 @@
       <div class="features-box" id="car-features-section" style="display:none;">
         <h3>Car Features</h3>
         <div class="features-list" id="car-features-list"></div>
+      </div>
+      <div class="bodywork-box" id="car-bodywork-section" style="display:none;">
+        <h3>Body Work Map</h3>
+        <div class="bodywork-summary" id="car-bodywork-summary"></div>
+        <div class="panel-grid" id="car-bodywork-grid"></div>
+        <p class="bodywork-note" id="car-bodywork-note"></p>
       </div>
     </div>
   </section>
@@ -246,6 +286,60 @@
       el.appendChild(document.createTextNode("Response time: "));
       el.appendChild(document.createTextNode(responseTime));
     }
+  }
+  function gbPaintStatusLabel(value) {
+    var v = String(value || "").toLowerCase();
+    if (v === "original") return "Original paint";
+    if (v === "touched") return "Touch-up done";
+    if (v === "sprayed") return "Sprayed";
+    if (v === "mixed") return "Mixed condition";
+    return "Not specified";
+  }
+  function gbRenderBodyMap(section, summaryEl, gridEl, noteEl, panelMarks, paintStatus, bodyNote) {
+    if (!section || !summaryEl || !gridEl || !noteEl) return;
+    var marks = panelMarks && typeof panelMarks === "object" ? panelMarks : {};
+    var panelOrder = [
+      "hood", "roof", "trunk", "left_fender", "right_fender",
+      "left_front_door", "right_front_door", "left_rear_door", "right_rear_door",
+      "front_bumper", "rear_bumper", "left_quarter", "right_quarter"
+    ];
+    var panelLabel = {
+      hood: "Hood",
+      roof: "Roof",
+      trunk: "Trunk",
+      left_fender: "L Fender",
+      right_fender: "R Fender",
+      left_front_door: "L F Door",
+      right_front_door: "R F Door",
+      left_rear_door: "L R Door",
+      right_rear_door: "R R Door",
+      front_bumper: "Front Bmpr",
+      rear_bumper: "Rear Bmpr",
+      left_quarter: "L Quarter",
+      right_quarter: "R Quarter"
+    };
+    var keys = panelOrder.slice();
+    Object.keys(marks).forEach(function (key) {
+      if (keys.indexOf(key) === -1) keys.push(key);
+    });
+    var sprayed = 0, touched = 0, repaired = 0;
+    gridEl.textContent = "";
+    keys.forEach(function (key) {
+      var mark = String(marks[key] || "").toLowerCase();
+      if (mark === "sprayed") sprayed += 1;
+      if (mark === "touched") touched += 1;
+      if (mark === "repaired") repaired += 1;
+      var cell = document.createElement("div");
+      cell.className = "panel-cell " + (mark ? ("mark-" + mark) : "mark-none");
+      var text = panelLabel[key] || key.replace(/_/g, " ");
+      cell.textContent = mark ? (text + " · " + mark) : (text + " · clean");
+      gridEl.appendChild(cell);
+    });
+    summaryEl.textContent =
+      "Overall paint status: " + gbPaintStatusLabel(paintStatus) +
+      " · Sprayed: " + sprayed + " · Touched: " + touched + " · Repaired: " + repaired;
+    noteEl.textContent = String(bodyNote || "").trim() ? ("Dealer note: " + bodyNote) : "";
+    section.style.display = "";
   }
   (function hydrateFromQuery() {
     const params = new URLSearchParams(window.location.search);
@@ -382,6 +476,11 @@
     const modelYear = (listing && listing.modelYear) || "";
     const engine = (listing && listing.engine) || "";
     const color = (listing && listing.color) || "";
+    const bodyType = (listing && listing.bodyType) || "";
+    const assembly = (listing && listing.assembly) || "";
+    const paintStatus = (listing && listing.paintStatus) || "";
+    const bodyNote = (listing && listing.bodyNote) || "";
+    const panelMarks = (listing && listing.panelMarks && typeof listing.panelMarks === "object") ? listing.panelMarks : {};
     const dealerName = (dealer && dealer.dealerName) || (listing && listing.dealerName) || (params.get("dealer") || "—");
     const contactName = (dealer && dealer.contactName) || (listing && listing.contactName) || (params.get("contactName") || "—");
     const contactRole = (dealer && dealer.contactRole) || (listing && listing.contactRole) || (params.get("contactRole") || "—");
@@ -440,7 +539,12 @@
     if (descriptionEl && listing && listing.description) descriptionEl.textContent = listing.description;
     const extraEl = document.getElementById("car-extra-details");
     if (extraEl) {
-      extraEl.textContent = "Year: " + (modelYear || "-") + " · Engine: " + (engine || "-") + " · Color: " + (color || "-");
+      extraEl.textContent =
+        "Year: " + (modelYear || "-") +
+        " · Engine: " + (engine || "-") +
+        " · Color: " + (color || "-") +
+        " · Body: " + (bodyType || "-") +
+        " · Assembly: " + (assembly || "-");
     }
     const featureSection = document.getElementById("car-features-section");
     const featureList = document.getElementById("car-features-list");
@@ -459,6 +563,15 @@
         featureSection.style.display = "none";
       }
     }
+    gbRenderBodyMap(
+      document.getElementById("car-bodywork-section"),
+      document.getElementById("car-bodywork-summary"),
+      document.getElementById("car-bodywork-grid"),
+      document.getElementById("car-bodywork-note"),
+      panelMarks,
+      paintStatus,
+      bodyNote
+    );
 
     const dealerNameEl = document.querySelector(".dealer-head h3");
     const dealerCityEl = document.querySelector(".dealer-head p");

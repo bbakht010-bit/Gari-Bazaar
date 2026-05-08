@@ -78,12 +78,15 @@ export function normalizeListing(id, raw) {
     registrationCity: pick(data, ["registrationCity", "city"], "-"),
     bodyType: pick(data, ["bodyType"], ""),
     assembly: pick(data, ["assembly"], ""),
+    paintStatus: pick(data, ["paintStatus"], ""),
+    bodyNote: pick(data, ["bodyNote"], ""),
     contactName: pick(data, ["contactName"]),
     contactRole: pick(data, ["contactRole"]),
     phone: pick(data, ["phone"]),
     dealerName: pick(data, ["dealerName"]),
     description: pick(data, ["description"], ""),
     features: Array.isArray(data.features) ? data.features.map((f) => clean(f)).filter(Boolean) : [],
+    panelMarks: data.panelMarks && typeof data.panelMarks === "object" ? data.panelMarks : {},
     carImages: carImages,
     coverImage: coverImage || (carImages[0] || "")
   };

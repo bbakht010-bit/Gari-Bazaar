@@ -87,6 +87,43 @@
     font-size: 13px;
     color: var(--gray-700);
   }
+  .detail-table {
+    margin-top: 14px;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .detail-table h3 {
+    font-size: 16px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--gray-100);
+    background: #f9fafb;
+  }
+  .detail-rows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .detail-row:nth-child(odd) { border-right: 1px solid var(--gray-100); }
+  .detail-row:last-child,
+  .detail-row:nth-last-child(2) { border-bottom: none; }
+  .detail-key { color: var(--gray-500); font-weight: 600; }
+  .detail-value { color: var(--gray-900); font-weight: 600; text-align: right; }
+  .detail-note {
+    padding: 10px 12px;
+    border-top: 1px solid var(--gray-100);
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.6;
+  }
   .bodywork-box {
     margin-top: 14px;
     border: 1px solid var(--gray-200);
@@ -97,6 +134,37 @@
   .bodywork-box h3 { font-size: 16px; margin-bottom: 8px; }
   .bodywork-summary { font-size: 13px; color: var(--gray-700); line-height: 1.6; }
   .bodywork-note { margin-top: 6px; font-size: 13px; color: var(--gray-700); }
+  .bodywork-legend {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+  .legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    background: #fff;
+  }
+  .legend-chip::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.9;
+  }
+  .legend-chip.sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
+  .legend-chip.touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
+  .legend-chip.repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .legend-chip.clean { background: #f9fafb; border-color: var(--gray-200); color: var(--gray-500); }
   .panel-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -118,9 +186,9 @@
     color: var(--gray-500);
     border-color: var(--gray-200);
   }
-  .panel-cell.mark-sprayed { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
-  .panel-cell.mark-touched { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
-  .panel-cell.mark-repaired { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+  .panel-cell.mark-sprayed { background: #fef3c7 !important; border-color: #f59e0b !important; color: #92400e !important; }
+  .panel-cell.mark-touched { background: #dbeafe !important; border-color: #3b82f6 !important; color: #1e3a8a !important; }
+  .panel-cell.mark-repaired { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
   aside { padding: 18px; }
   .dealer-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
   .dealer-logo {
@@ -143,6 +211,9 @@
   @media (max-width: 900px) {
     main { grid-template-columns: 1fr; }
     .hero-photo { height: 260px; }
+    .detail-rows { grid-template-columns: 1fr; }
+    .detail-row:nth-child(odd) { border-right: none; }
+    .detail-row:nth-last-child(2) { border-bottom: 1px solid var(--gray-100); }
   }
 </style>
 <link rel="stylesheet" href="theme.css">
@@ -192,6 +263,11 @@
       </div>
       <p class="description"></p>
       <p class="description" id="car-extra-details"></p>
+      <div class="detail-table" id="dealer-detail-section" style="display:none;">
+        <h3>Dealer Entered Details</h3>
+        <div class="detail-rows" id="dealer-detail-rows"></div>
+        <div class="detail-note" id="dealer-detail-note" style="display:none;"></div>
+      </div>
       <div class="features-box" id="car-features-section" style="display:none;">
         <h3>Car Features</h3>
         <div class="features-list" id="car-features-list"></div>
@@ -199,6 +275,12 @@
       <div class="bodywork-box" id="car-bodywork-section" style="display:none;">
         <h3>Body Work Map</h3>
         <div class="bodywork-summary" id="car-bodywork-summary"></div>
+        <div class="bodywork-legend" aria-label="Bodywork color key">
+          <span class="legend-chip sprayed">Sprayed</span>
+          <span class="legend-chip touched">Touched</span>
+          <span class="legend-chip repaired">Repaired</span>
+          <span class="legend-chip clean">Clean</span>
+        </div>
         <div class="panel-grid" id="car-bodywork-grid"></div>
         <p class="bodywork-note" id="car-bodywork-note"></p>
       </div>
@@ -325,7 +407,8 @@
     var sprayed = 0, touched = 0, repaired = 0;
     gridEl.textContent = "";
     keys.forEach(function (key) {
-      var mark = String(marks[key] || "").toLowerCase();
+      var mark = String(marks[key] || "").trim().toLowerCase();
+      if (mark !== "sprayed" && mark !== "touched" && mark !== "repaired") mark = "";
       if (mark === "sprayed") sprayed += 1;
       if (mark === "touched") touched += 1;
       if (mark === "repaired") repaired += 1;
@@ -339,6 +422,41 @@
       "Overall paint status: " + gbPaintStatusLabel(paintStatus) +
       " · Sprayed: " + sprayed + " · Touched: " + touched + " · Repaired: " + repaired;
     noteEl.textContent = String(bodyNote || "").trim() ? ("Dealer note: " + bodyNote) : "";
+    section.style.display = "";
+  }
+  function gbRenderDealerDetails(section, rowsEl, noteEl, data) {
+    if (!section || !rowsEl || !data) return;
+    const rows = [
+      ["Model Year", data.modelYear || "-"],
+      ["Fuel Type", data.fuelType || "-"],
+      ["Engine", data.engine || "-"],
+      ["Color", data.color || "-"],
+      ["Body Type", data.bodyType || "-"],
+      ["Assembly", data.assembly || "-"],
+      ["Paint Status", gbPaintStatusLabel(data.paintStatus)],
+      ["Registration City", data.registrationCity || "-"],
+      ["Condition", data.condition || "-"],
+      ["Transmission", data.transmission || "-"],
+      ["Mileage", data.mileage || "-"],
+      ["City", data.city || "-"]
+    ];
+    rowsEl.textContent = "";
+    rows.forEach(function (pair) {
+      const row = document.createElement("div");
+      row.className = "detail-row";
+      row.innerHTML = '<span class="detail-key">' + pair[0] + '</span><span class="detail-value">' + String(pair[1]) + '</span>';
+      rowsEl.appendChild(row);
+    });
+    const note = String(data.bodyNote || "").trim();
+    if (noteEl) {
+      if (note) {
+        noteEl.textContent = "Body Note: " + note;
+        noteEl.style.display = "";
+      } else {
+        noteEl.textContent = "";
+        noteEl.style.display = "none";
+      }
+    }
     section.style.display = "";
   }
   (function hydrateFromQuery() {
@@ -356,6 +474,16 @@
     const engine = params.get('engine') || '-';
     const color = params.get('color') || '-';
     const registrationCity = params.get('registrationCity') || city;
+    const bodyType = params.get('bodyType') || '-';
+    const assembly = params.get('assembly') || '-';
+    const paintStatus = params.get('paintStatus') || '';
+    const bodyNote = params.get('bodyNote') || '';
+    let panelMarks = {};
+    try {
+      panelMarks = JSON.parse(params.get('panelMarks') || '{}') || {};
+    } catch (_err) {
+      panelMarks = {};
+    }
     const dealer = params.get('dealer') || '—';
     const contactName = params.get('contactName') || '—';
     const contactRole = params.get('contactRole') || '—';
@@ -388,7 +516,16 @@
       description.textContent = car + ' is available with ' + dealer + ' in ' + city + '. Contact ' + contactName + ' for inspection details, financing, and availability.';
     }
     const extra = document.getElementById('car-extra-details');
-    if (extra) extra.textContent = 'Year: ' + modelYear + ' · Engine: ' + engine + ' · Color: ' + color;
+    if (extra) extra.textContent = 'Year: ' + modelYear + ' · Engine: ' + engine + ' · Color: ' + color + ' · Body: ' + bodyType + ' · Assembly: ' + assembly;
+    gbRenderBodyMap(
+      document.getElementById("car-bodywork-section"),
+      document.getElementById("car-bodywork-summary"),
+      document.getElementById("car-bodywork-grid"),
+      document.getElementById("car-bodywork-note"),
+      panelMarks,
+      paintStatus,
+      bodyNote
+    );
 
     const dealerNameEl = document.querySelector('.dealer-head h3');
     const dealerCityEl = document.querySelector('.dealer-head p');
@@ -447,6 +584,8 @@
   })();
 </script>
 <script type="module">
+  import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { db } from "./firebase-client.js";
   import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
 
   (async function hydrateFromFirestoreIds() {
@@ -460,7 +599,46 @@
     }
     if (hintEl) hintEl.style.display = "none";
 
-    const listing = listingId ? await fetchListingById(listingId) : null;
+    let listing = listingId ? await fetchListingById(listingId) : null;
+    if (listingId) {
+      try {
+        const rawSnap = await getDoc(doc(db, "listings", listingId));
+        if (rawSnap.exists()) {
+          const raw = rawSnap.data() || {};
+          listing = {
+            ...(listing || {}),
+            id: listingId,
+            carName: String(raw.carName || raw.name || (listing && listing.carName) || ""),
+            priceLakh: String(raw.priceLakh || raw.price || (listing && listing.priceLakh) || ""),
+            mileage: String(raw.mileage || (listing && listing.mileage) || ""),
+            transmission: String(raw.transmission || (listing && listing.transmission) || ""),
+            condition: String(raw.condition || (listing && listing.condition) || ""),
+            city: String(raw.city || (listing && listing.city) || ""),
+            modelYear: String(raw.modelYear || (listing && listing.modelYear) || ""),
+            fuelType: String(raw.fuelType || (listing && listing.fuelType) || ""),
+            engine: String(raw.engine || (listing && listing.engine) || ""),
+            color: String(raw.color || (listing && listing.color) || ""),
+            registrationCity: String(raw.registrationCity || (listing && listing.registrationCity) || ""),
+            paintStatus: String(raw.paintStatus || (listing && listing.paintStatus) || ""),
+            bodyNote: String(raw.bodyNote || (listing && listing.bodyNote) || ""),
+            panelMarks: raw.panelMarks && typeof raw.panelMarks === "object"
+              ? raw.panelMarks
+              : ((listing && listing.panelMarks) || {}),
+            bodyType: String(raw.bodyType || (listing && listing.bodyType) || ""),
+            assembly: String(raw.assembly || (listing && listing.assembly) || ""),
+            description: String(raw.description || (listing && listing.description) || ""),
+            features: Array.isArray(raw.features) ? raw.features : ((listing && listing.features) || []),
+            contactName: String(raw.contactName || (listing && listing.contactName) || ""),
+            contactRole: String(raw.contactRole || (listing && listing.contactRole) || ""),
+            phone: String(raw.phone || (listing && listing.phone) || ""),
+            carImages: Array.isArray(raw.carImages) ? raw.carImages : ((listing && listing.carImages) || []),
+            coverImage: String(raw.coverImage || (listing && listing.coverImage) || "")
+          };
+        }
+      } catch (_err) {
+        // Keep normalized listing fallback if direct fetch fails.
+      }
+    }
     const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
     const dealer = dealerId ? await fetchDealerProfileById(dealerId) : null;
     if (!listing && !dealer) return;
@@ -482,9 +660,9 @@
     const bodyNote = (listing && listing.bodyNote) || "";
     const panelMarks = (listing && listing.panelMarks && typeof listing.panelMarks === "object") ? listing.panelMarks : {};
     const dealerName = (dealer && dealer.dealerName) || (listing && listing.dealerName) || (params.get("dealer") || "—");
-    const contactName = (dealer && dealer.contactName) || (listing && listing.contactName) || (params.get("contactName") || "—");
-    const contactRole = (dealer && dealer.contactRole) || (listing && listing.contactRole) || (params.get("contactRole") || "—");
-    var phone = (dealer && dealer.phone) || (listing && listing.phone) || params.get("phone") || "";
+    const contactName = (listing && listing.contactName) || (dealer && dealer.contactName) || (params.get("contactName") || "—");
+    const contactRole = (listing && listing.contactRole) || (dealer && dealer.contactRole) || (params.get("contactRole") || "—");
+    var phone = (listing && listing.phone) || (dealer && dealer.phone) || params.get("phone") || "";
     phone = typeof gbDigitsPhone === "function" ? gbDigitsPhone(phone) : String(phone).replace(/\D/g, "");
     const responseTime = (dealer && dealer.responseTime) || "";
     const carImages = (listing && Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : []);
@@ -546,6 +724,26 @@
         " · Body: " + (bodyType || "-") +
         " · Assembly: " + (assembly || "-");
     }
+    gbRenderDealerDetails(
+      document.getElementById("dealer-detail-section"),
+      document.getElementById("dealer-detail-rows"),
+      document.getElementById("dealer-detail-note"),
+      {
+        modelYear,
+        fuelType,
+        engine,
+        color,
+        bodyType,
+        assembly,
+        paintStatus,
+        registrationCity,
+        condition,
+        transmission,
+        mileage,
+        city,
+        bodyNote
+      }
+    );
     const featureSection = document.getElementById("car-features-section");
     const featureList = document.getElementById("car-features-list");
     const features = listing && Array.isArray(listing.features) ? listing.features.filter(Boolean) : [];

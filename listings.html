@@ -1272,19 +1272,25 @@
 
       const detailLink = card.querySelector('.detail-btn');
       if (detailLink) {
-        detailLink.href = 'car-detail.html?' + commonParams.toString();
+        const existingHref = detailLink.getAttribute('href') || '';
+        if (!existingHref.includes('car-detail.html?') || existingHref.indexOf('panelMarks=') === -1) {
+          detailLink.href = 'car-detail.html?' + commonParams.toString();
+        }
       }
       const dealerLink = card.querySelector('.dealer-btn');
       if (dealerLink) {
-        const dealerParams = new URLSearchParams({
-          dealerId: dealerId,
-          dealer: dealer,
-          city: city,
-          contactName: contact.name,
-          contactRole: contact.role,
-          phone: phone
-        });
-        dealerLink.href = 'dealer-profile.html?' + dealerParams.toString();
+        const existingDealerHref = dealerLink.getAttribute('href') || '';
+        if (!existingDealerHref.includes('dealer-profile.html?')) {
+          const dealerParams = new URLSearchParams({
+            dealerId: dealerId,
+            dealer: dealer,
+            city: city,
+            contactName: contact.name,
+            contactRole: contact.role,
+            phone: phone
+          });
+          dealerLink.href = 'dealer-profile.html?' + dealerParams.toString();
+        }
       }
     });
   }
@@ -1802,6 +1808,9 @@
       const priceLakh = toLakh(listing.priceLakh || listing.price);
       const bodyType = clean(listing.bodyType || "Any");
       const assembly = clean(listing.assembly || "Any");
+      const paintStatus = clean(listing.paintStatus || "");
+      const bodyNote = clean(listing.bodyNote || "");
+      const panelMarksJson = JSON.stringify(listing.panelMarks && typeof listing.panelMarks === "object" ? listing.panelMarks : {});
       const bodywork = bodyworkSummary(listing);
       const listingId = clean(listing.id || [slugify(title), slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
       const dealerId = clean(entry.dealerId || [slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
@@ -1822,6 +1831,11 @@
         engine,
         color,
         registrationCity,
+        bodyType,
+        assembly,
+        paintStatus,
+        bodyNote,
+        panelMarks: panelMarksJson,
         city,
         dealer: dealerName,
         contactName,

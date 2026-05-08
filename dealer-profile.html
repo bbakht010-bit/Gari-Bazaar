@@ -369,6 +369,16 @@
           const transmission = clean(listing.transmission || "-");
           const condition = clean(listing.condition || "-");
           const price = clean(listing.priceLakh || listing.price || "-");
+          const modelYear = clean(listing.modelYear || "");
+          const fuelType = clean(listing.fuelType || "");
+          const engine = clean(listing.engine || "");
+          const color = clean(listing.color || "");
+          const registrationCity = clean(listing.registrationCity || city);
+          const bodyType = clean(listing.bodyType || "");
+          const assembly = clean(listing.assembly || "");
+          const paintStatus = clean(listing.paintStatus || "");
+          const bodyNote = clean(listing.bodyNote || "");
+          const panelMarksJson = JSON.stringify(listing.panelMarks && typeof listing.panelMarks === "object" ? listing.panelMarks : {});
           const contactName = clean(listing.contactName || dealer.contactName || "Dealer");
           const contactRole = clean(listing.contactRole || dealer.contactRole || "Sales Desk");
           const phoneDigits = normalizePkPhone(clean(listing.phone || dealer.phone || ""));
@@ -383,6 +393,16 @@
             mileage: mileage,
             transmission: transmission,
             condition: condition,
+            modelYear: modelYear,
+            fuelType: fuelType,
+            engine: engine,
+            color: color,
+            registrationCity: registrationCity,
+            bodyType: bodyType,
+            assembly: assembly,
+            paintStatus: paintStatus,
+            bodyNote: bodyNote,
+            panelMarks: panelMarksJson,
             city: city,
             dealer: dealer.dealerName,
             contactName: contactName,

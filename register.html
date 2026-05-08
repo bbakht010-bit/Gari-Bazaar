@@ -519,9 +519,9 @@
 <!-- NAV -->
 <nav>
   <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
-  <a href="index.html" class="nav-back">
+  <a href="index.html" class="nav-back" id="register-nav-back">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Back to Home
+    <span id="register-nav-back-text">Back to Home</span>
   </a>
 </nav>
 
@@ -608,7 +608,7 @@
         </div>
         <h4>Upload Dealer Profile Picture</h4>
         <p>JPG or PNG recommended</p>
-        <input type="file" id="dealer-profile-picture" accept=".jpg,.jpeg,.png,.webp">
+        <input type="file" id="dealer-profile-picture" accept="image/*,.jpg,.jpeg,.png,.webp">
       </label>
     </div>
 
@@ -694,7 +694,7 @@
         </div>
         <h4>Upload Registration Document</h4>
         <p>PDF, JPG or PNG — max 10MB</p>
-        <input type="file" id="reg-upload" accept=".pdf,.jpg,.png">
+        <input type="file" id="reg-upload" accept=".pdf,image/*,.jpg,.jpeg,.png,.webp">
       </label>
 
       <label for="photos-upload" style="margin-left:34px; display:block; margin-bottom:8px; font-size:13px; font-weight:500; color:var(--gray-700);">
@@ -706,7 +706,7 @@
         </div>
         <h4>Upload Dealership Photos</h4>
         <p>Upload 3–6 photos of your showroom — JPG or PNG, max 5MB each</p>
-        <input type="file" id="photos-upload" accept=".jpg,.png" multiple>
+        <input type="file" id="photos-upload" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
       </label>
     </div>
 
@@ -861,12 +861,24 @@
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { auth, db, ensureUserRecord, getDealerProfile, upsertDealerProfile, uploadDealerProfileImage } from "./firebase-client.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { app, auth, db, ensureUserRecord, getDealerProfile, upsertDealerProfile, uploadDealerProfileImage } from "./firebase-client.js";
   let currentUser = null;
   let currentDealerProfile = null;
   let isProfileUpdateMode = false;
+  const storage = getStorage(app);
   const ownerEmailReadonly = document.getElementById('owner-email-readonly');
   const submitBtn = document.querySelector('.submit-btn');
+  const registerNavBack = document.getElementById('register-nav-back');
+  const registerNavBackText = document.getElementById('register-nav-back-text');
+  const pageTitle = document.querySelector('.page-header h1');
+  const pageSubtitle = document.querySelector('.page-header p');
+  const ownerSection = document.querySelectorAll('.form-section')[1];
+  const employeeSection = document.querySelectorAll('.form-section')[2];
+  const planSection = document.querySelectorAll('.form-section')[4];
+  const agreementSection = document.querySelectorAll('.form-section')[5];
+  const regUploadLabel = document.querySelector('label[for="reg-upload"]');
+  const photosUploadLabel = document.querySelector('label[for="photos-upload"]');
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -916,6 +928,7 @@
         submitBtn.textContent = 'Submit Change Request';
       }
     }
+    applyUpdateModeUi();
   });
 
   // Plan selection highlight
@@ -958,13 +971,65 @@
     container.appendChild(error);
   }
 
-  function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(new Error("Could not read selected file."));
-      reader.readAsDataURL(file);
-    });
+  function bytesLabel(size) {
+    const mb = size / (1024 * 1024);
+    return mb.toFixed(1) + " MB";
+  }
+
+  function sanitizeFileName(name) {
+    return String(name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
+  }
+
+  async function uploadDealerVerificationDoc(uid, file) {
+    const path = "dealers/" + uid + "/verification/" + Date.now() + "_" + sanitizeFileName(file.name || "registration.pdf");
+    const fileRef = ref(storage, path);
+    await uploadBytes(fileRef, file, { contentType: file.type || "application/pdf" });
+    return await getDownloadURL(fileRef);
+  }
+
+  async function uploadDealerGallery(uid, files) {
+    const list = Array.from(files || []);
+    const urls = [];
+    for (const file of list) {
+      const path = "dealers/" + uid + "/gallery/" + Date.now() + "_" + sanitizeFileName(file.name || "photo.jpg");
+      const fileRef = ref(storage, path);
+      await uploadBytes(fileRef, file, { contentType: file.type || "image/jpeg" });
+      urls.push(await getDownloadURL(fileRef));
+    }
+    return urls;
+  }
+
+  function applyUpdateModeUi() {
+    if (!isProfileUpdateMode) return;
+    if (pageTitle) pageTitle.textContent = "Update Dealership Profile";
+    if (pageSubtitle) {
+      pageSubtitle.textContent = "Submit dealership profile changes for admin approval. Existing registration files stay saved unless you replace them.";
+    }
+    if (submitBtn) submitBtn.textContent = "Submit Change Request";
+    if (registerNavBack) {
+      registerNavBack.href = "dealer-dashboard.html";
+    }
+    if (registerNavBackText) {
+      registerNavBackText.textContent = "Back to Dealer Dashboard";
+    }
+    if (ownerSection) {
+      ownerSection.querySelectorAll("input, select, textarea").forEach((el) => {
+        el.disabled = true;
+      });
+      const sectionSub = ownerSection.querySelector(".section-sub");
+      if (sectionSub) sectionSub.textContent = "Owner details are locked during profile updates.";
+    }
+    if (employeeSection) employeeSection.style.display = "none";
+    if (planSection) {
+      planSection.querySelectorAll("input").forEach((el) => {
+        el.disabled = true;
+      });
+      const planSub = planSection.querySelector(".section-sub");
+      if (planSub) planSub.textContent = "Plan changes are handled by admin support.";
+    }
+    if (agreementSection) agreementSection.style.display = "none";
+    if (regUploadLabel) regUploadLabel.innerHTML = 'Government Registration Certificate <span style="color:#dc2626">*</span> <small style="color:#6b7280;font-weight:400;">(only required if not already uploaded)</small>';
+    if (photosUploadLabel) photosUploadLabel.innerHTML = 'Dealership Photos <span style="color:#dc2626">*</span> <small style="color:#6b7280;font-weight:400;">(only required if none exist)</small>';
   }
 
   if (addEmployeeCheckbox && employeeFields) {
@@ -995,11 +1060,15 @@
       { id: 'dealer-city', message: 'Please select your city.' },
       { id: 'dealer-area', message: 'Area/Sector is required.' },
       { id: 'dealer-business-since', message: 'Business start year is required.' },
-      { id: 'dealer-address', message: 'Full address is required.' },
-      { id: 'owner-name', message: 'Owner full name is required.' },
-      { id: 'owner-cnic', message: 'CNIC number is required.' },
-      { id: 'owner-phone', message: 'Owner phone number is required.' }
+      { id: 'dealer-address', message: 'Full address is required.' }
     ];
+    if (!isProfileUpdateMode) {
+      requiredFields.push(
+        { id: 'owner-name', message: 'Owner full name is required.' },
+        { id: 'owner-cnic', message: 'CNIC number is required.' },
+        { id: 'owner-phone', message: 'Owner phone number is required.' }
+      );
+    }
 
     let firstInvalid = null;
 
@@ -1016,16 +1085,38 @@
     const regUploadArea = document.getElementById('reg-upload-area');
     const photosUploadArea = document.getElementById('photos-upload-area');
 
-    if (!isProfileUpdateMode && regUpload && regUpload.files.length === 0) {
+    const existingRegDoc = String((currentDealerProfile && currentDealerProfile.registrationDocumentUrl) || "");
+    const existingDealerPhotos = Array.isArray(currentDealerProfile && currentDealerProfile.dealershipPhotos)
+      ? currentDealerProfile.dealershipPhotos.filter(Boolean)
+      : [];
+
+    if (regUpload && regUpload.files.length > 0) {
+      const regFile = regUpload.files[0];
+      if (regFile.size > 10 * 1024 * 1024) {
+        addBlockError(regUploadArea, 'Registration document exceeds 10 MB limit.');
+        if (!firstInvalid) firstInvalid = regUploadArea;
+      }
+    }
+    if (photosUpload && photosUpload.files.length > 0) {
+      const photoFiles = Array.from(photosUpload.files);
+      photoFiles.forEach((photo) => {
+        if (photo.size > 5 * 1024 * 1024) {
+          addBlockError(photosUploadArea, 'Each dealership photo must be under 5 MB. "' + photo.name + '" is ' + bytesLabel(photo.size) + '.');
+          if (!firstInvalid) firstInvalid = photosUploadArea;
+        }
+      });
+    }
+
+    if ((!isProfileUpdateMode || !existingRegDoc) && regUpload && regUpload.files.length === 0) {
       addBlockError(regUploadArea, 'Registration document is required.');
       if (!firstInvalid) firstInvalid = regUploadArea;
     }
-    if (!isProfileUpdateMode && photosUpload && photosUpload.files.length === 0) {
+    if ((!isProfileUpdateMode || existingDealerPhotos.length === 0) && photosUpload && photosUpload.files.length === 0) {
       addBlockError(photosUploadArea, 'Please upload dealership photos.');
       if (!firstInvalid) firstInvalid = photosUploadArea;
     }
 
-    if (addEmployeeCheckbox && addEmployeeCheckbox.checked) {
+    if (!isProfileUpdateMode && addEmployeeCheckbox && addEmployeeCheckbox.checked) {
       const employeeName = document.getElementById('employee-name');
       const employeePhone = document.getElementById('employee-phone');
       if (!employeeName.value.trim()) {
@@ -1040,13 +1131,15 @@
 
     const agree1 = document.getElementById('agree1');
     const agree2 = document.getElementById('agree2');
-    if (!agree1.checked) {
-      addFieldError(agree1, 'You must confirm dealership registration and information accuracy.');
-      if (!firstInvalid) firstInvalid = agree1;
-    }
-    if (!agree2.checked) {
-      addFieldError(agree2, 'You must accept Dealer Terms and Privacy Policy.');
-      if (!firstInvalid) firstInvalid = agree2;
+    if (!isProfileUpdateMode) {
+      if (!agree1.checked) {
+        addFieldError(agree1, 'You must confirm dealership registration and information accuracy.');
+        if (!firstInvalid) firstInvalid = agree1;
+      }
+      if (!agree2.checked) {
+        addFieldError(agree2, 'You must accept Dealer Terms and Privacy Policy.');
+        if (!firstInvalid) firstInvalid = agree2;
+      }
     }
 
     if (firstInvalid) {
@@ -1081,11 +1174,22 @@
     let profilePicture = existingProfile && existingProfile.profilePicture ? existingProfile.profilePicture : "";
     const selectedProfilePic = profilePictureInput && profilePictureInput.files && profilePictureInput.files[0];
     if (selectedProfilePic) {
-      try {
-        profilePicture = await uploadDealerProfileImage(currentUser.uid, selectedProfilePic);
-      } catch (_e) {
-        profilePicture = await fileToDataUrl(selectedProfilePic);
-      }
+      profilePicture = await uploadDealerProfileImage(currentUser.uid, selectedProfilePic);
+    }
+
+    let registrationDocumentUrl = existingProfile && existingProfile.registrationDocumentUrl
+      ? String(existingProfile.registrationDocumentUrl)
+      : "";
+    const selectedRegDoc = regUpload && regUpload.files && regUpload.files[0];
+    if (selectedRegDoc) {
+      registrationDocumentUrl = await uploadDealerVerificationDoc(currentUser.uid, selectedRegDoc);
+    }
+    let dealershipPhotos = Array.isArray(existingProfile && existingProfile.dealershipPhotos)
+      ? existingProfile.dealershipPhotos.filter(Boolean)
+      : [];
+    const selectedDealerPhotos = photosUpload && photosUpload.files ? Array.from(photosUpload.files) : [];
+    if (selectedDealerPhotos.length > 0) {
+      dealershipPhotos = await uploadDealerGallery(currentUser.uid, selectedDealerPhotos);
     }
 
     const dealerProfile = {
@@ -1101,17 +1205,32 @@
       whatsapp: document.getElementById('owner-whatsapp').value.trim() || document.getElementById('owner-phone').value.trim(),
       email: currentUser.email || '',
       profilePicture: profilePicture,
+      registrationDocumentUrl: registrationDocumentUrl,
+      dealershipPhotos: dealershipPhotos,
       plan: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
       verificationStatus: nextStatus,
       createdAt: (existingProfile && existingProfile.createdAt) || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     if (isProfileUpdateMode) {
+      dealerProfile.ownerName = (existingProfile && existingProfile.ownerName) || "";
+      dealerProfile.ownerCnic = (existingProfile && existingProfile.ownerCnic) || "";
+      dealerProfile.phone = (existingProfile && existingProfile.phone) || "";
+      dealerProfile.whatsapp = (existingProfile && existingProfile.whatsapp) || "";
+      dealerProfile.plan = (existingProfile && existingProfile.plan) || dealerProfile.plan;
+    }
+    if (isProfileUpdateMode) {
       const changeRequestSafe = { ...dealerProfile };
       delete changeRequestSafe.verificationStatus;
       delete changeRequestSafe.suspended;
       delete changeRequestSafe.carsSold;
       delete changeRequestSafe.soldHistory;
+      delete changeRequestSafe.ownerName;
+      delete changeRequestSafe.ownerCnic;
+      delete changeRequestSafe.phone;
+      delete changeRequestSafe.whatsapp;
+      delete changeRequestSafe.email;
+      delete changeRequestSafe.plan;
       await addDoc(collection(db, "dealerChangeRequests"), {
         dealerId: currentUser.uid,
         dealerName: dealerProfile.businessName,
@@ -1130,7 +1249,10 @@
     this.style.background = '#166534';
     this.disabled = true;
     setTimeout(() => {
-      window.location.href = 'dealer-application-pending.html';
+      if (isProfileUpdateMode) {
+        localStorage.setItem('gb_dealer_flash_message', 'Change request submitted successfully. It is now pending admin approval.');
+      }
+      window.location.href = isProfileUpdateMode ? 'dealer-dashboard.html' : 'dealer-application-pending.html';
     }, 500);
   });
 

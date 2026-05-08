@@ -320,6 +320,15 @@
     if (waBtn) waBtn.href = "https://wa.me/" + clean(dealer.phone).replace(/[^\d]/g, "") + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
     const callBtn = document.querySelector("aside.card .action.call");
     if (callBtn) callBtn.href = "tel:+" + clean(dealer.phone).replace(/[^\d]/g, "");
+    const gallery = document.querySelector(".dealer-gallery");
+    if (gallery) {
+      const photos = Array.isArray(dealer.dealershipPhotos) ? dealer.dealershipPhotos.filter(Boolean).slice(0, 6) : [];
+      if (photos.length) {
+        gallery.innerHTML = photos.map((src) =>
+          '<div class="dealer-photo"><img src="' + esc(src) + '" alt="Dealership photo" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"></div>'
+        ).join("");
+      }
+    }
 
     const statNumbers = document.querySelectorAll(".stats .stat h3");
     const liveListingsSnap = await getDocs(query(collection(db, "listings"), where("dealerId", "==", dealerId)));

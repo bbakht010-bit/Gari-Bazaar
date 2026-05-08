@@ -251,6 +251,18 @@
     font-size: 12px;
     color: var(--gray-500);
   }
+.page-status {
+  margin: 14px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+.page-status.show { display: block; }
 
   @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .layout { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: 1fr; } .pill { display: none; } }
@@ -273,6 +285,7 @@
 </section>
 
 <main class="wrap">
+  <div id="dealer-dashboard-flash" class="page-status" role="status" aria-live="polite"></div>
   <section class="kpi-grid">
     <article class="kpi"><div class="label">Active Cars</div><div class="value" id="kpi-cars">0</div><div class="meta">Free plan limit: 2</div></article>
     <article class="kpi"><div class="label">Employees</div><div class="value" id="kpi-employees">0</div><div class="meta">Manage assignment quality</div></article>
@@ -366,7 +379,7 @@
           </div>
           <div class="field full">
             <label>Car Photos * (Buyer can view these in original quality)</label>
-            <input id="car-images" type="file" accept=".jpg,.jpeg,.png,.webp" multiple>
+            <input id="car-images" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
             <p class="note" style="margin-top:4px;">You can select multiple photos at once. Photos are uploaded to Firebase Storage in high quality.</p>
           </div>
           <div class="field">
@@ -388,7 +401,7 @@
       </div>
       <div class="field" style="margin-bottom:10px;">
         <label>Dealer Profile Picture</label>
-        <input id="dealer-profile-picture-input" type="file" accept=".jpg,.jpeg,.png,.webp">
+        <input id="dealer-profile-picture-input" type="file" accept="image/*,.jpg,.jpeg,.png,.webp">
       </div>
       <div class="actions" style="margin-bottom:10px;">
         <button id="dealer-profile-picture-save" class="btn btn-outline" type="button">Update Profile Picture</button>
@@ -520,6 +533,17 @@
 
   const dealerName = (dealerProfile && dealerProfile.businessName) || 'Your Dealership';
   const dealerCity = (dealerProfile && dealerProfile.city) || 'Pakistan';
+  const dashboardFlash = document.getElementById('dealer-dashboard-flash');
+  const flashMessage = localStorage.getItem('gb_dealer_flash_message');
+  if (dashboardFlash && flashMessage) {
+    dashboardFlash.textContent = flashMessage;
+    dashboardFlash.classList.add('show');
+    localStorage.removeItem('gb_dealer_flash_message');
+    setTimeout(() => {
+      dashboardFlash.classList.remove('show');
+      dashboardFlash.textContent = '';
+    }, 8000);
+  }
   const pill = document.getElementById('dealerDashboardPill');
   const title = document.getElementById('dealerDashboardTitle');
   const subtitle = document.getElementById('dealerDashboardSubtitle');
@@ -621,15 +645,6 @@
       if (url) results.push(url);
     }
     return results;
-  }
-
-  function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(new Error("Could not read selected file."));
-      reader.readAsDataURL(file);
-    });
   }
 
   function byId(list, id) {
@@ -1000,9 +1015,6 @@
     const err = document.getElementById('car-error');
     clearError(err);
     setCarFormStatus('');
-    await loadLiveState();
-    renderAll();
-    if (!requireActiveDealer(err)) return;
 
     const name = document.getElementById('car-name').value.trim();
     const price = document.getElementById('car-price').value.trim();
@@ -1024,7 +1036,12 @@
     const features = Array.from(document.querySelectorAll('.car-feature-option:checked')).map((el) => el.value);
     const assigneeId = document.getElementById('car-assignee').value;
     const carImagesInput = document.getElementById('car-images');
+    const selectedImageFiles = carImagesInput && carImagesInput.files ? Array.from(carImagesInput.files) : [];
     const carCoverIndexInput = document.getElementById('car-cover-index');
+
+    await loadLiveState();
+    renderAll();
+    if (!requireActiveDealer(err)) return;
 
     if (!name || !price || !mileage || !transmission || !condition || !city || !paintStatus) {
       return setError(err, 'Please complete all required car fields.');
@@ -1043,13 +1060,15 @@
     if (engineDigits && !/^\d{3,5}$/.test(engineDigits)) {
       return setError(err, 'Engine must be 3 to 5 digits (for example: 660, 1300, 1800).');
     }
-    const imageFiles = carImagesInput && carImagesInput.files ? carImagesInput.files : [];
     const editingId = state.editingCarId || "";
     const editingCar = editingId ? byId(state.cars, editingId) : null;
     const existingImages = editingCar && Array.isArray(editingCar.carImages) ? editingCar.carImages : [];
+    if (!editingId && selectedImageFiles.length === 0) {
+      return setError(err, 'Please upload at least one car photo.');
+    }
     const coverIndexRaw = carCoverIndexInput ? Number(carCoverIndexInput.value || "1") : 1;
     const coverIndex = Number.isFinite(coverIndexRaw) ? Math.max(1, Math.floor(coverIndexRaw)) : 1;
-    const effectiveImageCount = imageFiles.length > 0 ? imageFiles.length : existingImages.length;
+    const effectiveImageCount = selectedImageFiles.length > 0 ? selectedImageFiles.length : existingImages.length;
     if (effectiveImageCount > 0 && coverIndex > effectiveImageCount) {
       return setError(err, 'Cover photo number must be between 1 and total available photos.');
     }
@@ -1057,7 +1076,10 @@
     const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
     const listingId = editingId || crypto.randomUUID();
     try {
-      const uploadedImages = imageFiles.length ? await filesToStorageUrls(imageFiles, listingId) : [];
+      const uploadedImages = selectedImageFiles.length ? await filesToStorageUrls(selectedImageFiles, listingId) : [];
+      if (selectedImageFiles.length > 0 && uploadedImages.length === 0) {
+        return setError(err, 'Selected photos could not be uploaded. Please try again.');
+      }
       const finalImages = uploadedImages.length ? uploadedImages : existingImages;
       const coverImage = finalImages[Math.max(0, coverIndex - 1)] || finalImages[0] || "";
       const payload = {
@@ -1235,14 +1257,20 @@
         setError(dealerProfilePictureError, 'Please select an image first.');
         return;
       }
+      if (!(file.type || '').toLowerCase().startsWith('image/')) {
+        setError(dealerProfilePictureError, 'Please select a valid image file.');
+        return;
+      }
+      if (file.size > 12 * 1024 * 1024) {
+        setError(dealerProfilePictureError, 'Image is too large. Please choose a file under 12 MB.');
+        return;
+      }
       try {
         dealerProfilePictureSave.disabled = true;
         dealerProfilePictureSave.textContent = 'Updating...';
-        let profilePicture = "";
-        try {
-          profilePicture = await uploadDealerProfileImage(dealerUid, file);
-        } catch (_storageErr) {
-          profilePicture = await fileToDataUrl(file);
+        const profilePicture = await uploadDealerProfileImage(dealerUid, file);
+        if (!profilePicture) {
+          throw new Error('Image upload failed. Please try a different image.');
         }
         await updateDoc(doc(db, "dealerProfiles", dealerUid), {
           profilePicture: profilePicture,
@@ -1250,9 +1278,19 @@
         });
         if (dealerProfile) dealerProfile.profilePicture = profilePicture;
         if (dealerProfilePictureInput) dealerProfilePictureInput.value = "";
-        setError(dealerProfilePictureError, 'Profile picture updated successfully.');
+        setSuccess(dealerProfilePictureError, 'Profile picture updated successfully.');
       } catch (error) {
-        setError(dealerProfilePictureError, 'Could not update profile picture: ' + (error && error.message ? error.message : 'Unknown error'));
+        const rawMsg = error && error.message ? String(error.message) : 'Unknown error';
+        const lowerMsg = rawMsg.toLowerCase();
+        let friendlyMsg = rawMsg;
+        if (lowerMsg.includes('permission')) {
+          friendlyMsg = 'Could not update profile picture: missing permissions. Please log in again as dealer and retry.';
+        } else if (lowerMsg.includes('quota') || lowerMsg.includes('size') || lowerMsg.includes('too large')) {
+          friendlyMsg = 'Could not update profile picture: image is too large. Please use a smaller file under 12 MB.';
+        } else {
+          friendlyMsg = 'Could not update profile picture: ' + rawMsg;
+        }
+        setError(dealerProfilePictureError, friendlyMsg);
       } finally {
         dealerProfilePictureSave.disabled = false;
         dealerProfilePictureSave.textContent = 'Update Profile Picture';

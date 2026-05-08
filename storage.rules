@@ -23,8 +23,34 @@ service firebase.storage {
       allow read: if true;
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
-        request.resource.size < 6 * 1024 * 1024 &&
-        request.resource.contentType.matches('image/.*');
+        request.resource.size < 12 * 1024 * 1024 &&
+        (
+          request.resource.contentType.matches('image/.*') ||
+          fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
+        );
+    }
+
+    match /dealers/{dealerId}/verification/{fileName} {
+      allow read: if isDealerUser() && request.auth.uid == dealerId;
+      allow write: if isDealerUser() &&
+        request.auth.uid == dealerId &&
+        request.resource.size < 12 * 1024 * 1024 &&
+        (
+          request.resource.contentType.matches('application/pdf') ||
+          request.resource.contentType.matches('image/.*') ||
+          fileName.matches('(?i).+\\.(pdf|jpg|jpeg|png|webp)$')
+        );
+    }
+
+    match /dealers/{dealerId}/gallery/{fileName} {
+      allow read: if true;
+      allow write: if isDealerUser() &&
+        request.auth.uid == dealerId &&
+        request.resource.size < 8 * 1024 * 1024 &&
+        (
+          request.resource.contentType.matches('image/.*') ||
+          fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
+        );
     }
   }
 }

@@ -99,3 +99,159 @@ html[data-theme="dark"] #gb-theme-toggle {
   border-color: #374151;
   background: #0f172a;
 }
+
+/* Global UI sync layer (safe, non-destructive) */
+:root {
+  --gb-radius-sm: 8px;
+  --gb-radius-md: 10px;
+  --gb-radius-lg: 14px;
+  --gb-border: #e5e7eb;
+  --gb-text: #111827;
+  --gb-muted: #4b5563;
+  --gb-success-bg: #f0fdf4;
+  --gb-success-border: #bbf7d0;
+  --gb-success-text: #166534;
+}
+
+nav {
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04);
+}
+
+.card,
+.panel,
+.kpi,
+.form-card,
+.dealer-card,
+.car-card,
+.plan-card,
+.setting,
+.sidebar {
+  border-radius: var(--gb-radius-lg) !important;
+  border-color: var(--gb-border) !important;
+}
+
+.btn,
+.btn-primary,
+.btn-outline,
+.btn-danger,
+.btn-home,
+.btn-hero-primary,
+.btn-hero-secondary,
+.btn-nav-soft,
+.mini-btn,
+button[type="submit"] {
+  border-radius: var(--gb-radius-md) !important;
+  min-height: 40px;
+}
+
+.btn-outline,
+.mini-btn,
+.btn-nav-soft {
+  border-color: var(--gb-border);
+}
+
+.field input,
+.field select,
+.field textarea,
+input,
+select,
+textarea {
+  border-radius: var(--gb-radius-sm);
+}
+
+label,
+.field label {
+  color: var(--gb-muted);
+}
+
+.pill,
+.badge,
+.tag,
+.status {
+  border-radius: 999px;
+}
+
+.error,
+.inline-status,
+.page-status {
+  border-radius: var(--gb-radius-sm);
+}
+
+.error.success,
+.inline-status.show,
+.page-status.show {
+  background: var(--gb-success-bg) !important;
+  border-color: var(--gb-success-border) !important;
+  color: var(--gb-success-text) !important;
+}
+
+/* Keep dense nav/button rows cleaner on small screens */
+@media (max-width: 760px) {
+  .nav-right,
+  .nav-cta {
+    gap: 8px !important;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-outline,
+  .btn-nav-soft,
+  .mini-btn {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+/* Extra compact pass for very small phones */
+@media (max-width: 480px) {
+  nav {
+    min-height: 62px !important;
+    height: auto !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center !important;
+  }
+
+  .logo {
+    font-size: 22px !important;
+  }
+
+  .nav-right,
+  .nav-cta,
+  .nav-links {
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .nav-links {
+    width: 100%;
+    order: 3;
+  }
+
+  .nav-buyer-links {
+    gap: 8px !important;
+    padding-right: 0 !important;
+    border-right: none !important;
+  }
+
+  .pill {
+    display: none !important;
+  }
+
+  .btn,
+  .btn-primary,
+  .btn-outline,
+  .btn-nav-soft,
+  .mini-btn {
+    min-height: 36px !important;
+    font-size: 12px !important;
+    padding: 7px 10px !important;
+  }
+
+  .hero,
+  .page-hero {
+    padding-top: 92px !important;
+  }
+}

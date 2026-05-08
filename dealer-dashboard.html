@@ -450,6 +450,7 @@
   <section class="card" style="margin-top:14px;">
     <div class="section-title">
       <div><h2>Sold Cars History</h2><p>Stored without photos. Visible to dealer only.</p></div>
+      <span id="sold-history-meta" class="badge emp">0 sold cars</span>
     </div>
     <div class="list" id="sold-history-list"></div>
   </section>
@@ -457,7 +458,7 @@
 
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { collection, deleteDoc, doc, getDocs, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { collection, deleteDoc, doc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getDownloadURL, getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
   import { app, auth, db, FIREBASE_FUNCTIONS_REGION, uploadDealerProfileImage, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
@@ -578,6 +579,7 @@
   };
   let currentPanelMarks = {};
   const storage = getStorage(app);
+  const LISTING_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
 
   async function loadLiveState() {
     const freshProfile = await getDealerProfile(dealerUid);
@@ -638,6 +640,13 @@
     const files = Array.from(fileList || []);
     const results = [];
     for (const file of files) {
+      if (!String(file.type || "").startsWith("image/")) {
+        throw new Error('Only image files are allowed for car photos.');
+      }
+      if (Number(file.size || 0) > LISTING_IMAGE_MAX_BYTES) {
+        const sizeMb = (Number(file.size || 0) / (1024 * 1024)).toFixed(1);
+        throw new Error('Image "' + (file.name || "file") + '" is ' + sizeMb + 'MB. Max allowed is 12MB.');
+      }
       const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;
       const imageRef = ref(storage, path);
@@ -646,6 +655,53 @@
       if (url) results.push(url);
     }
     return results;
+  }
+
+  async function markListingSoldClientFallback(listingId) {
+    await runTransaction(db, async (tx) => {
+      const listingRef = doc(db, "listings", listingId);
+      const profileRef = doc(db, "dealerProfiles", dealerUid);
+      const privateRef = doc(db, "dealerPrivate", dealerUid);
+
+      const listingSnap = await tx.get(listingRef);
+      if (!listingSnap.exists()) throw new Error("Listing not found.");
+      const listing = listingSnap.data() || {};
+      if (String(listing.dealerId || "") !== dealerUid) throw new Error("You can only mark your own listing as sold.");
+
+      const profileSnap = await tx.get(profileRef);
+      if (!profileSnap.exists()) throw new Error("Dealer profile not found.");
+      const profile = profileSnap.data() || {};
+      const status = String(profile.verificationStatus || "").toLowerCase();
+      if (status !== "verified" && status !== "approved") throw new Error("Dealership is not approved.");
+      if (profile.suspended) throw new Error("Dealership is suspended.");
+
+      const privateSnap = await tx.get(privateRef);
+      const existingHistory = privateSnap.exists() && Array.isArray((privateSnap.data() || {}).soldHistory)
+        ? (privateSnap.data() || {}).soldHistory
+        : [];
+      if (existingHistory.length >= 600) throw new Error("Sold history limit reached (600).");
+
+      const soldEntry = {
+        listingId: String(listingId),
+        name: String(listing.carName || listing.name || ""),
+        price: String(listing.priceLakh || listing.price || ""),
+        mileage: String(listing.mileage || ""),
+        transmission: String(listing.transmission || ""),
+        condition: String(listing.condition || ""),
+        city: String(listing.city || ""),
+        soldAt: new Date().toISOString()
+      };
+
+      tx.set(privateRef, {
+        soldHistory: existingHistory.concat([soldEntry]),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      tx.update(profileRef, {
+        carsSold: Number(profile.carsSold || 0) + 1,
+        updatedAt: serverTimestamp()
+      });
+      tx.delete(listingRef);
+    });
   }
 
   function byId(list, id) {
@@ -908,6 +964,8 @@
 
   function renderSoldHistory() {
     const root = document.getElementById('sold-history-list');
+    const soldMeta = document.getElementById('sold-history-meta');
+    if (soldMeta) soldMeta.textContent = state.soldHistory.length + ' sold car' + (state.soldHistory.length === 1 ? '' : 's');
     if (!root) return;
     root.innerHTML = '';
     if (!state.soldHistory.length) {
@@ -1130,7 +1188,13 @@
       setCarFormExpanded(false);
     } catch (error) {
       setCarFormExpanded(true);
-      setError(err, 'Could not save listing: ' + (error && error.message ? error.message : 'Unknown error'));
+      let message = error && error.message ? error.message : 'Unknown error';
+      if (error && error.code === 'storage/unauthorized') {
+        message = 'Upload blocked by Storage security rules. Please sign in again; if it persists, deploy latest storage rules.';
+      } else if (error && error.code === 'storage/retry-limit-exceeded') {
+        message = 'Upload timed out. Please check connection and retry with smaller images.';
+      }
+      setError(err, 'Could not save listing: ' + message);
     }
   });
 
@@ -1189,13 +1253,27 @@
         await markListingSoldFn({ listingId: soldId });
         await loadLiveState();
         renderAll();
+        setSuccess(err, 'Car marked as sold and moved to Sold Cars History.');
       } catch (error) {
-        const msg =
-          error && error.code === "functions/not-found"
-            ? "Listing not found (it may have already been removed)."
-            : error && error.message
-              ? error.message
-              : "Unknown error";
+        const code = error && error.code ? String(error.code) : "";
+        const functionUnavailable =
+          code === "functions/not-found" ||
+          code === "functions/unavailable" ||
+          code === "functions/internal" ||
+          code === "not-found";
+        if (functionUnavailable) {
+          try {
+            await markListingSoldClientFallback(soldId);
+            await loadLiveState();
+            renderAll();
+            setSuccess(err, 'Car marked as sold and moved to Sold Cars History.');
+          } catch (fallbackError) {
+            const fallbackMsg = fallbackError && fallbackError.message ? fallbackError.message : "Unknown error";
+            setError(err, "Could not mark car as sold: " + fallbackMsg);
+          }
+          return;
+        }
+        const msg = error && error.message ? error.message : "Unknown error";
         setError(err, "Could not mark car as sold: " + msg);
       }
       return;

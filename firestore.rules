@@ -34,13 +34,10 @@ service cloud.firestore {
       return !request.resource.data.keys().hasAny(['ownerCnic', 'soldHistory']);
     }
 
-    function dealerCarsSoldUnchanged() {
-      return request.resource.data.get('carsSold', 0) == resource.data.get('carsSold', 0);
-    }
-
-    function dealerSoldHistoryNotGrowingFromClient() {
-      return !resource.exists ||
-        request.resource.data.get('soldHistory', []).size() <= resource.data.get('soldHistory', []).size();
+    function dealerCarsSoldProgressValid() {
+      let oldValue = resource.data.get('carsSold', 0);
+      let newValue = request.resource.data.get('carsSold', 0);
+      return newValue == oldValue || newValue == oldValue + 1;
     }
 
     function listingCoreStringsValid() {
@@ -100,7 +97,6 @@ service cloud.firestore {
       allow update: if isAdmin() || (
         isOwner(uid) &&
         request.resource.data.get('soldHistory', []).size() <= 600 &&
-        dealerSoldHistoryNotGrowingFromClient() &&
         (!('ownerCnic' in request.resource.data) ||
           (request.resource.data.ownerCnic is string && request.resource.data.ownerCnic.size() <= 24))
       );
@@ -122,7 +118,7 @@ service cloud.firestore {
         isDealerUser() &&
         unchangedStatusAndSuspension() &&
         dealerPublicProfilePayloadClean() &&
-        dealerCarsSoldUnchanged()
+        dealerCarsSoldProgressValid()
       );
       allow delete: if isAdmin();
     }

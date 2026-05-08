@@ -2,10 +2,14 @@
   "name": "gari-bazaar",
   "private": true,
   "scripts": {
+    "check:stable-urls": "node scripts/check-stable-urls.mjs",
+    "test:e2e": "playwright test",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "predeploy": "npm run check:stable-urls"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "firebase-tools": "^13.29.1"
   }
 }

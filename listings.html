@@ -902,6 +902,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+  <!-- Page purpose: Browse, filter, and sort verified live listings loaded from Firestore. -->
 
 <nav>
   <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
@@ -1155,7 +1156,9 @@
   </div>
 </footer>
 
+<script src="url-utils.js"></script>
 <script>
+  // Client-side listing filters/sorting for currently rendered card DOM.
   let cards = Array.from(document.querySelectorAll('.car-card'));
   let cardList = cards.slice();
   const carGrid = document.querySelector('.car-grid');
@@ -1237,6 +1240,7 @@
     return match ? match[1].replace(/,/g, '') : '';
   }
 
+  // Backfills stable ID links for any static cards that were rendered without live Firestore data.
   function attachCardLinks() {
     cards.forEach((card) => {
       const title = compactWhitespace((card.querySelector('.car-main h4') || {}).textContent || '');
@@ -1255,26 +1259,21 @@
       const dealerId = [slugify(dealer), slugify(city)].filter(Boolean).join('-');
       const listingId = [slugify(title), slugify(dealer), slugify(city)].filter(Boolean).join('-');
 
-      const commonParams = new URLSearchParams({
-        listingId: listingId,
-        dealerId: dealerId
-      });
+      const detailHref = GB_URLS.detailHref(listingId, dealerId);
+      const dealerHref = GB_URLS.dealerHref(dealerId);
 
       const detailLink = card.querySelector('.detail-btn');
       if (detailLink) {
         const existingHref = detailLink.getAttribute('href') || '';
         if (!existingHref.includes('car-detail.html?')) {
-          detailLink.href = 'car-detail.html?' + commonParams.toString();
+          detailLink.href = detailHref;
         }
       }
       const dealerLink = card.querySelector('.dealer-btn');
       if (dealerLink) {
         const existingDealerHref = dealerLink.getAttribute('href') || '';
         if (!existingDealerHref.includes('dealer-profile.html?')) {
-          const dealerParams = new URLSearchParams({
-            dealerId: dealerId
-          });
-          dealerLink.href = 'dealer-profile.html?' + dealerParams.toString();
+          dealerLink.href = dealerHref;
         }
       }
     });
@@ -1420,6 +1419,7 @@
     resultsCount.textContent = visibleCount + ' ' + label;
   }
 
+  // Single source of truth for all filter/search/sort controls in this page.
   function runListingsSearch() {
     const keyword = normalize(listingSearchInput ? listingSearchInput.value : '');
     const cityFromSelect = citySelect && citySelect.value !== 'All Cities' ? normalize(citySelect.value) : '';
@@ -1674,6 +1674,7 @@
     }
   });
 
+  // Initial pass on first paint.
   attachCardLinks();
   updateSidebarCounts();
 
@@ -1682,6 +1683,7 @@
 <script type="module">
   import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
+  // Live render path: replaces placeholder cards with approved Firestore listings.
 
   function esc(value) {
     return String(value || "")
@@ -1740,6 +1742,7 @@
     const carGrid = document.querySelector(".car-grid");
     if (!carGrid) return;
 
+    // Load dealers + listings together so cards can include dealer metadata.
     const [dealerSnap, listingSnap] = await Promise.all([
       getDocs(collection(db, "dealerProfiles")),
       getDocs(collection(db, "listings"))
@@ -1750,6 +1753,7 @@
       dealers.set(docSnap.id, docSnap.data() || {});
     });
 
+    // Keep only listings that are both dealer-verified and moderation-live.
     const liveListings = [];
     listingSnap.forEach((docSnap) => {
       const listing = { id: docSnap.id, ...(docSnap.data() || {}) };
@@ -1802,13 +1806,9 @@
       const coverImage = clean(listing.coverImage || carImages[0] || "");
       const coverForImg = /^https?:\/\//.test(coverImage) || coverImage.indexOf("data:image/") === 0 ? coverImage : "";
       const waText = encodeURIComponent("Assalamualaikum " + contactName + ", I am interested in " + title + ".");
-      const detailParams = new URLSearchParams({
-        listingId,
-        dealerId
-      });
-      const dealerParams = new URLSearchParams({
-        dealerId
-      });
+      // Stable links always include IDs only; detail page hydrates the rest from Firestore.
+      const detailHref = GB_URLS.detailHref(listingId, dealerId);
+      const dealerHref = GB_URLS.dealerHref(dealerId);
 
       return (
         '<article class="car-card" tabindex="0" data-body="' + esc(bodyType) + '" data-assembly="' + esc(assembly) + '" data-stock-index="' + esc(index + 1) + '">' +
@@ -1836,8 +1836,8 @@
                   '<a class="contact-link call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>"
                 : '<span class="contact-meta" style="display:block;">Phone not listed for this car.</span>') +
             "</div>" +
-            '<a class="action-link detail-btn" href="car-detail.html?' + esc(detailParams.toString()) + '">Show Car Details</a>' +
-            '<a class="action-link dealer-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
+            '<a class="action-link detail-btn" href="' + esc(detailHref) + '">Show Car Details</a>' +
+            '<a class="action-link dealer-btn" href="' + esc(dealerHref) + '">View Dealer Profile</a>' +
           "</div>" +
         "</article>"
       );
@@ -1848,6 +1848,7 @@
     if (typeof updateSidebarCounts === "function") updateSidebarCounts();
   }
 
+  // Non-blocking failure path to avoid breaking page interactivity.
   renderLiveListings().catch((error) => {
     console.error("Failed to load live listings:", error);
   });
@@ -1856,6 +1857,7 @@
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { auth } from "./firebase-client.js";
+  // Small nav auth-state toggles for signed-in buyer UX.
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");

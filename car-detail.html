@@ -219,6 +219,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+  <!-- Page purpose: Car detail view hydrated from stable listing/dealer IDs and Firestore data. -->
 <nav>
   <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
   <a href="listings.html" class="btn">Back to Listings</a>
@@ -543,9 +544,7 @@
 
     const dealerProfileLink = document.querySelector('.action.profile');
     if (dealerProfileLink) {
-      const dealerParams = new URLSearchParams();
-      if (dealerId) dealerParams.set("dealerId", dealerId);
-      dealerProfileLink.href = dealerParams.toString() ? ('dealer-profile.html?' + dealerParams.toString()) : 'dealer-profile.html';
+      dealerProfileLink.href = GB_URLS.dealerHref(dealerId);
     }
   })();
 
@@ -580,24 +579,11 @@
     mountPoint.appendChild(nav);
   })();
 </script>
+<script src="url-utils.js"></script>
 <script type="module">
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
   import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
-
-  function applyCanonicalDetailUrl(listingId, dealerId) {
-    const lid = String(listingId || "").trim();
-    const did = String(dealerId || "").trim();
-    if (!lid && !did) return;
-    const nextParams = new URLSearchParams();
-    if (lid) nextParams.set("listingId", lid);
-    if (did) nextParams.set("dealerId", did);
-    const nextSearch = "?" + nextParams.toString();
-    if (window.location.search !== nextSearch) {
-      const nextUrl = window.location.pathname + nextSearch + window.location.hash;
-      window.history.replaceState(null, "", nextUrl);
-    }
-  }
 
   (async function hydrateFromFirestoreIds() {
     const params = new URLSearchParams(window.location.search);
@@ -651,7 +637,7 @@
       }
     }
     const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
-    applyCanonicalDetailUrl(listingId || (listing && listing.id), dealerId);
+    GB_URLS.canonicalizeDetailUrl(listingId || (listing && listing.id), dealerId);
     const dealer = dealerId ? await fetchDealerProfileById(dealerId) : null;
     if (!listing && !dealer) return;
 
@@ -817,9 +803,7 @@
 
     const profileLink = document.querySelector(".action.profile");
     if (profileLink) {
-      const qs = new URLSearchParams();
-      if (dealerId) qs.set("dealerId", dealerId);
-      profileLink.href = qs.toString() ? ("dealer-profile.html?" + qs.toString()) : "dealer-profile.html";
+      profileLink.href = GB_URLS.dealerHref(dealerId);
     }
   })();
 </script>

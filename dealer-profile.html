@@ -166,6 +166,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+  <!-- Page purpose: Dealer profile with verified inventory, contact actions, and quick search. -->
 <nav>
   <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
   <a href="listings.html" class="btn">Browse Cars</a>
@@ -224,10 +225,12 @@
     <div class="cars-grid" id="dealerCarsGrid"></div>
   </section>
 </main>
+<script src="url-utils.js"></script>
 <script type="module">
   import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
   import { buildDealerId, fetchDealerProfileById } from "./marketplace-firestore.js";
+  // Dealer profile hydration and dealer-owned listing rendering.
 
   const dealerProfileSearchInput = document.getElementById("dealerProfileSearchInput");
   const dealerProfileSearchBtn = document.getElementById("dealerProfileSearchBtn");
@@ -274,18 +277,6 @@
     return String(value);
   }
 
-  function applyCanonicalDealerUrl(dealerId) {
-    const cleanId = String(dealerId || "").trim();
-    if (!cleanId) return;
-    const nextParams = new URLSearchParams();
-    nextParams.set("dealerId", cleanId);
-    const nextSearch = "?" + nextParams.toString();
-    if (window.location.search !== nextSearch) {
-      const nextUrl = window.location.pathname + nextSearch + window.location.hash;
-      window.history.replaceState(null, "", nextUrl);
-    }
-  }
-
   (async function hydrateDealerFromFirestoreId() {
     const params = new URLSearchParams(window.location.search);
     let dealerId = (params.get("dealerId") || "").trim();
@@ -295,7 +286,8 @@
       dealerId = buildDealerId(dealerName, dealerCity);
     }
     if (!dealerId) return;
-    applyCanonicalDealerUrl(dealerId);
+    // Normalize old shared links (name/city) to canonical dealerId URL.
+    GB_URLS.canonicalizeDealerUrl(dealerId);
     const dealer = await fetchDealerProfileById(dealerId);
     if (!dealer) return;
 
@@ -351,6 +343,7 @@
       }
     }
 
+    // Stats section uses live listings count scoped to this dealer.
     const statNumbers = document.querySelectorAll(".stats .stat h3");
     const liveListingsSnap = await getDocs(query(collection(db, "listings"), where("dealerId", "==", dealerId)));
     const allListings = liveListingsSnap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
@@ -371,6 +364,7 @@
         : "No reviews yet";
     }
 
+    // Render this dealer's active inventory cards with stable detail links.
     if (dealerCarsGrid) {
       if (!activeListings.length) {
         dealerCarsGrid.innerHTML = '<p class="line">No active listings for this dealer right now.</p>';
@@ -397,10 +391,7 @@
           const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
           const coverImage = clean(listing.coverImage || carImages[0] || dealer.profilePicture || "");
           const search = [carName, city, mileage, transmission, condition, contactName, contactRole].join(" ").toLowerCase();
-          const detailQs = new URLSearchParams({
-            listingId: listing.id,
-            dealerId: dealerId
-          });
+          const detailHref = GB_URLS.detailHref(listing.id, dealerId);
           return (
             '<article class="car-card" data-search="' + esc(search) + '">' +
               '<div class="car-photo">' +
@@ -421,7 +412,7 @@
                   '<a class="card-btn wa" href="https://wa.me/' + esc(phoneDigits) + '?text=' + encodeURIComponent("Assalamualaikum, I am interested in " + carName + ".") + '" target="_blank" rel="noopener noreferrer">WhatsApp</a>' +
                   '<a class="card-btn call" href="tel:+' + esc(phoneDigits) + '">Call ' + esc(contactName) + "</a>" +
                 "</div>" +
-                '<a href="car-detail.html?' + esc(detailQs.toString()) + '" class="details-btn">Show Car Details</a>' +
+                '<a href="' + esc(detailHref) + '" class="details-btn">Show Car Details</a>' +
               "</div>" +
             "</article>"
           );
@@ -429,6 +420,7 @@
       }
     }
 
+    // Lightweight client-side search over rendered dealer inventory cards.
     function runDealerProfileSearch() {
       if (!dealerProfileSearchInput || !dealerCarsGrid) return;
       const queryText = dealerProfileSearchInput.value.trim().toLowerCase();

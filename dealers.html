@@ -117,6 +117,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+  <!-- Page purpose: Discover verified dealers and open canonical dealer profile pages. -->
 <nav>
   <a href="index.html" class="logo">Gari<span>Bazaar</span></a>
   <a class="btn" href="listings.html">Browse Cars</a>
@@ -142,6 +143,7 @@
   <p class="empty" id="dealerEmptyState">No dealer matched this search. Try a city name like Islamabad or Rawalpindi.</p>
 </main>
 
+<script src="url-utils.js"></script>
 <script type="module">
   import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
@@ -223,9 +225,7 @@
       const activeCars = listingCountByDealer.get(dealer.id) || 0;
       const search = [name, city, speciality, "active cars " + activeCars].join(" ").toLowerCase();
       const waText = encodeURIComponent("Assalam o Alaikum " + name + ", I want to sell my car through your dealership on GariBazaar.");
-      const dealerParams = new URLSearchParams({
-        dealerId: dealer.id || [slugify(name), slugify(city)].filter(Boolean).join('-')
-      });
+      const dealerHref = GB_URLS.dealerHref(dealer.id || [slugify(name), slugify(city)].filter(Boolean).join('-'));
 
       cards.push(
         '<article class="dealer-card" data-search="' + esc(search) + '">' +
@@ -237,7 +237,7 @@
           '</div>' +
           '<p class="dealer-meta">Speciality: ' + esc(speciality) + '<br>Active Cars: ' + esc(activeCars) + '</p>' +
           '<p class="dealer-rate">' + esc(rating) + '</p>' +
-          '<a class="card-btn" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">View Dealer Profile</a>' +
+          '<a class="card-btn" href="' + esc(dealerHref) + '">View Dealer Profile</a>' +
           (hasPhone
             ? '<a class="card-btn whatsapp-btn" href="https://wa.me/' + esc(phone) + '?text=' + waText + '" target="_blank" rel="noopener noreferrer">Sell My Car (WhatsApp)</a>'
             : '<p class="dealer-meta" style="margin-top:8px;">WhatsApp not on file for this dealer.</p>') +

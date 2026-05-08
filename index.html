@@ -1040,6 +1040,7 @@
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
+  <!-- Page purpose: Homepage with live marketplace highlights and entry points to listings/dealers. -->
 
 <!-- NAV -->
 <nav>
@@ -1247,6 +1248,7 @@
 
 </script>
 
+<script src="url-utils.js"></script>
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1376,13 +1378,8 @@
       const carImages = Array.isArray(listing.carImages) ? listing.carImages.filter(Boolean) : [];
       const coverImage = clean(listing.coverImage || carImages[0] || "");
       const coverForImg = /^https?:\/\//.test(coverImage) || coverImage.indexOf("data:image/") === 0 ? coverImage : "";
-      const detailParams = new URLSearchParams({
-        listingId: String(listing.id || ""),
-        dealerId: String(listing.dealerId || "")
-      });
-      const dealerParams = new URLSearchParams({
-        dealerId: String(listing.dealerId || "")
-      });
+      const detailHref = GB_URLS.detailHref(String(listing.id || ""), String(listing.dealerId || ""));
+      const dealerHref = GB_URLS.dealerHref(String(listing.dealerId || ""));
       return (
         '<article class="car-card" tabindex="0">' +
           '<div class="car-img">' +
@@ -1395,7 +1392,7 @@
             '<h3 class="car-name">' + esc(title) + '</h3>' +
             '<p class="car-dealer">' + esc(dealerName) + ' · ' + esc(city) + '</p>' +
             '<div class="car-specs"><span class="spec">' + esc(mileage) + '</span><span class="spec">' + esc(transmission) + '</span></div>' +
-            '<div class="car-footer"><div class="car-price">' + esc(price) + ' <span>Lakh</span></div><a class="contact-btn" href="car-detail.html?' + esc(detailParams.toString()) + '">View</a></div>' +
+            '<div class="car-footer"><div class="car-price">' + esc(price) + ' <span>Lakh</span></div><a class="contact-btn" href="' + esc(detailHref) + '">View</a></div>' +
             '<div class="car-expanded">' +
               '<p class="expanded-meta">Contact: ' + esc(contactName) + ' (' + esc(contactRole) + ')</p>' +
               '<div class="expanded-actions">' +
@@ -1404,7 +1401,7 @@
                     '<a class="expanded-link call" href="tel:+' + esc(phoneDigits) + '">Call</a>'
                   : '<span class="expanded-meta">Phone not on listing</span>') +
               '</div>' +
-              '<a class="expanded-link profile" href="dealer-profile.html?' + esc(dealerParams.toString()) + '">Dealer Profile</a>' +
+              '<a class="expanded-link profile" href="' + esc(dealerHref) + '">Dealer Profile</a>' +
             '</div>' +
           '</div>' +
         '</article>'

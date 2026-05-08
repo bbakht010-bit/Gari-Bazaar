@@ -1,0 +1,7 @@
+{
+  "dsn": "",
+  "environment": "production",
+  "tracesSampleRate": 0.02,
+  "replaysSessionSampleRate": 0.0,
+  "replaysOnErrorSampleRate": 0.2
+}

@@ -1368,7 +1368,6 @@
       const assembly = clean(listing.assembly || "");
       const paintStatus = clean(listing.paintStatus || "");
       const bodyNote = clean(listing.bodyNote || "");
-      const panelMarksJson = JSON.stringify(listing.panelMarks && typeof listing.panelMarks === "object" ? listing.panelMarks : {});
       const phoneRaw = clean(listing.phone || dealer.phone || dealer.whatsapp || "");
       const phoneDigits = normalizePkPhone(phoneRaw);
       const hasPhone = phoneDigits.length >= 12 && phoneDigits.indexOf("92") === 0;
@@ -1379,35 +1378,10 @@
       const coverForImg = /^https?:\/\//.test(coverImage) || coverImage.indexOf("data:image/") === 0 ? coverImage : "";
       const detailParams = new URLSearchParams({
         listingId: String(listing.id || ""),
-        dealerId: String(listing.dealerId || ""),
-        car: title,
-        price: price,
-        mileage: mileage,
-        transmission: transmission,
-        condition: condition,
-        modelYear: modelYear,
-        fuelType: fuelType,
-        engine: engine,
-        color: color,
-        registrationCity: registrationCity,
-        bodyType: bodyType,
-        assembly: assembly,
-        paintStatus: paintStatus,
-        bodyNote: bodyNote,
-        panelMarks: panelMarksJson,
-        city: city,
-        dealer: dealerName,
-        contactName,
-        contactRole,
-        phone: phoneDigits
+        dealerId: String(listing.dealerId || "")
       });
       const dealerParams = new URLSearchParams({
-        dealerId: String(listing.dealerId || ""),
-        dealer: dealerName,
-        city: city,
-        contactName,
-        contactRole,
-        phone: phoneDigits
+        dealerId: String(listing.dealerId || "")
       });
       return (
         '<article class="car-card" tabindex="0">' +

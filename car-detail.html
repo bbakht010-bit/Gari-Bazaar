@@ -461,6 +461,8 @@
   }
   (function hydrateFromQuery() {
     const params = new URLSearchParams(window.location.search);
+    const listingId = (params.get("listingId") || "").trim();
+    const dealerId = (params.get("dealerId") || "").trim();
     const car = params.get('car');
     if (!car) return;
 
@@ -541,14 +543,9 @@
 
     const dealerProfileLink = document.querySelector('.action.profile');
     if (dealerProfileLink) {
-      const dealerParams = new URLSearchParams({
-        dealer: dealer,
-        city: city,
-        contactName: contactName,
-        contactRole: contactRole,
-        phone: phone
-      });
-      dealerProfileLink.href = 'dealer-profile.html?' + dealerParams.toString();
+      const dealerParams = new URLSearchParams();
+      if (dealerId) dealerParams.set("dealerId", dealerId);
+      dealerProfileLink.href = dealerParams.toString() ? ('dealer-profile.html?' + dealerParams.toString()) : 'dealer-profile.html';
     }
   })();
 
@@ -587,6 +584,20 @@
   import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
   import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
+
+  function applyCanonicalDetailUrl(listingId, dealerId) {
+    const lid = String(listingId || "").trim();
+    const did = String(dealerId || "").trim();
+    if (!lid && !did) return;
+    const nextParams = new URLSearchParams();
+    if (lid) nextParams.set("listingId", lid);
+    if (did) nextParams.set("dealerId", did);
+    const nextSearch = "?" + nextParams.toString();
+    if (window.location.search !== nextSearch) {
+      const nextUrl = window.location.pathname + nextSearch + window.location.hash;
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }
 
   (async function hydrateFromFirestoreIds() {
     const params = new URLSearchParams(window.location.search);
@@ -640,6 +651,7 @@
       }
     }
     const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
+    applyCanonicalDetailUrl(listingId || (listing && listing.id), dealerId);
     const dealer = dealerId ? await fetchDealerProfileById(dealerId) : null;
     if (!listing && !dealer) return;
 
@@ -805,8 +817,9 @@
 
     const profileLink = document.querySelector(".action.profile");
     if (profileLink) {
-      const qs = new URLSearchParams({ dealerId: dealerId, dealer: dealerName, city: city, contactName: contactName, contactRole: contactRole, phone: phone });
-      profileLink.href = "dealer-profile.html?" + qs.toString();
+      const qs = new URLSearchParams();
+      if (dealerId) qs.set("dealerId", dealerId);
+      profileLink.href = qs.toString() ? ("dealer-profile.html?" + qs.toString()) : "dealer-profile.html";
     }
   })();
 </script>

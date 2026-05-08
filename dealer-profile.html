@@ -274,6 +274,18 @@
     return String(value);
   }
 
+  function applyCanonicalDealerUrl(dealerId) {
+    const cleanId = String(dealerId || "").trim();
+    if (!cleanId) return;
+    const nextParams = new URLSearchParams();
+    nextParams.set("dealerId", cleanId);
+    const nextSearch = "?" + nextParams.toString();
+    if (window.location.search !== nextSearch) {
+      const nextUrl = window.location.pathname + nextSearch + window.location.hash;
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }
+
   (async function hydrateDealerFromFirestoreId() {
     const params = new URLSearchParams(window.location.search);
     let dealerId = (params.get("dealerId") || "").trim();
@@ -283,6 +295,7 @@
       dealerId = buildDealerId(dealerName, dealerCity);
     }
     if (!dealerId) return;
+    applyCanonicalDealerUrl(dealerId);
     const dealer = await fetchDealerProfileById(dealerId);
     if (!dealer) return;
 
@@ -378,7 +391,6 @@
           const assembly = clean(listing.assembly || "");
           const paintStatus = clean(listing.paintStatus || "");
           const bodyNote = clean(listing.bodyNote || "");
-          const panelMarksJson = JSON.stringify(listing.panelMarks && typeof listing.panelMarks === "object" ? listing.panelMarks : {});
           const contactName = clean(listing.contactName || dealer.contactName || "Dealer");
           const contactRole = clean(listing.contactRole || dealer.contactRole || "Sales Desk");
           const phoneDigits = normalizePkPhone(clean(listing.phone || dealer.phone || ""));
@@ -387,27 +399,7 @@
           const search = [carName, city, mileage, transmission, condition, contactName, contactRole].join(" ").toLowerCase();
           const detailQs = new URLSearchParams({
             listingId: listing.id,
-            dealerId: dealerId,
-            car: carName,
-            price: price,
-            mileage: mileage,
-            transmission: transmission,
-            condition: condition,
-            modelYear: modelYear,
-            fuelType: fuelType,
-            engine: engine,
-            color: color,
-            registrationCity: registrationCity,
-            bodyType: bodyType,
-            assembly: assembly,
-            paintStatus: paintStatus,
-            bodyNote: bodyNote,
-            panelMarks: panelMarksJson,
-            city: city,
-            dealer: dealer.dealerName,
-            contactName: contactName,
-            contactRole: contactRole,
-            phone: phoneDigits
+            dealerId: dealerId
           });
           return (
             '<article class="car-card" data-search="' + esc(search) + '">' +

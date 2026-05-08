@@ -1257,23 +1257,13 @@
 
       const commonParams = new URLSearchParams({
         listingId: listingId,
-        dealerId: dealerId,
-        car: title,
-        price: price,
-        mileage: mileage,
-        transmission: transmission,
-        condition: condition,
-        city: city,
-        dealer: dealer,
-        contactName: contact.name,
-        contactRole: contact.role,
-        phone: phone
+        dealerId: dealerId
       });
 
       const detailLink = card.querySelector('.detail-btn');
       if (detailLink) {
         const existingHref = detailLink.getAttribute('href') || '';
-        if (!existingHref.includes('car-detail.html?') || existingHref.indexOf('panelMarks=') === -1) {
+        if (!existingHref.includes('car-detail.html?')) {
           detailLink.href = 'car-detail.html?' + commonParams.toString();
         }
       }
@@ -1282,12 +1272,7 @@
         const existingDealerHref = dealerLink.getAttribute('href') || '';
         if (!existingDealerHref.includes('dealer-profile.html?')) {
           const dealerParams = new URLSearchParams({
-            dealerId: dealerId,
-            dealer: dealer,
-            city: city,
-            contactName: contact.name,
-            contactRole: contact.role,
-            phone: phone
+            dealerId: dealerId
           });
           dealerLink.href = 'dealer-profile.html?' + dealerParams.toString();
         }
@@ -1810,7 +1795,6 @@
       const assembly = clean(listing.assembly || "Any");
       const paintStatus = clean(listing.paintStatus || "");
       const bodyNote = clean(listing.bodyNote || "");
-      const panelMarksJson = JSON.stringify(listing.panelMarks && typeof listing.panelMarks === "object" ? listing.panelMarks : {});
       const bodywork = bodyworkSummary(listing);
       const listingId = clean(listing.id || [slugify(title), slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
       const dealerId = clean(entry.dealerId || [slugify(dealerName), slugify(city)].filter(Boolean).join("-"));
@@ -1820,36 +1804,10 @@
       const waText = encodeURIComponent("Assalamualaikum " + contactName + ", I am interested in " + title + ".");
       const detailParams = new URLSearchParams({
         listingId,
-        dealerId,
-        car: title,
-        price: priceLakh,
-        mileage,
-        transmission,
-        condition,
-        modelYear,
-        fuelType,
-        engine,
-        color,
-        registrationCity,
-        bodyType,
-        assembly,
-        paintStatus,
-        bodyNote,
-        panelMarks: panelMarksJson,
-        city,
-        dealer: dealerName,
-        contactName,
-        contactRole,
-        phone: phoneDigits,
-        coverImage: coverImage
+        dealerId
       });
       const dealerParams = new URLSearchParams({
-        dealerId,
-        dealer: dealerName,
-        city,
-        contactName,
-        contactRole,
-        phone: phoneDigits
+        dealerId
       });
 
       return (

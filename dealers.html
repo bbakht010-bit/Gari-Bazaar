@@ -224,12 +224,7 @@
       const search = [name, city, speciality, "active cars " + activeCars].join(" ").toLowerCase();
       const waText = encodeURIComponent("Assalam o Alaikum " + name + ", I want to sell my car through your dealership on GariBazaar.");
       const dealerParams = new URLSearchParams({
-        dealerId: dealer.id || [slugify(name), slugify(city)].filter(Boolean).join('-'),
-        dealer: name,
-        city,
-        contactName,
-        contactRole: "Sales Desk",
-        phone
+        dealerId: dealer.id || [slugify(name), slugify(city)].filter(Boolean).join('-')
       });
 
       cards.push(

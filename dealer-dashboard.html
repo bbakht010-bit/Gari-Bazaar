@@ -245,6 +245,12 @@
     display: none;
   }
   .inline-status.show { display: block; }
+  .field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--gray-500);
+  }
 
   @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .layout { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: 1fr; } .pill { display: none; } }
@@ -284,14 +290,14 @@
       <form id="car-form" class="collapsible-content">
         <div class="grid-2">
           <div class="field"><label>Car Name *</label><input id="car-name" type="text" placeholder="Toyota Corolla Altis 2022"></div>
-          <div class="field"><label>Price (PKR Lakh) *</label><input id="car-price" type="number" min="0" step="0.1" inputmode="decimal" placeholder="52"></div>
+          <div class="field"><label>Price (PKR) *</label><input id="car-price" type="number" min="0" step="1" inputmode="numeric" placeholder="2500000"><small id="car-price-unit" class="field-hint">Unit: Rupees</small></div>
           <div class="field"><label>Mileage *</label><input id="car-mileage" type="text" placeholder="21,000 km"></div>
           <div class="field"><label>Model Year</label><input id="car-year" type="number" min="1980" max="2100" step="1" placeholder="2022"></div>
           <div class="field"><label>Transmission *</label><select id="car-trans"><option value="">Select</option><option>Automatic</option><option>Manual</option></select></div>
           <div class="field"><label>Condition *</label><select id="car-condition"><option value="">Select</option><option>New</option><option>Used</option></select></div>
           <div class="field"><label>City *</label><select id="car-city"><option value="">Select</option><option>Islamabad</option><option>Rawalpindi</option></select></div>
           <div class="field"><label>Fuel Type</label><select id="car-fuel"><option value="">Select</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div>
-          <div class="field"><label>Engine</label><input id="car-engine" type="text" placeholder="e.g. 1800cc"></div>
+          <div class="field"><label>Engine</label><input id="car-engine" type="text" inputmode="numeric" placeholder="e.g. 1800 (cc auto added)"></div>
           <div class="field"><label>Exterior Color</label><select id="car-color"><option value="">Select</option><option>White</option><option>Black</option><option>Silver</option><option>Gray</option><option>Blue</option><option>Red</option><option>Green</option><option>Brown</option><option>Beige</option><option>Golden</option></select></div>
           <div class="field"><label>Registration City</label><input id="car-registration-city" type="text" placeholder="e.g. Islamabad"></div>
           <div class="field"><label>Body Type</label><select id="car-body-type"><option value="">Select</option><option>Sedan</option><option>Hatchback</option><option>SUV</option><option>Crossover</option><option>Pickup</option><option>Coupe</option></select></div>
@@ -673,6 +679,23 @@
     };
   }
 
+  function formatPriceWithUnit(priceValue) {
+    const n = Number(String(priceValue || '').replace(/[^\d.]/g, ''));
+    if (!Number.isFinite(n) || n < 0) return '-';
+    const formatted = new Intl.NumberFormat('en-PK', { maximumFractionDigits: 0 }).format(Math.round(n));
+    if (n >= 10000000) return 'PKR ' + formatted + ' (Crore)';
+    if (n >= 100000) return 'PKR ' + formatted + ' (Lakh)';
+    return 'PKR ' + formatted + ' (Rupees)';
+  }
+
+  function priceUnitLabel(priceValue) {
+    const n = Number(String(priceValue || '').replace(/[^\d.]/g, ''));
+    if (!Number.isFinite(n) || n < 0) return 'Unit: Rupees';
+    if (n >= 10000000) return 'Unit: Crore';
+    if (n >= 100000) return 'Unit: Lakh';
+    return n === 1 ? 'Unit: Rupee' : 'Unit: Rupees';
+  }
+
   function renderBodyPanelGrid(targetId, panelMarks, isReadonly) {
     const root = document.getElementById(targetId);
     if (!root) return;
@@ -756,7 +779,7 @@
     document.getElementById('car-city').value = car.city || '';
     document.getElementById('car-year').value = car.modelYear || '';
     document.getElementById('car-fuel').value = car.fuelType || '';
-    document.getElementById('car-engine').value = car.engine || '';
+    document.getElementById('car-engine').value = String(car.engine || '').replace(/\s*cc$/i, '');
     document.getElementById('car-color').value = car.color || '';
     document.getElementById('car-registration-city').value = car.registrationCity || '';
     document.getElementById('car-body-type').value = car.bodyType || '';
@@ -850,7 +873,7 @@
       const item = document.createElement('div');
       item.className = 'item';
       item.innerHTML =
-        '<div class="item-main"><h4>' + car.name + ' · ' + car.price + ' Lakh</h4>' +
+        '<div class="item-main"><h4>' + car.name + ' · ' + formatPriceWithUnit(car.price) + '</h4>' +
         '<p>' + car.city + ' · ' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
         '<p>' + (car.modelYear || '-') + ' · ' + (car.fuelType || '-') + ' · ' + (car.engine || '-') + ' · ' + (car.color || '-') + '</p>' +
         '<p>Paint: ' + paintLabel(car.paintStatus) + (car.bodyNote ? ' · ' + car.bodyNote : '') + '</p>' +
@@ -884,7 +907,7 @@
       const item = document.createElement('div');
       item.className = 'item';
       item.innerHTML =
-        '<div class="item-main"><h4>' + (entry.name || 'Car') + ' · ' + (entry.price || '-') + ' Lakh</h4>' +
+        '<div class="item-main"><h4>' + (entry.name || 'Car') + ' · ' + formatPriceWithUnit(entry.price || '-') + '</h4>' +
         '<p>' + (entry.city || '-') + ' · ' + (entry.mileage || '-') + ' · ' + (entry.transmission || '-') + ' · ' + (entry.condition || '-') + '</p>' +
         '<p>Sold on: ' + (entry.soldAt ? new Date(entry.soldAt).toLocaleString() : '-') + '</p></div>';
       root.appendChild(item);
@@ -915,7 +938,7 @@
         '<div class="preview-top">' +
         '<span class="badge verify">Live listing</span>' +
         '<span class="badge ' + (managedByOwner ? 'owner">Managed by Owner' : 'emp">Assigned to Advisor') + '</span></div>' +
-        '<div class="preview-body"><h4>' + car.name + '</h4><div class="price">' + car.price + ' Lakh PKR</div>' +
+        '<div class="preview-body"><h4>' + car.name + '</h4><div class="price">' + formatPriceWithUnit(car.price) + '</div>' +
         '<p class="meta">' + car.mileage + ' · ' + car.transmission + ' · ' + car.condition + '</p>' +
         '<p class="meta">Paint: ' + paintLabel(car.paintStatus) + '</p>' +
         '<div id="' + panelGridId + '" class="panel-grid" style="margin-top:8px;"></div>' +
@@ -989,7 +1012,8 @@
     const city = document.getElementById('car-city').value;
     const modelYear = document.getElementById('car-year').value.trim();
     const fuelType = document.getElementById('car-fuel').value;
-    const engine = document.getElementById('car-engine').value.trim();
+    const engineInput = document.getElementById('car-engine').value.trim();
+    const engineDigits = engineInput.replace(/\s*cc$/i, '').trim();
     const color = document.getElementById('car-color').value.trim();
     const registrationCity = document.getElementById('car-registration-city').value.trim();
     const bodyType = document.getElementById('car-body-type').value;
@@ -1016,8 +1040,8 @@
         return setError(err, 'Model year must be between 1980 and ' + (currentYear + 1) + '.');
       }
     }
-    if (engine && !/^\d{3,5}\s*cc$/i.test(engine)) {
-      return setError(err, 'Engine format should look like 660cc, 1300cc, or 1800cc.');
+    if (engineDigits && !/^\d{3,5}$/.test(engineDigits)) {
+      return setError(err, 'Engine must be 3 to 5 digits (for example: 660, 1300, 1800).');
     }
     const imageFiles = carImagesInput && carImagesInput.files ? carImagesInput.files : [];
     const editingId = state.editingCarId || "";
@@ -1040,14 +1064,15 @@
         dealerId: dealerUid,
         dealerName: dealerName,
         carName: name,
-        priceLakh: String(numericPrice),
+        priceLakh: String(Math.round(numericPrice)),
+        price: String(Math.round(numericPrice)),
         mileage,
         transmission,
         condition,
         city,
         modelYear: modelYear || "",
         fuelType: fuelType || "",
-        engine: engine || "",
+        engine: engineDigits ? (engineDigits + 'cc') : "",
         color: color || "",
         registrationCity: registrationCity || city || "",
         bodyType: bodyType || "",
@@ -1252,6 +1277,7 @@
 
   await loadLiveState();
   const carPriceInput = document.getElementById('car-price');
+  const carPriceUnit = document.getElementById('car-price-unit');
   if (carPriceInput) {
     carPriceInput.addEventListener('keydown', (event) => {
       if (event.key === '-' || event.key === 'Minus') {
@@ -1265,6 +1291,14 @@
       if (carPriceInput.value !== '' && Number(carPriceInput.value) < 0) {
         carPriceInput.value = '0';
       }
+      if (carPriceUnit) carPriceUnit.textContent = priceUnitLabel(carPriceInput.value);
+    });
+    if (carPriceUnit) carPriceUnit.textContent = priceUnitLabel(carPriceInput.value);
+  }
+  const carEngineInput = document.getElementById('car-engine');
+  if (carEngineInput) {
+    carEngineInput.addEventListener('input', () => {
+      carEngineInput.value = carEngineInput.value.replace(/[^\d]/g, '');
     });
   }
   renderBodyPanelGrid('car-panel-grid', currentPanelMarks, false);

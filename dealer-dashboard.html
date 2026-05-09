@@ -459,9 +459,18 @@
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, deleteDoc, doc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getDownloadURL, getStorage, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-  import { app, auth, db, FIREBASE_FUNCTIONS_REGION, uploadDealerProfileImage, getUserRecord, getDealerProfile, isDealerProfileComplete } from "./firebase-client.js";
+  import {
+    app,
+    auth,
+    db,
+    FIREBASE_FUNCTIONS_REGION,
+    uploadDealerProfileImage,
+    uploadListingCarImages,
+    getUserRecord,
+    getDealerProfile,
+    isDealerProfileComplete
+  } from "./firebase-client.js";
 
   const markListingSoldFn = httpsCallable(getFunctions(app, FIREBASE_FUNCTIONS_REGION), "markListingSold");
 
@@ -578,8 +587,6 @@
     right_quarter: 'R Quarter'
   };
   let currentPanelMarks = {};
-  const storage = getStorage(app);
-  const LISTING_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
 
   async function loadLiveState() {
     const freshProfile = await getDealerProfile(dealerUid);
@@ -634,27 +641,6 @@
       employees: state.employees,
       updatedAt: serverTimestamp()
     });
-  }
-
-  async function filesToStorageUrls(fileList, listingId) {
-    const files = Array.from(fileList || []);
-    const results = [];
-    for (const file of files) {
-      if (!String(file.type || "").startsWith("image/")) {
-        throw new Error('Only image files are allowed for car photos.');
-      }
-      if (Number(file.size || 0) > LISTING_IMAGE_MAX_BYTES) {
-        const sizeMb = (Number(file.size || 0) / (1024 * 1024)).toFixed(1);
-        throw new Error('Image "' + (file.name || "file") + '" is ' + sizeMb + 'MB. Max allowed is 12MB.');
-      }
-      const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
-      const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;
-      const imageRef = ref(storage, path);
-      await uploadBytes(imageRef, file, { contentType: file.type || "image/jpeg" });
-      const url = await getDownloadURL(imageRef);
-      if (url) results.push(url);
-    }
-    return results;
   }
 
   async function markListingSoldClientFallback(listingId) {
@@ -1135,7 +1121,9 @@
     const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
     const listingId = editingId || crypto.randomUUID();
     try {
-      const uploadedImages = selectedImageFiles.length ? await filesToStorageUrls(selectedImageFiles, listingId) : [];
+      const uploadedImages = selectedImageFiles.length
+        ? await uploadListingCarImages(dealerUid, listingId, selectedImageFiles)
+        : [];
       if (selectedImageFiles.length > 0 && uploadedImages.length === 0) {
         return setError(err, 'Selected photos could not be uploaded. Please try again.');
       }

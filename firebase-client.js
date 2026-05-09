@@ -55,6 +55,35 @@ export async function uploadDealerProfileImage(uid, file) {
   return await getDownloadURL(storageRef);
 }
 
+/** Matches `storage.rules` max object size for listing images. */
+const LISTING_CAR_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
+
+/**
+ * Car listing photos → `listings/{dealerUid}/{listingId}/…` in the default bucket (Firebase Storage / GCS).
+ * Download URLs are stored in Firestore `carImages` / `coverImage` for buyers to load.
+ */
+export async function uploadListingCarImages(dealerUid, listingId, fileList) {
+  if (!dealerUid || !listingId) return [];
+  const files = Array.from(fileList || []);
+  const results = [];
+  for (const file of files) {
+    if (!String(file.type || "").startsWith("image/")) {
+      throw new Error("Only image files are allowed for car photos.");
+    }
+    if (Number(file.size || 0) > LISTING_CAR_IMAGE_MAX_BYTES) {
+      const sizeMb = (Number(file.size || 0) / (1024 * 1024)).toFixed(1);
+      throw new Error('Image "' + (file.name || "file") + '" is ' + sizeMb + "MB. Max allowed is 12MB.");
+    }
+    const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;
+    const imageRef = ref(storage, path);
+    await uploadBytes(imageRef, file, { contentType: file.type || "image/jpeg" });
+    const url = await getDownloadURL(imageRef);
+    if (url) results.push(url);
+  }
+  return results;
+}
+
 export async function getUserRecord(uid) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);

@@ -16,8 +16,15 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
+      "node_modules/**",
       "functions/**",
-      "scripts/**"
+      "scripts/**",
+      "tests/**",
+      "test-results/**",
+      "playwright-report/**",
+      "playwright.config.js",
+      "package.json",
+      "package-lock.json"
     ]
   }
 }

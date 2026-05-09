@@ -457,7 +457,7 @@
 </main>
 
 <script type="module">
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, deleteDoc, doc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
   import {
@@ -468,6 +468,7 @@
     uploadDealerProfileImage,
     uploadListingCarImages,
     getUserRecord,
+    userHasDealerAccess,
     getDealerProfile,
     isDealerProfileComplete
   } from "./firebase-client.js";
@@ -482,8 +483,14 @@
         return;
       }
       const record = await getUserRecord(user.uid);
-      if (!record || record.role !== "dealer") {
+      if (!record || !userHasDealerAccess(record)) {
         window.location.href = "dealer-login.html";
+        return;
+      }
+      await reload(user);
+      if (!user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "dealer");
+        window.location.href = "verify-email.html";
         return;
       }
       const liveProfile = await getDealerProfile(user.uid);

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
 <title>Admin Panel — GariBazaar</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -703,8 +704,21 @@
 
 <script type="module">
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { collection, doc, onSnapshot, serverTimestamp, setDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { auth, db, getUserRecord } from "./firebase-client.js";
+  import {
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    onSnapshot,
+    query,
+    serverTimestamp,
+    setDoc,
+    updateDoc,
+    deleteField,
+    where,
+    writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { auth, db, verifyFirebaseAdminAccess, userHasBuyerAccess } from "./firebase-client.js";
 
   function escapeHtml(value) {
     return String(value || "")
@@ -713,6 +727,23 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  async function deleteDocsWhere(collectionName, field, value) {
+    const q = query(collection(db, collectionName), where(field, "==", value));
+    const snapshot = await getDocs(q);
+    const docs = snapshot.docs;
+    const batchSize = 500;
+    for (let i = 0; i < docs.length; i += batchSize) {
+      const batch = writeBatch(db);
+      docs.slice(i, i + batchSize).forEach((d) => batch.delete(d.ref));
+      await batch.commit();
+    }
+    return docs.length;
+  }
+
+  function deleteAllListingsForDealer(dealerUid) {
+    return deleteDocsWhere("listings", "dealerId", dealerUid);
   }
 
   function statusBadge(statusText, variant) {
@@ -760,7 +791,7 @@
       const role = String(l.contactRole || "").toLowerCase();
       return !l.contactName || !role || role.includes("owner");
     });
-    const buyers = users.filter((u) => String(u.role || "").toLowerCase() === "buyer");
+    const buyers = users.filter((u) => userHasBuyerAccess(u));
     const freeDealers = dealers.filter((d) => {
       const plan = String(d.plan || "free").toLowerCase();
       return !plan || plan === "free";
@@ -829,7 +860,8 @@
             "<td>" + statusBadge(plan, planBadge) + "</td>" +
             "<td>" + escapeHtml(rating ? rating.toFixed(1) : "-") + "</td>" +
             "<td>" +
-            '<button class="mini-btn" data-dealer-action="' + (isSuspended ? "activate" : "suspend") + '" data-dealer-id="' + escapeHtml(d.id) + '">' + (isSuspended ? "Activate" : "Suspend") + "</button>" +
+            '<button class="mini-btn" data-dealer-action="' + (isSuspended ? "activate" : "suspend") + '" data-dealer-id="' + escapeHtml(d.id) + '">' + (isSuspended ? "Activate" : "Suspend") + "</button> " +
+            '<button class="mini-btn reject" data-dealer-action="delete-dealer" data-dealer-id="' + escapeHtml(d.id) + '">Delete dealer</button>' +
             "</td>" +
             "</tr>";
         }).join("");
@@ -939,8 +971,8 @@
       return;
     }
     const email = (user.email || "").toLowerCase();
-    const record = await getUserRecord(user.uid);
-    if (!record || record.role !== "admin") {
+    const gate = await verifyFirebaseAdminAccess(user);
+    if (!gate.ok) {
       await signOut(auth);
       window.location.href = "admin-login.html";
       return;
@@ -1021,7 +1053,32 @@
         return;
       }
       if (dealerAction && dealerId) {
+        if (dealerAction === "delete-dealer") {
+          if (
+            !confirm(
+              "Delete this dealership permanently? All vehicle listings will be removed. Firestore profile and user role data will be deleted. The Firebase Authentication account must be removed separately in the console if you want the email blocked from signing in."
+            )
+          ) {
+            return;
+          }
+          await deleteAllListingsForDealer(dealerId);
+          await deleteDocsWhere("dealerChangeRequests", "dealerId", dealerId);
+          await deleteDoc(doc(db, "dealerPrivate", dealerId));
+          await deleteDoc(doc(db, "dealerProfiles", dealerId));
+          await deleteDoc(doc(db, "users", dealerId));
+          return;
+        }
         const suspended = dealerAction === "suspend";
+        if (suspended) {
+          if (
+            !confirm(
+              "Suspend this dealer and delete all of their vehicle listings from the marketplace? This cannot be undone."
+            )
+          ) {
+            return;
+          }
+          await deleteAllListingsForDealer(dealerId);
+        }
         await updateDoc(doc(db, "dealerProfiles", dealerId), { suspended: suspended, updatedAt: serverTimestamp() });
         return;
       }

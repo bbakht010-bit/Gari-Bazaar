@@ -178,7 +178,7 @@
 </main>
 
 <script type="module">
-  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { auth, ensureUserRecord, upsertBuyerProfile } from "./firebase-client.js";
   const form = document.getElementById('buyer-signup-form');
 
@@ -215,7 +215,9 @@
         updatedAt: new Date().toISOString()
       };
       await upsertBuyerProfile(credential.user.uid, profile);
-      window.location.href = 'buyer-profile.html';
+      await sendEmailVerification(credential.user);
+      sessionStorage.setItem("gb_verify_role", "buyer");
+      window.location.href = "verify-email.html";
     } catch (error) {
       const code = error && error.code ? error.code : '';
       if (code === 'auth/email-already-in-use') {

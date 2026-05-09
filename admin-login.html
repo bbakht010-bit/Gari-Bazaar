@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
 <title>Admin Login — GariBazaar</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -52,7 +53,7 @@
 </main>
 <script type="module">
   import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { app, ensureUserRecord, getUserRecord } from "./firebase-client.js";
+  import { app, ensureUserRecord, verifyFirebaseAdminAccess } from "./firebase-client.js";
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
   const form = document.getElementById("admin-login-form");
@@ -64,11 +65,11 @@
 
   async function verifyAdminOrSignOut(user) {
     const signedEmail = (user.email || "").toLowerCase();
-    await ensureUserRecord(user.uid, user.email, "dealer");
-    const record = await getUserRecord(user.uid);
-    if (!record || record.role !== "admin") {
+    await ensureUserRecord(user.uid, user.email, null);
+    const gate = await verifyFirebaseAdminAccess(user);
+    if (!gate.ok) {
       await signOut(auth);
-      throw new Error("Admin role is missing for this account.");
+      throw new Error("This account is not authorized as admin. Admin access is only granted in Firebase (Firestore users/{uid} role).");
     }
     sessionStorage.setItem("gb_admin_session_email", signedEmail);
     window.location.href = "admin.html";

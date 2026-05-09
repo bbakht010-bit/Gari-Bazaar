@@ -5,10 +5,18 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isDealerUser() {
+    function userDoc() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasDealerAccess() {
       return isSignedIn() &&
         firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "dealer";
+        (userDoc().role == "dealer" || userDoc().get("dealer", false) == true);
+    }
+
+    function isDealerUser() {
+      return hasDealerAccess();
     }
 
     match /listings/{dealerId}/{listingId}/{fileName} {

@@ -1252,7 +1252,7 @@
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
-  import { auth, getBuyerProfile } from "./firebase-client.js";
+  import { auth, getBuyerProfile, userHasBuyerAccess } from "./firebase-client.js";
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
@@ -1316,7 +1316,7 @@
       const moderation = String(l.moderationStatus || "live").toLowerCase();
       return moderation === "live" && liveDealerIds.has(String(l.dealerId || ""));
     });
-    const buyers = liveUsers.filter((u) => String(u.role || "").toLowerCase() === "buyer");
+    const buyers = liveUsers.filter((u) => userHasBuyerAccess(u));
     const citySet = new Set(
       activeListings
         .map((l) => String(l.city || "").trim())

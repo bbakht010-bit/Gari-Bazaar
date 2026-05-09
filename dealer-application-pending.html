@@ -165,7 +165,7 @@
   </main>
 
   <script type="module">
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { onAuthStateChanged, signOut, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { db } from "./firebase-client.js";
     import { auth, getDealerProfile } from "./firebase-client.js";
@@ -203,6 +203,12 @@
       }
       if (!user) {
         window.location.href = "dealer-login.html";
+        return;
+      }
+      await reload(user);
+      if (!user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "dealer");
+        window.location.href = "verify-email.html";
         return;
       }
 

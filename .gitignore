@@ -2,3 +2,7 @@ playwright-report/
 test-results/
 tests/.auth/
 !tests/.auth/.gitkeep
+
+# Local Firebase Admin service account keys (never commit)
+*-firebase-adminsdk-*.json
+serviceAccount*.json

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify your email — GariBazaar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #0a4a2a;
+    --green-mid: #166534;
+    --green-main: #15803d;
+    --green-faint: #f0fdf4;
+    --gold: #ca8a04;
+    --gray-200: #e5e7eb;
+    --gray-600: #4b5563;
+    --gray-900: #111827;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gray-900);
+    background: linear-gradient(135deg, #f8fafc, #ecfdf5);
+    min-height: 100vh;
+  }
+  nav {
+    height: 70px;
+    border-bottom: 1px solid var(--gray-200);
+    background: rgba(255,255,255,0.95);
+    padding: 0 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green-mid);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+  .wrap {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .card-head {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: white;
+    padding: 24px;
+  }
+  .card-head h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    line-height: 1.15;
+  }
+  .card-head p { margin-top: 10px; font-size: 14px; color: rgba(255,255,255,0.88); line-height: 1.55; }
+  .card-body { padding: 22px; }
+  .card-body p { font-size: 14px; line-height: 1.65; color: #374151; margin-bottom: 12px; }
+  .email-box {
+    font-weight: 700;
+    color: var(--green-mid);
+    word-break: break-all;
+    margin: 8px 0 16px;
+    padding: 10px 12px;
+    background: var(--green-faint);
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: var(--green-main);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--green-mid); }
+  .btn:disabled { opacity: 0.65; cursor: not-allowed; }
+  .btn-outline {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    color: #1f2937;
+    margin-top: 10px;
+  }
+  .btn-outline:hover { background: #f9fafb; }
+  .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--gray-600);
+    line-height: 1.55;
+  }
+  .msg {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    display: none;
+  }
+  .msg.show { display: block; }
+  .msg.ok { background: var(--green-faint); color: var(--green-mid); border: 1px solid #bbf7d0; }
+  .msg.err { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+</style>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<nav>
+  <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+</nav>
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h1>Check your email</h1>
+      <p>We sent a verification link. You must confirm your email before continuing.</p>
+    </div>
+    <div class="card-body">
+      <p>Sending to:</p>
+      <div id="verify-email-display" class="email-box">—</div>
+      <p class="hint">Open the email from Firebase / GariBazaar and tap <strong>Verify</strong>. Then click the button below (or refresh this page).</p>
+      <button id="verify-check-btn" class="btn" type="button">I've verified — continue</button>
+      <button id="verify-resend-btn" class="btn btn-outline" type="button">Resend verification email</button>
+      <button id="verify-signout-btn" class="btn btn-outline" type="button">Sign out</button>
+      <div id="verify-msg" class="msg" role="status"></div>
+    </div>
+  </section>
+</main>
+<script type="module">
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    auth,
+    getUserRecord,
+    userHasDealerAccess,
+    userHasBuyerAccess,
+    getDealerPostLoginPath,
+    getBuyerPostLoginPath,
+    reloadFirebaseUser,
+    sendVerificationEmailToCurrentUser
+  } from "./firebase-client.js";
+
+  const emailDisplay = document.getElementById("verify-email-display");
+  const checkBtn = document.getElementById("verify-check-btn");
+  const resendBtn = document.getElementById("verify-resend-btn");
+  const signOutBtn = document.getElementById("verify-signout-btn");
+  const msgEl = document.getElementById("verify-msg");
+
+  function showMsg(text, isError) {
+    msgEl.textContent = text;
+    msgEl.className = "msg show " + (isError ? "err" : "ok");
+  }
+
+  function clearMsg() {
+    msgEl.className = "msg";
+    msgEl.textContent = "";
+  }
+
+  async function continueAfterVerification() {
+    const u = await reloadFirebaseUser();
+    if (!u || !u.emailVerified) return false;
+    const hint = sessionStorage.getItem("gb_verify_role");
+    sessionStorage.removeItem("gb_verify_role");
+    const record = await getUserRecord(u.uid);
+    const dealerCapable = userHasDealerAccess(record);
+    const buyerCapable = userHasBuyerAccess(record);
+    let useDealer = false;
+    if (hint === "dealer" && dealerCapable) {
+      useDealer = true;
+    } else if (hint === "buyer") {
+      useDealer = false;
+    } else {
+      useDealer = dealerCapable && !buyerCapable;
+    }
+    window.location.href = useDealer
+      ? await getDealerPostLoginPath(u)
+      : await getBuyerPostLoginPath(u);
+    return true;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      const hint = sessionStorage.getItem("gb_verify_role");
+      window.location.href = hint === "dealer" ? "dealer-login.html" : "buyer-login.html";
+      return;
+    }
+    if (emailDisplay) emailDisplay.textContent = user.email || "(no email)";
+    await continueAfterVerification();
+  });
+
+  checkBtn.addEventListener("click", async () => {
+    clearMsg();
+    checkBtn.disabled = true;
+    try {
+      const ok = await continueAfterVerification();
+      if (!ok) {
+        showMsg("Not verified yet. Check inbox and spam, then try again.", true);
+      }
+    } finally {
+      checkBtn.disabled = false;
+    }
+  });
+
+  resendBtn.addEventListener("click", async () => {
+    clearMsg();
+    resendBtn.disabled = true;
+    try {
+      await sendVerificationEmailToCurrentUser();
+      showMsg("Verification email sent again. Check your inbox.", false);
+    } catch (e) {
+      const code = e && e.code ? e.code : "";
+      if (code === "auth/too-many-requests") {
+        showMsg("Too many requests. Wait a few minutes before resending.", true);
+      } else {
+        showMsg(e && e.message ? e.message : "Could not resend. Try again later.", true);
+      }
+    } finally {
+      resendBtn.disabled = false;
+    }
+  });
+
+  signOutBtn.addEventListener("click", async () => {
+    sessionStorage.removeItem("gb_verify_role");
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
+</script>
+<script src="theme.js"></script>
+</body>
+</html>

@@ -9,16 +9,34 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    // Admin: trusted Firebase Auth custom claim (synced from Firestore by Cloud Function), OR Firestore role until claims propagate.
     function isAdmin() {
+      return signedIn() && (
+        request.auth.token.admin == true ||
+        (
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+        )
+      );
+    }
+
+    function ownerEscalatesToAdmin() {
+      return request.resource.data.get('role', '') == 'admin' &&
+        resource.data.get('role', '') != 'admin';
+    }
+
+    function userData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasDealerAccess() {
       return signedIn() &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+        (userData().role == "dealer" || userData().get("dealer", false) == true);
     }
 
     function isDealerUser() {
-      return signedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "dealer";
+      return signedIn() && hasDealerAccess();
     }
 
     function validUserRole(role) {
@@ -75,9 +93,11 @@ service cloud.firestore {
         request.resource.data.email is string &&
         validUserRole(request.resource.data.role) &&
         request.resource.data.role in ["buyer", "dealer"];
-      allow update: if (isOwner(uid) &&
-        request.resource.data.role == resource.data.role &&
-        request.resource.data.email is string) || isAdmin();
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.email is string &&
+          !ownerEscalatesToAdmin());
       allow read, delete: if isOwner(uid) || isAdmin();
     }
 

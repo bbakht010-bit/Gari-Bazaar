@@ -860,12 +860,13 @@
 </div>
 
 <script type="module">
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import {
     auth,
     db,
     ensureUserRecord,
+    userHasDealerAccess,
     getDealerProfile,
     upsertDealerProfile,
     uploadDealerProfileImage,
@@ -895,9 +896,15 @@
       window.location.href = 'dealer-login.html';
       return;
     }
+    await reload(user);
+    if (!user.emailVerified) {
+      sessionStorage.setItem("gb_verify_role", "dealer");
+      window.location.href = "verify-email.html";
+      return;
+    }
     currentUser = user;
     const record = await ensureUserRecord(user.uid, user.email, "dealer");
-    if (record.role && record.role !== "dealer") {
+    if (!userHasDealerAccess(record)) {
       window.location.href = "index.html";
       return;
     }

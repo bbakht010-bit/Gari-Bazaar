@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -201,24 +201,103 @@ export async function getUserRecord(uid) {
   return snap.exists() ? snap.data() : null;
 }
 
+/** True if this account may use dealer-only features (dashboard, listings, Storage dealer paths). */
+export function userHasDealerAccess(record) {
+  if (!record) return false;
+  if (record.role === "admin") return false;
+  if (record.dealer === true) return true;
+  return record.role === "dealer";
+}
+
+/** True if this account may use buyer sign-in and buyer profile flows. */
+export function userHasBuyerAccess(record) {
+  if (!record) return false;
+  if (record.role === "admin") return false;
+  if (record.buyer === true) return true;
+  if (record.buyer === false) return false;
+  return record.role === "buyer";
+}
+
+/** True only when `users/{uid}.role` is admin (set from Firebase Console / Admin SDK — never from the public app). */
+export function userIsAdmin(record) {
+  return !!(record && record.role === "admin");
+}
+
+/**
+ * Confirms this signed-in user is allowed to use the admin panel.
+ * Checks Firestore `users/{uid}` (source of truth you set in Console) and refreshes the ID token so `admin` custom claims apply when deployed.
+ */
+export async function verifyFirebaseAdminAccess(authUser) {
+  if (!authUser) return { ok: false };
+  await authUser.getIdToken(true);
+  const record = await getUserRecord(authUser.uid);
+  if (!userIsAdmin(record)) {
+    return { ok: false };
+  }
+  const { getIdTokenResult } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+  await getIdTokenResult(authUser);
+  return { ok: true };
+}
+
+/**
+ * Ensures `users/{uid}` exists and optionally grants buyer/dealer capability flags.
+ * Pass `defaultRole` null to sync email only (no new capability grants) — used by admin login.
+ */
 export async function ensureUserRecord(uid, email, defaultRole) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
+
   if (!snap.exists()) {
+    if (defaultRole == null) return null;
+    const role = normalizeUserRole(defaultRole);
     const payload = {
       email: trim(email).toLowerCase(),
-      role: normalizeUserRole(defaultRole),
+      role,
+      buyer: role === "buyer",
+      dealer: role === "dealer",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
     await setDoc(ref, payload);
     return payload;
   }
-  const current = snap.data();
+
+  const current = snap.data() || {};
+  if (current.role === "admin") {
+    const nextEmail = trim(email).toLowerCase();
+    if (nextEmail && current.email !== nextEmail) {
+      await updateDoc(ref, { email: nextEmail, updatedAt: serverTimestamp() });
+      return { ...current, email: nextEmail };
+    }
+    return current;
+  }
+
+  if (defaultRole == null) {
+    const nextEmail = trim(email).toLowerCase();
+    if (nextEmail && current.email !== nextEmail) {
+      await updateDoc(ref, { email: nextEmail, updatedAt: serverTimestamp() });
+      return { ...current, email: nextEmail };
+    }
+    return current;
+  }
+
+  const normalized = normalizeUserRole(defaultRole);
   const nextEmail = trim(email).toLowerCase();
+  const updates = {};
   if (nextEmail && current.email !== nextEmail) {
-    await updateDoc(ref, { email: nextEmail, updatedAt: serverTimestamp() });
-    return { ...current, email: nextEmail };
+    updates.email = nextEmail;
+  }
+  if (normalized === "dealer" && !userHasDealerAccess(current)) {
+    updates.dealer = true;
+  }
+  if (normalized === "buyer" && !userHasBuyerAccess(current)) {
+    updates.buyer = true;
+  }
+
+  if (Object.keys(updates).length) {
+    updates.updatedAt = serverTimestamp();
+    await updateDoc(ref, updates);
+    return { ...current, ...updates };
   }
   return current;
 }
@@ -226,6 +305,76 @@ export async function ensureUserRecord(uid, email, defaultRole) {
 export async function setUserRole(uid, role) {
   const ref = doc(db, "users", uid);
   await setDoc(ref, { role, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+/** Reload current user from Firebase (e.g. after clicking email verification link). */
+export async function reloadFirebaseUser() {
+  const u = auth.currentUser;
+  if (!u) return null;
+  await reload(u);
+  return auth.currentUser;
+}
+
+/** Sends Firebase verification email (free). No-op if already verified. */
+export async function sendVerificationEmailToCurrentUser() {
+  const u = auth.currentUser;
+  if (!u) throw new Error("Not signed in.");
+  if (u.emailVerified) return { skipped: true };
+  await sendEmailVerification(u);
+  return { sent: true };
+}
+
+
+/**
+ * Where to send a dealer after auth when email is verified (matches dealer-login flow).
+ */
+export async function getDealerPostLoginPath(user) {
+  if (!user || !user.uid) return "dealer-login.html";
+  let profile = await getDealerProfile(user.uid);
+  if (!profile) {
+    const legacyRaw = localStorage.getItem("gb_dealer_profile_" + user.uid);
+    if (legacyRaw) {
+      try {
+        const legacy = JSON.parse(legacyRaw);
+        delete legacy.verificationStatus;
+        delete legacy.suspended;
+        delete legacy.carsSold;
+        delete legacy.soldHistory;
+        await upsertDealerProfile(user.uid, {
+          ...legacy,
+          verificationStatus: "pending",
+          suspended: false
+        });
+        profile = await getDealerProfile(user.uid);
+      } catch (_error) {}
+    }
+  }
+  if (profile) {
+    localStorage.setItem("gb_dealer_profile_" + user.uid, JSON.stringify(profile));
+  }
+  if (!isDealerProfileComplete(profile)) return "register.html";
+  const status = String((profile && profile.verificationStatus) || "pending").toLowerCase();
+  if (status === "verified" || status === "approved") return "dealer-dashboard.html";
+  return "dealer-application-pending.html";
+}
+
+/**
+ * Where to send a buyer after auth when email is verified (matches buyer-login flow).
+ */
+export async function getBuyerPostLoginPath(user) {
+  if (!user || !user.uid) return "buyer-login.html";
+  let profile = await getBuyerProfile(user.uid);
+  if (!profile) {
+    const legacyRaw = localStorage.getItem("gb_buyer_profile_" + user.uid);
+    if (legacyRaw) {
+      try {
+        const legacy = JSON.parse(legacyRaw);
+        await upsertBuyerProfile(user.uid, legacy);
+        profile = await getBuyerProfile(user.uid);
+      } catch (_error) {}
+    }
+  }
+  return isBuyerProfileComplete(profile) ? "index.html" : "buyer-profile.html";
 }
 
 export function isBuyerProfileComplete(profile) {

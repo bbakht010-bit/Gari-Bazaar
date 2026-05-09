@@ -197,6 +197,29 @@
     border: none;
     padding: 0;
   }
+
+  .signin-panel.hidden {
+    display: none !important;
+  }
+
+  .signup-expand {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gray-200);
+    display: none;
+  }
+  .signup-expand.show {
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .signup-expand .signup-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green-mid);
+    margin-bottom: 12px;
+  }
 </style>
 <link rel="stylesheet" href="theme.css">
 </head>
@@ -215,19 +238,41 @@
     </div>
     <div class="card-body">
       <form id="login-form">
-        <div class="field">
-          <label for="email">Dealer Email</label>
-          <input id="email" type="email" autocomplete="username" placeholder="dealer@example.com" required>
+        <div id="signin-panel" class="signin-panel">
+          <div class="field">
+            <label for="email">Dealer Email</label>
+            <input id="email" type="email" autocomplete="username" placeholder="dealer@example.com" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
+          </div>
+          <button class="btn-login" type="submit">Login to Dashboard</button>
+          <button id="dealer-google-login" class="btn-google" type="button">Continue with Google</button>
+          <button id="dealer-create-email" class="btn-create" type="button">New dealer? Create account with Email</button>
         </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required>
-        </div>
-        <button class="btn-login" type="submit">Login to Dashboard</button>
-        <button id="dealer-google-login" class="btn-google" type="button">Continue with Google</button>
-        <button id="dealer-create-email" class="btn-create" type="button">New dealer? Create account with Email</button>
-        <div id="login-error" class="error"></div>
       </form>
+
+      <div id="signup-expand" class="signup-expand" aria-live="polite">
+        <p class="signup-title">Create your dealer account</p>
+        <div class="field">
+          <label for="signup-email">Email</label>
+          <input id="signup-email" type="email" autocomplete="email" placeholder="your@email.com">
+        </div>
+        <div class="field">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" autocomplete="new-password" placeholder="At least 6 characters" minlength="6">
+        </div>
+        <div class="field">
+          <label for="signup-password-confirm">Confirm password</label>
+          <input id="signup-password-confirm" type="password" autocomplete="new-password" placeholder="Re-enter password">
+        </div>
+        <button id="signup-submit" class="btn-login" type="button">Create dealer account</button>
+        <button id="signup-cancel" class="btn-google" type="button">Back to sign in</button>
+      </div>
+
+      <div id="login-error" class="error"></div>
+
       <div class="auth-note">
         Dealer login is connected to Firebase Authentication. Use your dealer account credentials to access dashboard.
       </div>
@@ -237,8 +282,8 @@
 </main>
 
 <script type="module">
-  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, getDealerProfile, isDealerProfileComplete, upsertDealerProfile } from "./firebase-client.js";
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, getDealerPostLoginPath, userHasDealerAccess } from "./firebase-client.js";
   const googleProvider = new GoogleAuthProvider();
 
   const form = document.getElementById("login-form");
@@ -246,6 +291,13 @@
   const submitButton = form.querySelector('button[type="submit"]');
   const googleButton = document.getElementById("dealer-google-login");
   const createEmailButton = document.getElementById("dealer-create-email");
+  const signupExpand = document.getElementById("signup-expand");
+  const signupEmail = document.getElementById("signup-email");
+  const signupPassword = document.getElementById("signup-password");
+  const signupPasswordConfirm = document.getElementById("signup-password-confirm");
+  const signupSubmit = document.getElementById("signup-submit");
+  const signupCancel = document.getElementById("signup-cancel");
+  const signinPanel = document.getElementById("signin-panel");
   const resetLocalButton = document.getElementById("dealer-reset-local");
 
   function showError(message) {
@@ -264,35 +316,6 @@
     localStorage.setItem("gb_dealer_email", user.email || "");
   }
 
-  async function getDealerPostLoginPath(user) {
-    let profile = await getDealerProfile(user.uid);
-    if (!profile) {
-      const legacyRaw = localStorage.getItem("gb_dealer_profile_" + user.uid);
-      if (legacyRaw) {
-        try {
-          const legacy = JSON.parse(legacyRaw);
-          delete legacy.verificationStatus;
-          delete legacy.suspended;
-          delete legacy.carsSold;
-          delete legacy.soldHistory;
-          await upsertDealerProfile(user.uid, {
-            ...legacy,
-            verificationStatus: "pending",
-            suspended: false
-          });
-          profile = await getDealerProfile(user.uid);
-        } catch (_error) {}
-      }
-    }
-    if (profile) {
-      localStorage.setItem("gb_dealer_profile_" + user.uid, JSON.stringify(profile));
-    }
-    if (!isDealerProfileComplete(profile)) return "register.html";
-    const status = String((profile && profile.verificationStatus) || "pending").toLowerCase();
-    if (status === "verified" || status === "approved") return "dealer-dashboard.html";
-    return "dealer-application-pending.html";
-  }
-
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
     hideError();
@@ -304,8 +327,15 @@
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
-      if (record.role && record.role !== "dealer") {
+      if (!userHasDealerAccess(record)) {
         showError("This account is not a dealer account.");
+        return;
+      }
+      await reload(credential.user);
+      if (!credential.user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "dealer");
+        rememberDealerSession(credential.user);
+        window.location.href = "verify-email.html";
         return;
       }
       rememberDealerSession(credential.user);
@@ -332,8 +362,15 @@
     try {
       const credential = await signInWithPopup(auth, googleProvider);
       const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
-      if (record.role && record.role !== "dealer") {
+      if (!userHasDealerAccess(record)) {
         showError("This account is not a dealer account.");
+        return;
+      }
+      await reload(credential.user);
+      if (!credential.user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "dealer");
+        rememberDealerSession(credential.user);
+        window.location.href = "verify-email.html";
         return;
       }
       rememberDealerSession(credential.user);
@@ -353,25 +390,84 @@
     }
   });
 
-  createEmailButton.addEventListener("click", async function () {
+  function clearSignupFields() {
+    if (signupEmail) signupEmail.value = "";
+    if (signupPassword) signupPassword.value = "";
+    if (signupPasswordConfirm) signupPasswordConfirm.value = "";
+  }
+
+  function setSignupExpanded(open) {
+    if (signinPanel) signinPanel.classList.toggle("hidden", !!open);
+    if (signupExpand) signupExpand.classList.toggle("show", !!open);
+    if (createEmailButton) createEmailButton.setAttribute("aria-expanded", open ? "true" : "false");
+    const cardTitle = document.querySelector(".card-head h1");
+    const cardSub = document.querySelector(".card-head p");
+    if (cardTitle) cardTitle.textContent = open ? "Create dealer account" : "Dealer Login";
+    if (cardSub) {
+      cardSub.textContent = open
+        ? "Set email and password, then complete registration."
+        : "Sign in to manage your cars, employees, and listing assignments.";
+    }
+    if (open && signupExpand && signupEmail) {
+      signupEmail.focus();
+      signupExpand.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  createEmailButton.addEventListener("click", function () {
     hideError();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    if (!email || !password) {
-      showError("Enter email and password first, then click create account.");
+    if (!signupExpand) return;
+    clearSignupFields();
+    setSignupExpanded(true);
+  });
+
+  signupCancel.addEventListener("click", function () {
+    hideError();
+    clearSignupFields();
+    setSignupExpanded(false);
+  });
+
+  signupSubmit.addEventListener("click", async function () {
+    hideError();
+    const email = (signupEmail && signupEmail.value.trim()) || "";
+    const password = (signupPassword && signupPassword.value) || "";
+    const confirm = (signupPasswordConfirm && signupPasswordConfirm.value) || "";
+
+    if (!email) {
+      showError("Please enter your email.");
+      if (signupEmail) signupEmail.focus();
       return;
     }
-    createEmailButton.disabled = true;
-    createEmailButton.textContent = "Creating account...";
+    if (!password) {
+      showError("Please choose a password.");
+      if (signupPassword) signupPassword.focus();
+      return;
+    }
+    if (password.length < 6) {
+      showError("Password should be at least 6 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      showError("Passwords do not match.");
+      if (signupPasswordConfirm) signupPasswordConfirm.focus();
+      return;
+    }
+
+    signupSubmit.disabled = true;
+    signupSubmit.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      await sendEmailVerification(credential.user);
       rememberDealerSession(credential.user);
-      window.location.href = "register.html";
+      sessionStorage.setItem("gb_verify_role", "dealer");
+      window.location.href = "verify-email.html";
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/email-already-in-use") {
-        showError("This email already has a dealer account. Please sign in.");
+        showError(
+          "An account already exists with this email. Sign in (Google or password), then use dealer login — the same account can be linked as a dealer."
+        );
       } else if (code === "auth/weak-password") {
         showError("Password should be at least 6 characters.");
       } else if (code === "auth/invalid-email") {
@@ -380,8 +476,8 @@
         showError("Could not create dealer account right now.");
       }
     } finally {
-      createEmailButton.disabled = false;
-      createEmailButton.textContent = "New dealer? Create account with Email";
+      signupSubmit.disabled = false;
+      signupSubmit.textContent = "Create dealer account";
     }
   });
 

@@ -183,6 +183,29 @@
   }
   .alt-links a { color: var(--green-main); font-weight: 600; text-decoration: none; }
   .alt-links a:hover { text-decoration: underline; }
+
+  .signin-panel.hidden {
+    display: none !important;
+  }
+
+  .signup-expand {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gray-200);
+    display: none;
+  }
+  .signup-expand.show {
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .signup-expand .signup-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--green-mid);
+    margin-bottom: 12px;
+  }
 </style>
 <link rel="stylesheet" href="theme.css">
 </head>
@@ -200,36 +223,64 @@
       <p>Save favourite dealers, get alerts on new stock, and manage inquiries (coming with your Firebase rollout).</p>
     </div>
     <div class="card-body">
-      <form id="buyer-login-form">
+      <div id="buyer-signin-panel" class="signin-panel">
+        <form id="buyer-login-form">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" autocomplete="username" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <button class="btn-login" type="submit">Sign in</button>
+          <button id="buyer-google-login" class="btn-google" type="button">Continue with Google</button>
+          <button id="buyer-create-email" class="btn-create" type="button">New here? Create account with Email</button>
+        </form>
+        <p class="alt-links">
+          Dealer? <a href="dealer-login.html">Dealer login</a>
+        </p>
+      </div>
+
+      <div id="buyer-signup-expand" class="signup-expand" aria-live="polite">
+        <p class="signup-title">Create your buyer account</p>
         <div class="field">
-          <label for="email">Email</label>
-          <input id="email" type="email" autocomplete="username" placeholder="you@example.com" required>
+          <label for="buyer-signup-email">Email</label>
+          <input id="buyer-signup-email" type="email" autocomplete="email" placeholder="you@example.com">
         </div>
         <div class="field">
-          <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          <label for="buyer-signup-password">Password</label>
+          <input id="buyer-signup-password" type="password" autocomplete="new-password" placeholder="At least 6 characters" minlength="6">
         </div>
-        <button class="btn-login" type="submit">Sign in</button>
-        <button id="buyer-google-login" class="btn-google" type="button">Continue with Google</button>
-        <button id="buyer-create-email" class="btn-create" type="button">New here? Create account with Email</button>
-        <div id="buyer-login-error" class="error"></div>
-      </form>
-      <p class="alt-links">
-        Dealer? <a href="dealer-login.html">Dealer login</a>
-      </p>
+        <div class="field">
+          <label for="buyer-signup-password-confirm">Confirm password</label>
+          <input id="buyer-signup-password-confirm" type="password" autocomplete="new-password" placeholder="Re-enter password">
+        </div>
+        <button id="buyer-signup-submit" class="btn-login" type="button">Create buyer account</button>
+        <button id="buyer-signup-cancel" class="btn-google" type="button">Back to sign in</button>
+      </div>
+
+      <div id="buyer-login-error" class="error"></div>
     </div>
   </section>
 </main>
 
 <script type="module">
-  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, getBuyerProfile, isBuyerProfileComplete, upsertBuyerProfile } from "./firebase-client.js";
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, ensureUserRecord, getBuyerPostLoginPath, userHasBuyerAccess } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-login-form");
   const errorBox = document.getElementById("buyer-login-error");
   const submitButton = form.querySelector('button[type="submit"]');
   const googleButton = document.getElementById("buyer-google-login");
   const createEmailButton = document.getElementById("buyer-create-email");
+  const signupExpand = document.getElementById("buyer-signup-expand");
+  const signupEmail = document.getElementById("buyer-signup-email");
+  const signupPassword = document.getElementById("buyer-signup-password");
+  const signupPasswordConfirm = document.getElementById("buyer-signup-password-confirm");
+  const signupSubmit = document.getElementById("buyer-signup-submit");
+  const signupCancel = document.getElementById("buyer-signup-cancel");
+  const buyerSigninPanel = document.getElementById("buyer-signin-panel");
   const googleProvider = new GoogleAuthProvider();
 
   function showError(message) {
@@ -240,21 +291,6 @@
   function hideError() {
     errorBox.classList.remove("show");
     errorBox.textContent = "";
-  }
-
-  async function getPostLoginPath(user) {
-    let profile = await getBuyerProfile(user.uid);
-    if (!profile) {
-      const legacyRaw = localStorage.getItem("gb_buyer_profile_" + user.uid);
-      if (legacyRaw) {
-        try {
-          const legacy = JSON.parse(legacyRaw);
-          await upsertBuyerProfile(user.uid, legacy);
-          profile = legacy;
-        } catch (_error) {}
-      }
-    }
-    return isBuyerProfileComplete(profile) ? "index.html" : "buyer-profile.html";
   }
 
   function rememberSession(user) {
@@ -275,12 +311,19 @@
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
-      if (record.role && record.role !== "buyer") {
+      if (!userHasBuyerAccess(record)) {
         showError("This account is not a buyer account.");
         return;
       }
+      await reload(credential.user);
+      if (!credential.user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "buyer");
+        rememberSession(credential.user);
+        window.location.href = "verify-email.html";
+        return;
+      }
       rememberSession(credential.user);
-      window.location.href = await getPostLoginPath(credential.user);
+      window.location.href = await getBuyerPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/invalid-credential" || code === "auth/user-not-found" || code === "auth/wrong-password") {
@@ -307,12 +350,19 @@
     try {
       const credential = await signInWithPopup(auth, googleProvider);
       const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
-      if (record.role && record.role !== "buyer") {
+      if (!userHasBuyerAccess(record)) {
         showError("This account is not a buyer account.");
         return;
       }
+      await reload(credential.user);
+      if (!credential.user.emailVerified) {
+        sessionStorage.setItem("gb_verify_role", "buyer");
+        rememberSession(credential.user);
+        window.location.href = "verify-email.html";
+        return;
+      }
       rememberSession(credential.user);
-      window.location.href = await getPostLoginPath(credential.user);
+      window.location.href = await getBuyerPostLoginPath(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/popup-closed-by-user") {
@@ -328,22 +378,78 @@
     }
   });
 
-  createEmailButton.addEventListener("click", async function () {
+  function clearBuyerSignupFields() {
+    if (signupEmail) signupEmail.value = "";
+    if (signupPassword) signupPassword.value = "";
+    if (signupPasswordConfirm) signupPasswordConfirm.value = "";
+  }
+
+  function setBuyerSignupExpanded(open) {
+    if (buyerSigninPanel) buyerSigninPanel.classList.toggle("hidden", !!open);
+    if (signupExpand) signupExpand.classList.toggle("show", !!open);
+    if (createEmailButton) createEmailButton.setAttribute("aria-expanded", open ? "true" : "false");
+    const cardTitle = document.querySelector(".card-head h1");
+    const cardSub = document.querySelector(".card-head p");
+    if (cardTitle) cardTitle.textContent = open ? "Create buyer account" : "Buyer sign in";
+    if (cardSub) {
+      cardSub.textContent = open
+        ? "Set email and password to create your account."
+        : "Save favourite dealers, get alerts on new stock, and manage inquiries (coming with your Firebase rollout).";
+    }
+    if (open && signupEmail && signupExpand) {
+      signupEmail.focus();
+      signupExpand.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  createEmailButton.addEventListener("click", function () {
     hideError();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
-    if (!email || !password) {
-      showError("Enter email and password first, then click create account.");
+    if (!signupExpand) return;
+    clearBuyerSignupFields();
+    setBuyerSignupExpanded(true);
+  });
+
+  signupCancel.addEventListener("click", function () {
+    hideError();
+    clearBuyerSignupFields();
+    setBuyerSignupExpanded(false);
+  });
+
+  signupSubmit.addEventListener("click", async function () {
+    hideError();
+    const email = (signupEmail && signupEmail.value.trim()) || "";
+    const password = (signupPassword && signupPassword.value) || "";
+    const confirm = (signupPasswordConfirm && signupPasswordConfirm.value) || "";
+
+    if (!email) {
+      showError("Please enter your email.");
+      if (signupEmail) signupEmail.focus();
+      return;
+    }
+    if (!password) {
+      showError("Please choose a password.");
+      if (signupPassword) signupPassword.focus();
+      return;
+    }
+    if (password.length < 6) {
+      showError("Password should be at least 6 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      showError("Passwords do not match.");
+      if (signupPasswordConfirm) signupPasswordConfirm.focus();
       return;
     }
 
-    createEmailButton.disabled = true;
-    createEmailButton.textContent = "Creating account...";
+    signupSubmit.disabled = true;
+    signupSubmit.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      await sendEmailVerification(credential.user);
       rememberSession(credential.user);
-      window.location.href = "buyer-profile.html";
+      sessionStorage.setItem("gb_verify_role", "buyer");
+      window.location.href = "verify-email.html";
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/email-already-in-use") {
@@ -356,8 +462,8 @@
         showError("Could not create account right now. Please try again.");
       }
     } finally {
-      createEmailButton.disabled = false;
-      createEmailButton.textContent = "New here? Create account with Email";
+      signupSubmit.disabled = false;
+      signupSubmit.textContent = "Create buyer account";
     }
   });
 

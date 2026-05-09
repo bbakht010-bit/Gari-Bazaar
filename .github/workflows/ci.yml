@@ -26,6 +26,9 @@ jobs:
       - name: Stable URL guard
         run: npm run check:stable-urls
 
+      - name: Login/signup UX guard
+        run: npm run check:login-ux
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 

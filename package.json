@@ -3,14 +3,17 @@
   "private": true,
   "scripts": {
     "check:stable-urls": "node scripts/check-stable-urls.mjs",
+    "check:login-ux": "node scripts/check-login-signup-ux.mjs",
     "test:e2e": "playwright test",
     "emulators": "npx firebase-tools@latest emulators:start --only auth,firestore,storage,functions,hosting",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
     "deploy": "firebase deploy",
-    "predeploy": "npm run check:stable-urls"
+    "predeploy": "npm run check:stable-urls && npm run check:login-ux",
+    "wipe:dev-auth": "node scripts/wipe-dev-auth.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
+    "firebase-admin": "^13.0.2",
     "firebase-tools": "^13.29.1"
   }
 }

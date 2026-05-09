@@ -5,6 +5,26 @@ admin.initializeApp();
 
 const db = admin.firestore();
 const REGION = "asia-south1";
+/** Must match your Firestore database location (default DB is often US multi-region → use us-central1 for Gen1 triggers). */
+const FIRESTORE_TRIGGER_REGION = "us-central1";
+
+/**
+ * Keeps Firebase Auth custom claim `admin` in sync with Firestore `users/{uid}.role`.
+ * Grant admin only by editing that document in Firebase Console (or Admin SDK) — never from client apps.
+ */
+exports.syncUserAdminClaim = functions.region(FIRESTORE_TRIGGER_REGION).firestore.document("users/{uid}").onWrite(async (change, context) => {
+  const uid = context.params.uid;
+  try {
+    const after = change.after.exists ? change.after.data() : null;
+    if (after && after.role === "admin") {
+      await admin.auth().setCustomUserClaims(uid, { admin: true });
+    } else {
+      await admin.auth().setCustomUserClaims(uid, { admin: false });
+    }
+  } catch (err) {
+    console.error("syncUserAdminClaim failed", uid, err && err.message ? err.message : err);
+  }
+});
 
 /**
  * Trusted mark-sold: only this function may append dealerPrivate.soldHistory and increment dealerProfiles.carsSold.
@@ -21,7 +41,10 @@ exports.markListingSold = functions.region(REGION).https.onCall(async (data, con
   }
 
   const userSnap = await db.doc(`users/${uid}`).get();
-  if (!userSnap.exists || userSnap.data().role !== "dealer") {
+  const ud = userSnap.exists ? userSnap.data() : {};
+  const canDealer =
+    ud.role === "dealer" || ud.dealer === true;
+  if (!userSnap.exists || !canDealer) {
     throw new functions.https.HttpsError("permission-denied", "Dealer accounts only.");
   }
 

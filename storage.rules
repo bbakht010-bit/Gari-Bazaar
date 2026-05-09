@@ -7,7 +7,7 @@ service firebase.storage {
 
     function isDealerUser() {
       return isSignedIn() &&
-        exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
         firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == "dealer";
     }
 

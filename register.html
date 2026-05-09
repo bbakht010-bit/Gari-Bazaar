@@ -862,16 +862,17 @@
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
   import {
-    app,
     auth,
     db,
-    storage,
     ensureUserRecord,
     getDealerProfile,
     upsertDealerProfile,
-    uploadDealerProfileImage
+    uploadDealerProfileImage,
+    uploadDealerVerificationDoc,
+    uploadDealerGallery,
+    DEALER_VERIFICATION_MAX_BYTES,
+    DEALER_GALLERY_MAX_BYTES
   } from "./firebase-client.js";
   let currentUser = null;
   let currentDealerProfile = null;
@@ -985,29 +986,6 @@
     return mb.toFixed(1) + " MB";
   }
 
-  function sanitizeFileName(name) {
-    return String(name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
-  }
-
-  async function uploadDealerVerificationDoc(uid, file) {
-    const path = "dealers/" + uid + "/verification/" + Date.now() + "_" + sanitizeFileName(file.name || "registration.pdf");
-    const fileRef = ref(storage, path);
-    await uploadBytes(fileRef, file, { contentType: file.type || "application/pdf" });
-    return await getDownloadURL(fileRef);
-  }
-
-  async function uploadDealerGallery(uid, files) {
-    const list = Array.from(files || []);
-    const urls = [];
-    for (const file of list) {
-      const path = "dealers/" + uid + "/gallery/" + Date.now() + "_" + sanitizeFileName(file.name || "photo.jpg");
-      const fileRef = ref(storage, path);
-      await uploadBytes(fileRef, file, { contentType: file.type || "image/jpeg" });
-      urls.push(await getDownloadURL(fileRef));
-    }
-    return urls;
-  }
-
   function applyUpdateModeUi() {
     if (!isProfileUpdateMode) return;
     if (pageTitle) pageTitle.textContent = "Update Dealership Profile";
@@ -1101,16 +1079,28 @@
 
     if (regUpload && regUpload.files.length > 0) {
       const regFile = regUpload.files[0];
-      if (regFile.size > 10 * 1024 * 1024) {
-        addBlockError(regUploadArea, 'Registration document exceeds 10 MB limit.');
+      if (regFile.size > DEALER_VERIFICATION_MAX_BYTES) {
+        addBlockError(
+          regUploadArea,
+          "Registration document exceeds " + DEALER_VERIFICATION_MAX_BYTES / (1024 * 1024) + " MB limit (Storage rules)."
+        );
         if (!firstInvalid) firstInvalid = regUploadArea;
       }
     }
     if (photosUpload && photosUpload.files.length > 0) {
       const photoFiles = Array.from(photosUpload.files);
       photoFiles.forEach((photo) => {
-        if (photo.size > 5 * 1024 * 1024) {
-          addBlockError(photosUploadArea, 'Each dealership photo must be under 5 MB. "' + photo.name + '" is ' + bytesLabel(photo.size) + '.');
+        if (photo.size > DEALER_GALLERY_MAX_BYTES) {
+          addBlockError(
+            photosUploadArea,
+            'Each dealership photo must be under ' +
+              DEALER_GALLERY_MAX_BYTES / (1024 * 1024) +
+              ' MB. "' +
+              photo.name +
+              '" is ' +
+              bytesLabel(photo.size) +
+              "."
+          );
           if (!firstInvalid) firstInvalid = photosUploadArea;
         }
       });

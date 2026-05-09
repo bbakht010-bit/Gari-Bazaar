@@ -56,8 +56,118 @@ export async function uploadDealerProfileImage(uid, file) {
   return await getDownloadURL(storageRef);
 }
 
+/** Matches `storage.rules` max object sizes (see `dealers/{id}/verification/*`). */
+export const DEALER_VERIFICATION_MAX_BYTES = 12 * 1024 * 1024;
+/** Matches `storage.rules` (dealership gallery). */
+export const DEALER_GALLERY_MAX_BYTES = 8 * 1024 * 1024;
+
 /** Matches `storage.rules` max object size for listing images. */
 const LISTING_CAR_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
+
+function safeStorageObjectName(originalName, fallback) {
+  return String(originalName || fallback).replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function inferredImageContentType(file) {
+  const t = String(file.type || "").trim();
+  if (t.startsWith("image/")) return t;
+  const n = String(file.name || "").toLowerCase();
+  if (n.endsWith(".jpg") || n.endsWith(".jpeg")) return "image/jpeg";
+  if (n.endsWith(".png")) return "image/png";
+  if (n.endsWith(".webp")) return "image/webp";
+  if (n.endsWith(".gif")) return "image/gif";
+  if (n.endsWith(".heic")) return "image/heic";
+  if (n.endsWith(".heif")) return "image/heif";
+  return "";
+}
+
+function inferredVerificationContentType(file, safeNameLower) {
+  const t = String(file.type || "").trim();
+  if (t === "application/pdf") return "application/pdf";
+  if (t.startsWith("image/")) return t;
+  const n = safeNameLower || String(file.name || "").toLowerCase();
+  if (n.endsWith(".pdf")) return "application/pdf";
+  if (/\.(jpe?g|png|webp)$/i.test(n)) {
+    if (n.endsWith(".png")) return "image/png";
+    if (n.endsWith(".webp")) return "image/webp";
+    return "image/jpeg";
+  }
+  return t || "";
+}
+
+/**
+ * Govt registration etc. → `dealers/{uid}/verification/…`. Rules: PDF or image, max 12MB.
+ */
+export async function uploadDealerVerificationDoc(uid, file) {
+  if (!uid || !file) return "";
+  const size = Number(file.size || 0);
+  if (size > DEALER_VERIFICATION_MAX_BYTES) {
+    throw new Error(
+      'Verification document "' +
+        (file.name || "file") +
+        '" exceeds ' +
+        (DEALER_VERIFICATION_MAX_BYTES / (1024 * 1024)) +
+        "MB (Storage rule limit)."
+    );
+  }
+  const safeBase = safeStorageObjectName(file.name, "registration.pdf");
+  const lower = safeBase.toLowerCase();
+  const mime = inferredVerificationContentType(file, lower);
+  const looksPdf =
+    mime === "application/pdf" ||
+    mime.startsWith("image/") ||
+    lower.endsWith(".pdf") ||
+    /\.(jpe?g|png|webp)$/i.test(lower);
+  if (!looksPdf) {
+    throw new Error("Verification document must be a PDF or image (JPG, PNG, WebP).");
+  }
+  const path = "dealers/" + uid + "/verification/" + Date.now() + "_" + safeBase;
+  const storageRef = ref(storage, path);
+  const contentType = mime || (lower.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
+  await uploadBytes(storageRef, file, { contentType });
+  return await getDownloadURL(storageRef);
+}
+
+/**
+ * Dealership photos on registration → `dealers/{uid}/gallery/…`. Rules: images, max 8MB.
+ */
+export async function uploadDealerGallery(uid, files) {
+  if (!uid) return [];
+  const list = Array.from(files || []);
+  const urls = [];
+  for (const file of list) {
+    const size = Number(file.size || 0);
+    if (size > DEALER_GALLERY_MAX_BYTES) {
+      const sizeMb = (size / (1024 * 1024)).toFixed(1);
+      throw new Error(
+        'Dealership photo "' + (file.name || "image") + '" is ' + sizeMb + "MB. Max is 8MB."
+      );
+    }
+    const mime = inferredImageContentType(file);
+    const safeBase = safeStorageObjectName(file.name, "photo.jpg");
+    const lower = safeBase.toLowerCase();
+    const allowedExt = /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(lower);
+    if (!mime.startsWith("image/") && !allowedExt) {
+      throw new Error(
+        'Dealership photo "' + (file.name || "") + "\" must be an image (JPG, PNG, WebP, HEIC, etc.)."
+      );
+    }
+    const path = "dealers/" + uid + "/gallery/" + Date.now() + "_" + safeBase;
+    const fileRef = ref(storage, path);
+    let ct = mime;
+    if (!ct) {
+      if (lower.endsWith(".png")) ct = "image/png";
+      else if (lower.endsWith(".webp")) ct = "image/webp";
+      else if (lower.endsWith(".gif")) ct = "image/gif";
+      else if (lower.endsWith(".heic")) ct = "image/heic";
+      else if (lower.endsWith(".heif")) ct = "image/heif";
+      else ct = "image/jpeg";
+    }
+    await uploadBytes(fileRef, file, { contentType: ct });
+    urls.push(await getDownloadURL(fileRef));
+  }
+  return urls;
+}
 
 /**
  * Car listing photos → `listings/{dealerUid}/{listingId}/…` in the default bucket (Firebase Storage / GCS).

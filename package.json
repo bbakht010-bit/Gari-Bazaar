@@ -4,6 +4,7 @@
   "scripts": {
     "check:stable-urls": "node scripts/check-stable-urls.mjs",
     "test:e2e": "playwright test",
+    "emulators": "npx firebase-tools@latest emulators:start --only auth,firestore,storage,functions,hosting",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
     "deploy": "firebase deploy",
     "predeploy": "npm run check:stable-urls"

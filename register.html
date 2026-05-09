@@ -862,12 +862,20 @@
 <script type="module">
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-  import { app, auth, db, ensureUserRecord, getDealerProfile, upsertDealerProfile, uploadDealerProfileImage } from "./firebase-client.js";
+  import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import {
+    app,
+    auth,
+    db,
+    storage,
+    ensureUserRecord,
+    getDealerProfile,
+    upsertDealerProfile,
+    uploadDealerProfileImage
+  } from "./firebase-client.js";
   let currentUser = null;
   let currentDealerProfile = null;
   let isProfileUpdateMode = false;
-  const storage = getStorage(app);
   const ownerEmailReadonly = document.getElementById('owner-email-readonly');
   const submitBtn = document.querySelector('.submit-btn');
   const registerNavBack = document.getElementById('register-nav-back');

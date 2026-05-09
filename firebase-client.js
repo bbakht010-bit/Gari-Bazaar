@@ -4,6 +4,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-aut
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+/** Must match Firebase Console → Project settings → Your apps → SDK snippet (`firebase apps:sdkconfig WEB`). */
 const firebaseConfig = {
   apiKey: "AIzaSyAs5VDo5lrmJUWONSN6gyYi856P0QXzndE",
   authDomain: "gari-bazaar.firebaseapp.com",

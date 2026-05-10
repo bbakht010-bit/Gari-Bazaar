@@ -1082,8 +1082,8 @@
       <div class="stat-number" id="heroCarsListed">0</div>
       <div class="stat-label">Cars Listed</div>
     </div>
-    <div class="stat">
-      <div class="stat-number" id="heroBuyersCount">0</div>
+    <div class="stat" title="Total buyer count isn’t shown publicly for privacy">
+      <div class="stat-number" id="heroBuyersCount">—</div>
       <div class="stat-label">Registered Buyers</div>
     </div>
     <div class="stat">
@@ -1252,7 +1252,7 @@
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import { db } from "./firebase-client.js";
-  import { auth, getBuyerProfile, userHasBuyerAccess } from "./firebase-client.js";
+  import { auth, getBuyerProfile } from "./firebase-client.js";
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
@@ -1265,7 +1265,6 @@
 
   let liveDealers = [];
   let liveListings = [];
-  let liveUsers = [];
 
   function esc(value) {
     return String(value || "")
@@ -1316,7 +1315,6 @@
       const moderation = String(l.moderationStatus || "live").toLowerCase();
       return moderation === "live" && liveDealerIds.has(String(l.dealerId || ""));
     });
-    const buyers = liveUsers.filter((u) => userHasBuyerAccess(u));
     const citySet = new Set(
       activeListings
         .map((l) => String(l.city || "").trim())
@@ -1325,7 +1323,7 @@
 
     if (heroVerifiedDealers) heroVerifiedDealers.textContent = String(verifiedDealers.length);
     if (heroCarsListed) heroCarsListed.textContent = String(activeListings.length);
-    if (heroBuyersCount) heroBuyersCount.textContent = String(buyers.length);
+    if (heroBuyersCount) heroBuyersCount.textContent = "—";
     if (heroCitiesCount) heroCitiesCount.textContent = String(citySet.size);
   }
 
@@ -1408,21 +1406,6 @@
     }).join("");
   }
 
-  onSnapshot(collection(db, "dealerProfiles"), (snap) => {
-    liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
-    renderHeroStats();
-    renderFeaturedCars();
-  });
-  onSnapshot(collection(db, "listings"), (snap) => {
-    liveListings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
-    renderHeroStats();
-    renderFeaturedCars();
-  });
-  onSnapshot(collection(db, "users"), (snap) => {
-    liveUsers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
-    renderHeroStats();
-  });
-
   async function updateHeroGreeting(user) {
     if (!heroGreeting) return;
     if (!user) {
@@ -1471,6 +1454,17 @@
       setSignedInUi(stillHasHint);
       updateHeroGreeting(null);
     }
+  });
+
+  onSnapshot(collection(db, "dealerProfiles"), (snap) => {
+    liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    renderHeroStats();
+    renderFeaturedCars();
+  });
+  onSnapshot(collection(db, "listings"), (snap) => {
+    liveListings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    renderHeroStats();
+    renderFeaturedCars();
   });
 </script>
 <script src="theme.js"></script>

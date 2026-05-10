@@ -1881,7 +1881,8 @@
       localStorage.setItem("gb_last_signed_in_email", user.email || "");
       setSignedInUi(true);
     } else {
-      setSignedInUi(false);
+      const stillHasHint = !!localStorage.getItem("gb_last_signed_in_uid");
+      setSignedInUi(stillHasHint);
     }
   });
 </script>

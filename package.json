@@ -8,7 +8,6 @@
     "emulators": "npx firebase-tools@latest emulators:start --only auth,firestore,storage,functions,hosting",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
     "deploy": "firebase deploy",
-    "predeploy": "npm run check:stable-urls && npm run check:login-ux",
     "wipe:dev-auth": "node scripts/wipe-dev-auth.mjs"
   },
   "devDependencies": {

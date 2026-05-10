@@ -33,6 +33,60 @@ const storage = getStorage(app);
 
 export const FIREBASE_FUNCTIONS_REGION = "asia-south1";
 
+/** Email for Firestore `users/{uid}` and rules (Google may omit `user.email` until profile loads). */
+export function authUserPrimaryEmail(user) {
+  if (!user) return "";
+  const direct = String(user.email || "").trim().toLowerCase();
+  if (direct) return direct;
+  try {
+    const providers = user.providerData || [];
+    const hit = providers.find((p) => p && String(p.email || "").trim());
+    return hit ? String(hit.email || "").trim().toLowerCase() : "";
+  } catch (_e) {
+    return "";
+  }
+}
+
+function googlePopupShouldUseRedirectFallback(err) {
+  const code = err && err.code ? String(err.code) : "";
+  return (
+    code === "auth/popup-blocked" ||
+    code === "auth/cancelled-popup-request" ||
+    code === "auth/operation-not-supported-in-this-environment"
+  );
+}
+
+/**
+ * Web login: popup first (best UX); if blocked, full-page redirect (works when popups fail).
+ */
+export async function signInWithGoogleWithRedirectFallback() {
+  const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import(
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
+  );
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    return await signInWithPopup(auth, provider);
+  } catch (e) {
+    if (googlePopupShouldUseRedirectFallback(e)) {
+      await signInWithRedirect(auth, provider);
+      return null;
+    }
+    throw e;
+  }
+}
+
+/** Call once after load on login pages that use Google redirect fallback. */
+export async function consumeGoogleRedirectResult() {
+  const { getRedirectResult } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+  try {
+    const credential = await getRedirectResult(auth);
+    return credential && credential.user ? credential : null;
+  } catch (_e) {
+    return null;
+  }
+}
+
 function trim(value) {
   return String(value || "").trim();
 }
@@ -206,7 +260,8 @@ export function userHasDealerAccess(record) {
   if (!record) return false;
   if (record.role === "admin") return false;
   if (record.dealer === true) return true;
-  return record.role === "dealer";
+  const r = trim(record.role).toLowerCase();
+  return r === "dealer";
 }
 
 /** True if this account may use buyer sign-in and buyer profile flows. */
@@ -215,7 +270,8 @@ export function userHasBuyerAccess(record) {
   if (record.role === "admin") return false;
   if (record.buyer === true) return true;
   if (record.buyer === false) return false;
-  return record.role === "buyer";
+  const r = trim(record.role).toLowerCase();
+  return r === "buyer";
 }
 
 /** True only when `users/{uid}.role` is admin (set from Firebase Console / Admin SDK — never from the public app). */
@@ -246,12 +302,14 @@ export async function verifyFirebaseAdminAccess(authUser) {
 export async function ensureUserRecord(uid, email, defaultRole) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
+  /** Firestore rules require `users/{uid}.email` string on every update; keep it aligned with Firebase Auth email. */
+  const authEmailLower = trim(email).toLowerCase();
 
   if (!snap.exists()) {
     if (defaultRole == null) return null;
     const role = normalizeUserRole(defaultRole);
     const payload = {
-      email: trim(email).toLowerCase(),
+      email: authEmailLower,
       role,
       buyer: role === "buyer",
       dealer: role === "dealer",
@@ -259,34 +317,37 @@ export async function ensureUserRecord(uid, email, defaultRole) {
       updatedAt: serverTimestamp()
     };
     await setDoc(ref, payload);
-    return payload;
+    const created = await getUserRecord(uid);
+    return created || payload;
   }
 
   const current = snap.data() || {};
-  if (current.role === "admin") {
-    const nextEmail = trim(email).toLowerCase();
-    if (nextEmail && current.email !== nextEmail) {
-      await updateDoc(ref, { email: nextEmail, updatedAt: serverTimestamp() });
-      return { ...current, email: nextEmail };
+  const existingEmailLower = trim(current.email).toLowerCase();
+
+  if (trim(String(current.role || "")).toLowerCase() === "admin") {
+    if (authEmailLower && existingEmailLower !== authEmailLower) {
+      await updateDoc(ref, { email: authEmailLower, updatedAt: serverTimestamp() });
+      return (await getUserRecord(uid)) || { ...current, email: authEmailLower };
     }
     return current;
   }
 
   if (defaultRole == null) {
-    const nextEmail = trim(email).toLowerCase();
-    if (nextEmail && current.email !== nextEmail) {
-      await updateDoc(ref, { email: nextEmail, updatedAt: serverTimestamp() });
-      return { ...current, email: nextEmail };
+    if (authEmailLower && existingEmailLower !== authEmailLower) {
+      await updateDoc(ref, { email: authEmailLower, updatedAt: serverTimestamp() });
+      return (await getUserRecord(uid)) || { ...current, email: authEmailLower };
     }
     return current;
   }
 
   const normalized = normalizeUserRole(defaultRole);
-  const nextEmail = trim(email).toLowerCase();
   const updates = {};
-  if (nextEmail && current.email !== nextEmail) {
-    updates.email = nextEmail;
+  if (authEmailLower && existingEmailLower !== authEmailLower) {
+    updates.email = authEmailLower;
+  } else if (authEmailLower && !existingEmailLower) {
+    updates.email = authEmailLower;
   }
+  // Same email works on buyer + dealer: add capability flags without changing primary `role` (rules block role churn).
   if (normalized === "dealer" && !userHasDealerAccess(current)) {
     updates.dealer = true;
   }
@@ -297,7 +358,7 @@ export async function ensureUserRecord(uid, email, defaultRole) {
   if (Object.keys(updates).length) {
     updates.updatedAt = serverTimestamp();
     await updateDoc(ref, updates);
-    return { ...current, ...updates };
+    return (await getUserRecord(uid)) || { ...current, ...updates };
   }
   return current;
 }

@@ -19,10 +19,20 @@ service firebase.storage {
       return hasDealerAccess();
     }
 
+    function dealerApprovedForListingMedia() {
+      return firestore.exists(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)).data.get('suspended', false) == false &&
+        (
+          firestore.get(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'verified' ||
+          firestore.get(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'approved'
+        );
+    }
+
     match /listings/{dealerId}/{listingId}/{fileName} {
       allow read: if true;
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
+        dealerApprovedForListingMedia() &&
         request.resource.size < 12 * 1024 * 1024 &&
         request.resource.contentType.matches('image/.*');
     }

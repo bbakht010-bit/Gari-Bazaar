@@ -20,14 +20,22 @@
     "bucket": "gari-bazaar.firebasestorage.app"
   },
   "hosting": {
+    "predeploy": [
+      "npm run check:stable-urls",
+      "npm run check:login-ux"
+    ],
     "public": ".",
     "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "docs/**",
       "**/.*",
-      "**/node_modules/**",
+      ".cursor/**",
+      ".firebase/**",
+      ".github/**",
+      "node_modules",
       "node_modules/**",
+      "**/node_modules/**",
       "functions/**",
       "scripts/**",
       "tests/**",
@@ -35,7 +43,10 @@
       "playwright-report/**",
       "playwright.config.js",
       "package.json",
-      "package-lock.json"
+      "package-lock.json",
+      "*.log",
+      "firebase-debug.log",
+      "firestore-debug.log"
     ]
   }
 }

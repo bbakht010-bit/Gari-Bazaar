@@ -39,6 +39,16 @@ service cloud.firestore {
       return signedIn() && hasDealerAccess();
     }
 
+    // Listing + listing-image writes must match dashboard intent: verified (or legacy approved) dealership, not suspended.
+    function dealerApprovedForListingWrites() {
+      return exists(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.get('suspended', false) == false &&
+        (
+          get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'verified' ||
+          get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'approved'
+        );
+    }
+
     function validUserRole(role) {
       return role in ["buyer", "dealer", "admin"];
     }
@@ -147,18 +157,22 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() ||
         (isDealerUser() &&
+          dealerApprovedForListingWrites() &&
           request.resource.data.dealerId == request.auth.uid &&
           request.resource.data.moderationStatus == 'live' &&
           listingCoreStringsValid());
       allow update: if isAdmin() ||
         (isDealerUser() &&
+          dealerApprovedForListingWrites() &&
           resource.data.dealerId == request.auth.uid &&
           request.resource.data.dealerId == resource.data.dealerId &&
           resource.data.moderationStatus != 'removed' &&
           request.resource.data.moderationStatus == 'live' &&
           listingCoreStringsValid());
       allow delete: if isAdmin() ||
-        (isDealerUser() && resource.data.dealerId == request.auth.uid);
+        (isDealerUser() &&
+          dealerApprovedForListingWrites() &&
+          resource.data.dealerId == request.auth.uid);
     }
 
     match /dealerChangeRequests/{requestId} {

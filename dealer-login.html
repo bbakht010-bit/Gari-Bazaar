@@ -282,13 +282,20 @@
 </main>
 
 <script type="module">
-  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, getDealerPostLoginPath, userHasDealerAccess } from "./firebase-client.js";
-  const googleProvider = new GoogleAuthProvider();
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, reload, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    auth,
+    ensureUserRecord,
+    getDealerPostLoginPath,
+    userHasDealerAccess,
+    authUserPrimaryEmail,
+    signInWithGoogleWithRedirectFallback,
+    consumeGoogleRedirectResult
+  } from "./firebase-client.js";
 
   const form = document.getElementById("login-form");
   const errorBox = document.getElementById("login-error");
-  const submitButton = form.querySelector('button[type="submit"]');
+  const submitButton = form && form.querySelector('button[type="submit"]');
   const googleButton = document.getElementById("dealer-google-login");
   const createEmailButton = document.getElementById("dealer-create-email");
   const signupExpand = document.getElementById("signup-expand");
@@ -301,21 +308,48 @@
   const resetLocalButton = document.getElementById("dealer-reset-local");
 
   function showError(message) {
+    if (!errorBox) return;
     errorBox.textContent = message;
     errorBox.classList.add("show");
   }
 
   function hideError() {
+    if (!errorBox) return;
     errorBox.classList.remove("show");
     errorBox.textContent = "";
   }
 
   function rememberDealerSession(user) {
+    if (!user || !user.uid) return;
     sessionStorage.setItem("garibazaar_dealer_session", "active");
     localStorage.setItem("gb_dealer_uid", user.uid);
     localStorage.setItem("gb_dealer_email", user.email || "");
   }
 
+  async function finalizeDealerGoogleLogin(user) {
+    const authEmail = authUserPrimaryEmail(user);
+    if (!authEmail) {
+      showError("Google returned no email. Use email/password dealer login instead.");
+      await signOut(auth);
+      return;
+    }
+    const record = await ensureUserRecord(user.uid, authEmail, "dealer");
+    if (!userHasDealerAccess(record)) {
+      showError("Could not enable dealer access on this account. Try again or use email/password.");
+      return;
+    }
+    await reload(user);
+    if (!user.emailVerified) {
+      sessionStorage.setItem("gb_verify_role", "dealer");
+      rememberDealerSession(user);
+      window.location.href = "verify-email.html";
+      return;
+    }
+    rememberDealerSession(user);
+    window.location.href = await getDealerPostLoginPath(user);
+  }
+
+  if (form && submitButton) {
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
     hideError();
@@ -326,7 +360,7 @@
     submitButton.textContent = "Signing in...";
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      const record = await ensureUserRecord(credential.user.uid, authUserPrimaryEmail(credential.user), "dealer");
       if (!userHasDealerAccess(record)) {
         showError("This account is not a dealer account.");
         return;
@@ -346,49 +380,46 @@
         showError("Invalid dealer email or password.");
       } else if (code === "auth/invalid-email") {
         showError("Please enter a valid email address.");
+      } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+        showError("Firestore blocked updating your profile. Refresh and try again, or email/password dealer login.");
       } else {
-        showError("Unable to sign in right now. Please try again.");
+        showError(error && error.message ? error.message : "Unable to sign in right now. Please try again.");
       }
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = "Login to Dashboard";
     }
   });
+  }
 
+  if (googleButton) {
   googleButton.addEventListener("click", async function () {
     hideError();
     googleButton.disabled = true;
     googleButton.textContent = "Please wait...";
     try {
-      const credential = await signInWithPopup(auth, googleProvider);
-      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
-      if (!userHasDealerAccess(record)) {
-        showError("This account is not a dealer account.");
+      const credential = await signInWithGoogleWithRedirectFallback();
+      if (!credential || !credential.user) {
         return;
       }
-      await reload(credential.user);
-      if (!credential.user.emailVerified) {
-        sessionStorage.setItem("gb_verify_role", "dealer");
-        rememberDealerSession(credential.user);
-        window.location.href = "verify-email.html";
-        return;
-      }
-      rememberDealerSession(credential.user);
-      window.location.href = await getDealerPostLoginPath(credential.user);
+      await finalizeDealerGoogleLogin(credential.user);
     } catch (error) {
       const code = error && error.code ? error.code : "";
       if (code === "auth/popup-closed-by-user") {
         showError("Google sign-in was cancelled.");
       } else if (code === "auth/unauthorized-domain") {
         showError("This domain is not authorized in Firebase Auth settings yet.");
+      } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+        showError("Could not attach dealer access to your profile. Try refreshing or email/password.");
       } else {
-        showError("Google sign-in failed. Please try again.");
+        showError(error && error.message ? error.message : "Google sign-in failed. Please try again.");
       }
     } finally {
       googleButton.disabled = false;
       googleButton.textContent = "Continue with Google";
     }
   });
+  }
 
   function clearSignupFields() {
     if (signupEmail) signupEmail.value = "";
@@ -414,19 +445,23 @@
     }
   }
 
+  if (createEmailButton && signupExpand) {
   createEmailButton.addEventListener("click", function () {
     hideError();
-    if (!signupExpand) return;
     clearSignupFields();
     setSignupExpanded(true);
   });
+  }
 
+  if (signupCancel) {
   signupCancel.addEventListener("click", function () {
     hideError();
     clearSignupFields();
     setSignupExpanded(false);
   });
+  }
 
+  if (signupSubmit) {
   signupSubmit.addEventListener("click", async function () {
     hideError();
     const email = (signupEmail && signupEmail.value.trim()) || "";
@@ -457,7 +492,7 @@
     signupSubmit.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
-      await ensureUserRecord(credential.user.uid, credential.user.email, "dealer");
+      await ensureUserRecord(credential.user.uid, authUserPrimaryEmail(credential.user), "dealer");
       await sendEmailVerification(credential.user);
       rememberDealerSession(credential.user);
       sessionStorage.setItem("gb_verify_role", "dealer");
@@ -472,6 +507,10 @@
         showError("Password should be at least 6 characters.");
       } else if (code === "auth/invalid-email") {
         showError("Please enter a valid email address.");
+      } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+        showError("Could not save your dealer account — Firestore rejected the write. Check rules or retry.");
+      } else if (error && error.message) {
+        showError(error.message);
       } else {
         showError("Could not create dealer account right now.");
       }
@@ -480,7 +519,29 @@
       signupSubmit.textContent = "Create dealer account";
     }
   });
+  }
 
+  consumeGoogleRedirectResult()
+    .then(async (credential) => {
+      if (!credential || !credential.user) return;
+      hideError();
+      if (googleButton) googleButton.disabled = true;
+      try {
+        await finalizeDealerGoogleLogin(credential.user);
+      } catch (error) {
+        const code = error && error.code ? error.code : "";
+        if (code === "permission-denied" || code === "firestore/permission-denied") {
+          showError("Could not finalize Google sign-in (permission denied).");
+        } else {
+          showError(error && error.message ? error.message : "Could not finalize Google sign-in.");
+        }
+      } finally {
+        if (googleButton) googleButton.disabled = false;
+      }
+    })
+    .catch(() => {});
+
+  if (resetLocalButton) {
   resetLocalButton.addEventListener("click", () => {
     const keys = Object.keys(localStorage);
     keys.forEach((key) => {
@@ -495,6 +556,7 @@
     hideError();
     showError("Dealer local profile data has been reset for this browser.");
   });
+  }
 
 </script>
 <script src="theme.js"></script>

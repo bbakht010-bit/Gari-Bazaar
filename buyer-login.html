@@ -266,12 +266,20 @@
 </main>
 
 <script type="module">
-  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, getBuyerPostLoginPath, userHasBuyerAccess } from "./firebase-client.js";
+  import { signInWithEmailAndPassword, createUserWithEmailAndPassword, reload, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    auth,
+    ensureUserRecord,
+    getBuyerPostLoginPath,
+    userHasBuyerAccess,
+    authUserPrimaryEmail,
+    signInWithGoogleWithRedirectFallback,
+    consumeGoogleRedirectResult
+  } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-login-form");
   const errorBox = document.getElementById("buyer-login-error");
-  const submitButton = form.querySelector('button[type="submit"]');
+  const submitButton = form && form.querySelector('button[type="submit"]');
   const googleButton = document.getElementById("buyer-google-login");
   const createEmailButton = document.getElementById("buyer-create-email");
   const signupExpand = document.getElementById("buyer-signup-expand");
@@ -281,24 +289,50 @@
   const signupSubmit = document.getElementById("buyer-signup-submit");
   const signupCancel = document.getElementById("buyer-signup-cancel");
   const buyerSigninPanel = document.getElementById("buyer-signin-panel");
-  const googleProvider = new GoogleAuthProvider();
 
   function showError(message) {
+    if (!errorBox) return;
     errorBox.textContent = message;
     errorBox.classList.add("show");
   }
 
   function hideError() {
+    if (!errorBox) return;
     errorBox.classList.remove("show");
     errorBox.textContent = "";
   }
 
   function rememberSession(user) {
+    if (!user || !user.uid) return;
     localStorage.setItem("gb_last_signed_in_uid", user.uid);
     localStorage.setItem("gb_last_signed_in_email", user.email || "");
   }
 
-  form.addEventListener("submit", async function (event) {
+  async function finalizeBuyerGoogleLogin(user) {
+    const authEmail = authUserPrimaryEmail(user);
+    if (!authEmail) {
+      showError("Google returned no email. Try another login method.");
+      await signOut(auth);
+      return;
+    }
+    const record = await ensureUserRecord(user.uid, authEmail, "buyer");
+    if (!userHasBuyerAccess(record)) {
+      showError("This account is not set up as a buyer. Use dealer login if you meant to manage listings.");
+      return;
+    }
+    await reload(user);
+    if (!user.emailVerified) {
+      sessionStorage.setItem("gb_verify_role", "buyer");
+      rememberSession(user);
+      window.location.href = "verify-email.html";
+      return;
+    }
+    rememberSession(user);
+    window.location.href = await getBuyerPostLoginPath(user);
+  }
+
+  if (submitButton && form) {
+    form.addEventListener("submit", async function (event) {
     event.preventDefault();
     hideError();
 
@@ -310,7 +344,7 @@
 
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      const record = await ensureUserRecord(credential.user.uid, authUserPrimaryEmail(credential.user), "buyer");
       if (!userHasBuyerAccess(record)) {
         showError("This account is not a buyer account.");
         return;
@@ -334,49 +368,46 @@
         showError("Too many attempts. Please wait a moment and try again.");
       } else if (code === "auth/configuration-not-found") {
         showError("Firebase Email/Password sign-in is not enabled yet. Enable it in Firebase Authentication settings.");
+      } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+        showError("Firestore blocked saving your profile. Open browser console if this repeats — rules or network issue.");
       } else {
-        showError("Unable to sign in right now. Please try again.");
+        showError(error && error.message ? error.message : "Unable to sign in right now. Please try again.");
       }
     } finally {
       submitButton.disabled = false;
       submitButton.textContent = "Sign in";
     }
-  });
+    });
+  }
 
-  googleButton.addEventListener("click", async function () {
-    hideError();
-    googleButton.disabled = true;
-    googleButton.textContent = "Please wait...";
-    try {
-      const credential = await signInWithPopup(auth, googleProvider);
-      const record = await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
-      if (!userHasBuyerAccess(record)) {
-        showError("This account is not a buyer account.");
-        return;
+  if (googleButton) {
+    googleButton.addEventListener("click", async function () {
+      hideError();
+      googleButton.disabled = true;
+      googleButton.textContent = "Please wait...";
+      try {
+        const credential = await signInWithGoogleWithRedirectFallback();
+        if (!credential || !credential.user) {
+          return;
+        }
+        await finalizeBuyerGoogleLogin(credential.user);
+      } catch (error) {
+        const code = error && error.code ? error.code : "";
+        if (code === "auth/popup-closed-by-user") {
+          showError("Google sign-in was cancelled.");
+        } else if (code === "auth/unauthorized-domain") {
+          showError("This domain is not authorized in Firebase Auth settings yet.");
+        } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+          showError("Could not update your buyer profile after Google sign-in.");
+        } else {
+          showError(error && error.message ? error.message : "Google sign-in failed. Please try again.");
+        }
+      } finally {
+        googleButton.disabled = false;
+        googleButton.textContent = "Continue with Google";
       }
-      await reload(credential.user);
-      if (!credential.user.emailVerified) {
-        sessionStorage.setItem("gb_verify_role", "buyer");
-        rememberSession(credential.user);
-        window.location.href = "verify-email.html";
-        return;
-      }
-      rememberSession(credential.user);
-      window.location.href = await getBuyerPostLoginPath(credential.user);
-    } catch (error) {
-      const code = error && error.code ? error.code : "";
-      if (code === "auth/popup-closed-by-user") {
-        showError("Google sign-in was cancelled.");
-      } else if (code === "auth/unauthorized-domain") {
-        showError("This domain is not authorized in Firebase Auth settings yet.");
-      } else {
-        showError("Google sign-in failed. Please try again.");
-      }
-    } finally {
-      googleButton.disabled = false;
-      googleButton.textContent = "Continue with Google";
-    }
-  });
+    });
+  }
 
   function clearBuyerSignupFields() {
     if (signupEmail) signupEmail.value = "";
@@ -402,20 +433,24 @@
     }
   }
 
-  createEmailButton.addEventListener("click", function () {
-    hideError();
-    if (!signupExpand) return;
-    clearBuyerSignupFields();
-    setBuyerSignupExpanded(true);
-  });
+  if (createEmailButton && signupExpand) {
+    createEmailButton.addEventListener("click", function () {
+      hideError();
+      clearBuyerSignupFields();
+      setBuyerSignupExpanded(true);
+    });
+  }
 
+  if (signupCancel) {
   signupCancel.addEventListener("click", function () {
     hideError();
     clearBuyerSignupFields();
     setBuyerSignupExpanded(false);
   });
+  }
 
-  signupSubmit.addEventListener("click", async function () {
+  if (signupSubmit) {
+    signupSubmit.addEventListener("click", async function () {
     hideError();
     const email = (signupEmail && signupEmail.value.trim()) || "";
     const password = (signupPassword && signupPassword.value) || "";
@@ -445,7 +480,7 @@
     signupSubmit.textContent = "Creating account...";
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
-      await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
+      await ensureUserRecord(credential.user.uid, authUserPrimaryEmail(credential.user), "buyer");
       await sendEmailVerification(credential.user);
       rememberSession(credential.user);
       sessionStorage.setItem("gb_verify_role", "buyer");
@@ -458,6 +493,10 @@
         showError("Password should be at least 6 characters.");
       } else if (code === "auth/invalid-email") {
         showError("Please enter a valid email address.");
+      } else if (code === "permission-denied" || code === "firestore/permission-denied") {
+        showError("Could not save your account record — Firestore rejected the write. Check Firebase rules or retry.");
+      } else if (error && error.message) {
+        showError(error.message);
       } else {
         showError("Could not create account right now. Please try again.");
       }
@@ -465,7 +504,28 @@
       signupSubmit.disabled = false;
       signupSubmit.textContent = "Create buyer account";
     }
-  });
+    });
+  }
+
+  consumeGoogleRedirectResult()
+    .then(async (credential) => {
+      if (!credential || !credential.user) return;
+      hideError();
+      if (googleButton) googleButton.disabled = true;
+      try {
+        await finalizeBuyerGoogleLogin(credential.user);
+      } catch (error) {
+        const code = error && error.code ? error.code : "";
+        if (code === "permission-denied" || code === "firestore/permission-denied") {
+          showError("Could not finalize Google sign-in (permission denied).");
+        } else {
+          showError(error && error.message ? error.message : "Could not finalize Google sign-in.");
+        }
+      } finally {
+        if (googleButton) googleButton.disabled = false;
+      }
+    })
+    .catch(() => {});
 
 </script>
 <script src="theme.js"></script>

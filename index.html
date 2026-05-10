@@ -111,6 +111,25 @@
   }
   .nav-profile-link:hover { background: var(--green-faint); }
 
+  /* Avoid flashing "Sign In" while Firebase restores a persisted session */
+  #navAuthPending {
+    display: none;
+    min-width: 92px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    box-sizing: border-box;
+    align-self: center;
+  }
+  .nav-cta.is-auth-pending #navAuthPending {
+    display: inline-block !important;
+  }
+  .nav-cta.is-auth-pending .nav-buyer-links,
+  .nav-cta.is-auth-pending .nav-profile-link {
+    display: none !important;
+  }
+
   @media (max-width: 900px) {
     .nav-buyer-links {
       border-right: none;
@@ -1050,7 +1069,8 @@
     <li><a href="dealers.html">Dealers</a></li>
     <li><a href="#how">How it Works</a></li>
   </ul>
-  <div class="nav-cta">
+  <div class="nav-cta is-auth-pending">
+    <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true" title=""></span>
     <div id="navBuyerLinks" class="nav-buyer-links">
       <a id="navBuyerSignIn" href="buyer-login.html">Sign In</a>
     </div>
@@ -1256,6 +1276,8 @@
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
+  const navAuthPending = document.getElementById("navAuthPending");
+  const navCta = document.querySelector("nav .nav-cta");
   const heroGreeting = document.getElementById("heroGreeting");
   const heroVerifiedDealers = document.getElementById("heroVerifiedDealers");
   const heroCarsListed = document.getElementById("heroCarsListed");
@@ -1440,21 +1462,25 @@
     }
   }
 
-  const hasSessionHint = !!localStorage.getItem("gb_last_signed_in_uid");
-  if (hasSessionHint) setSignedInUi(true);
-
-  onAuthStateChanged(auth, (user) => {
+  function resolveBuyerNavAuth(user) {
+    if (navCta) navCta.classList.remove("is-auth-pending");
+    if (navAuthPending) {
+      navAuthPending.style.display = "none";
+    }
     if (user) {
       localStorage.setItem("gb_last_signed_in_uid", user.uid);
       localStorage.setItem("gb_last_signed_in_email", user.email || "");
       setSignedInUi(true);
       updateHeroGreeting(user);
     } else {
-      const stillHasHint = !!localStorage.getItem("gb_last_signed_in_uid");
-      setSignedInUi(stillHasHint);
+      localStorage.removeItem("gb_last_signed_in_uid");
+      localStorage.removeItem("gb_last_signed_in_email");
+      setSignedInUi(false);
       updateHeroGreeting(null);
     }
-  });
+  }
+
+  onAuthStateChanged(auth, resolveBuyerNavAuth);
 
   onSnapshot(collection(db, "dealerProfiles"), (snap) => {
     liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));

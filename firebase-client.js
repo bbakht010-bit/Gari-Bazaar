@@ -98,11 +98,26 @@ function normalizeUserRole(role) {
 
 export { app, auth, db, storage };
 
+/** Dealer profile, gallery, verification docs, listing car photos — must match `storage.rules`. */
+export const DEALER_MEDIA_MAX_BYTES = 6 * 1024 * 1024;
+export const DEALER_VERIFICATION_MAX_BYTES = DEALER_MEDIA_MAX_BYTES;
+export const DEALER_GALLERY_MAX_BYTES = DEALER_MEDIA_MAX_BYTES;
+
+const LISTING_CAR_IMAGE_MAX_BYTES = DEALER_MEDIA_MAX_BYTES;
+
 /**
  * Dealer profile photo → Storage (public read). Falls back to caller if Storage is disabled.
  */
 export async function uploadDealerProfileImage(uid, file) {
   if (!uid || !file) return "";
+  const size = Number(file.size || 0);
+  if (size > DEALER_MEDIA_MAX_BYTES) {
+    throw new Error(
+      "Profile photo exceeds " +
+        DEALER_MEDIA_MAX_BYTES / (1024 * 1024) +
+        " MB. Use a smaller image or resize it."
+    );
+  }
   const ct = resolveImageFileContentType(file);
   if (!ct) {
     throw new Error("Please choose a JPG, PNG, WebP, GIF, or HEIC image.");
@@ -113,36 +128,6 @@ export async function uploadDealerProfileImage(uid, file) {
   await uploadBytes(storageRef, file, { contentType: ct });
   return await getDownloadURL(storageRef);
 }
-
-/** Matches `storage.rules` (`buyers/{id}/avatar/*`): JPG, PNG, or WebP only; max 2MB. */
-export const BUYER_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
-
-/**
- * Buyer profile avatar → `buyers/{uid}/avatar/…` (public read).
- */
-export async function uploadBuyerProfileImage(uid, file) {
-  if (!uid || !file) return "";
-  if (Number(file.size || 0) > BUYER_AVATAR_MAX_BYTES) {
-    throw new Error("Profile photo must be under 2 MB.");
-  }
-  const ct = resolveImageFileContentType(file);
-  if (!ct || !/^(image\/jpeg|image\/png|image\/webp)$/i.test(ct)) {
-    throw new Error("Profile photo must be JPG, PNG, or WebP.");
-  }
-  const safeName = safeStorageObjectName(file.name, "avatar.jpg");
-  const path = "buyers/" + uid + "/avatar/" + Date.now() + "_" + safeName;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file, { contentType: ct });
-  return await getDownloadURL(storageRef);
-}
-
-/** Matches `storage.rules` max object sizes (see `dealers/{id}/verification/*`). */
-export const DEALER_VERIFICATION_MAX_BYTES = 12 * 1024 * 1024;
-/** Matches `storage.rules` (dealership gallery). */
-export const DEALER_GALLERY_MAX_BYTES = 8 * 1024 * 1024;
-
-/** Matches `storage.rules` max object size for listing images. */
-const LISTING_CAR_IMAGE_MAX_BYTES = 12 * 1024 * 1024;
 
 function safeStorageObjectName(originalName, fallback) {
   return String(originalName || fallback).replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -181,6 +166,104 @@ export function resolveImageFileContentType(file) {
   return "image/jpeg";
 }
 
+/** Max image size before we resize in-browser (not the Storage rule — protects memory). */
+export const BUYER_AVATAR_PICK_MAX_BYTES = 35 * 1024 * 1024;
+
+/** Matches `storage.rules` (`buyers/{id}/avatar/*`); we compress to stay under this. */
+export const BUYER_AVATAR_MAX_BYTES = 6 * 1024 * 1024;
+
+function loadImageElementFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read this image. Try another photo."));
+    };
+    img.src = url;
+  });
+}
+
+/**
+ * Shrinks and re-encodes JPEG/PNG/WebP so typical phone-camera shots stay under `maxBytes`
+ * without asking the user to compress anything.
+ */
+async function prepareBuyerAvatarForUpload(file, maxBytes) {
+  const n = Number(file.size || 0);
+  if (n > BUYER_AVATAR_PICK_MAX_BYTES) {
+    throw new Error("This photo is too large to open in your browser. Please choose a file under 35 MB.");
+  }
+  const ct = resolveImageFileContentType(file);
+  if (!ct || !/^(image\/jpeg|image\/png|image\/webp)$/i.test(ct)) {
+    throw new Error("Profile photo must be JPG, PNG, or WebP.");
+  }
+  if (n <= maxBytes) {
+    return { file, contentType: ct };
+  }
+
+  const img = await loadImageElementFromFile(file);
+  const nw = img.naturalWidth || img.width;
+  const nh = img.naturalHeight || img.height;
+  if (nw < 1 || nh < 1) {
+    throw new Error("Invalid image.");
+  }
+
+  let maxEdge = 2048;
+  const minEdge = 360;
+
+  for (let round = 0; round < 20; round += 1) {
+    const scale = Math.min(1, maxEdge / Math.max(nw, nh));
+    const w = Math.max(1, Math.round(nw * scale));
+    const h = Math.max(1, Math.round(nh * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Your browser could not process this image.");
+    }
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+
+    for (let q = 0.9; q >= 0.36; q -= 0.05) {
+      const blob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", q));
+      if (blob && blob.size <= maxBytes) {
+        const rawBase = safeStorageObjectName(file.name, "avatar.jpg").replace(/\.[^.]+$/i, "") || "avatar";
+        const outFile = new File([blob], rawBase + ".jpg", { type: "image/jpeg" });
+        return { file: outFile, contentType: "image/jpeg" };
+      }
+    }
+
+    maxEdge = Math.max(minEdge, Math.floor(maxEdge * 0.8));
+  }
+
+  throw new Error("Could not prepare this photo. Try a different picture.");
+}
+
+/**
+ * Buyer profile avatar → `buyers/{uid}/avatar/…` (public read). Large picks are compressed client-side.
+ */
+export async function uploadBuyerProfileImage(uid, file) {
+  if (!uid || !file) return "";
+  const u = auth.currentUser;
+  if (!u || u.uid !== uid) {
+    throw new Error("You must stay signed in to upload your photo.");
+  }
+  await u.getIdToken(true);
+  const prepared = await prepareBuyerAvatarForUpload(file, BUYER_AVATAR_MAX_BYTES);
+  const safeName = safeStorageObjectName(prepared.file.name, "avatar.jpg");
+  const path = "buyers/" + uid + "/avatar/" + Date.now() + "_" + safeName;
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, prepared.file, { contentType: prepared.contentType });
+  return await getDownloadURL(storageRef);
+}
+
 function inferredVerificationContentType(file, safeNameLower) {
   const t = String(file.type || "").trim();
   if (t === "application/pdf") return "application/pdf";
@@ -196,7 +279,7 @@ function inferredVerificationContentType(file, safeNameLower) {
 }
 
 /**
- * Govt registration etc. → `dealers/{uid}/verification/…`. Rules: PDF or image, max 12MB.
+ * Govt registration etc. → `dealers/{uid}/verification/…`. Rules: PDF or image, max 6MB.
  */
 export async function uploadDealerVerificationDoc(uid, file) {
   if (!uid || !file) return "";
@@ -229,7 +312,7 @@ export async function uploadDealerVerificationDoc(uid, file) {
 }
 
 /**
- * Dealership photos on registration → `dealers/{uid}/gallery/…`. Rules: images, max 8MB.
+ * Dealership photos on registration → `dealers/{uid}/gallery/…`. Rules: images, max 6MB.
  */
 export async function uploadDealerGallery(uid, files) {
   if (!uid) return [];
@@ -240,7 +323,13 @@ export async function uploadDealerGallery(uid, files) {
     if (size > DEALER_GALLERY_MAX_BYTES) {
       const sizeMb = (size / (1024 * 1024)).toFixed(1);
       throw new Error(
-        'Dealership photo "' + (file.name || "image") + '" is ' + sizeMb + "MB. Max is 8MB."
+        'Dealership photo "' +
+          (file.name || "image") +
+          '" is ' +
+          sizeMb +
+          "MB. Max is " +
+          DEALER_GALLERY_MAX_BYTES / (1024 * 1024) +
+          "MB."
       );
     }
     const ct = resolveImageFileContentType(file);
@@ -277,7 +366,15 @@ export async function uploadListingCarImages(dealerUid, listingId, fileList) {
     }
     if (Number(file.size || 0) > LISTING_CAR_IMAGE_MAX_BYTES) {
       const sizeMb = (Number(file.size || 0) / (1024 * 1024)).toFixed(1);
-      throw new Error('Image "' + (file.name || "file") + '" is ' + sizeMb + "MB. Max allowed is 12MB.");
+      throw new Error(
+        'Image "' +
+          (file.name || "file") +
+          '" is ' +
+          sizeMb +
+          "MB. Max allowed is " +
+          LISTING_CAR_IMAGE_MAX_BYTES / (1024 * 1024) +
+          "MB."
+      );
     }
     const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;

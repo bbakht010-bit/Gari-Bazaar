@@ -68,6 +68,33 @@
   }
   .nav-links a:hover { color: var(--green-mid); }
   .nav-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #navAuthPending {
+    display: none;
+    min-width: 88px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    box-sizing: border-box;
+    align-self: center;
+  }
+  .nav-actions.is-auth-pending #navAuthPending {
+    display: inline-block !important;
+  }
+  .nav-actions.is-auth-pending #profile-logout,
+  .nav-actions.is-auth-pending #navSignInBuyer {
+    display: none !important;
+  }
+  .profile-loading {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 5%;
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  body.profile-ready .profile-loading { display: none; }
   .btn {
     border: 1px solid var(--gray-200);
     background: #fff;
@@ -267,12 +294,16 @@
     <li><a href="dealers.html">Dealers</a></li>
     <li><a href="buyer-profile.html">My Profile</a></li>
   </ul>
-  <div class="nav-actions">
-    <button id="profile-logout" class="btn">Log out</button>
+  <div class="nav-actions is-auth-pending" id="profileNavActions">
+    <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true"></span>
+    <a id="navSignInBuyer" href="buyer-login.html" class="btn">Sign In</a>
+    <button id="profile-logout" class="btn" type="button">Log out</button>
   </div>
 </nav>
 
-<main class="wrap">
+<p id="profileLoading" class="profile-loading">Checking your session…</p>
+
+<main class="wrap" id="profileMainContent" hidden>
   <aside class="card profile-sidebar">
     <div class="card-head">
       <h2 class="mini-head">My Profile</h2>
@@ -281,7 +312,7 @@
     <div class="card-body">
       <img id="profileAvatarPreview" class="profile-avatar" alt="Profile picture preview">
       <h3 class="summary-name" id="summaryFullName">Buyer</h3>
-      <p class="summary-sub" id="summaryEmail">Not signed in</p>
+      <p class="summary-sub" id="summaryEmail">…</p>
       <div class="summary-list">
         <div class="summary-row"><span>Phone</span><strong id="summaryPhone">-</strong></div>
         <div class="summary-row"><span>City</span><strong id="summaryCity">-</strong></div>
@@ -303,7 +334,7 @@
           <label for="profilePicture">Profile picture</label>
           <input id="profilePicture" type="file" accept="image/*,.jpg,.jpeg,.png,.webp">
         </div>
-        <p class="avatar-note">Upload JPG, PNG, or WEBP. Recommended square image.</p>
+        <p class="avatar-note">JPG, PNG, or WebP. Large photos are resized automatically—you do not need to compress them.</p>
 
         <div class="row">
           <div class="field">
@@ -380,12 +411,18 @@
     upsertBuyerProfile,
     resolveImageFileContentType,
     uploadBuyerProfileImage,
-    BUYER_AVATAR_MAX_BYTES
+    BUYER_AVATAR_PICK_MAX_BYTES,
+    authUserPrimaryEmail
   } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-profile-form");
   const msg = document.getElementById("profile-msg");
   const logoutButton = document.getElementById("profile-logout");
+  const profileMainContent = document.getElementById("profileMainContent");
+  const profileLoading = document.getElementById("profileLoading");
+  const profileNavActions = document.getElementById("profileNavActions");
+  const navAuthPending = document.getElementById("navAuthPending");
+  const navSignInBuyer = document.getElementById("navSignInBuyer");
   const avatarInput = document.getElementById("profilePicture");
   const avatarPreview = document.getElementById("profileAvatarPreview");
 
@@ -460,20 +497,32 @@
   let pendingAvatarFile = null;
   let avatarPreviewObjectUrl = "";
 
+  /** Nav used to show "Log out" in static HTML before Firebase ran — confusing for signed-out visitors. */
+  function showAuthenticatedChrome() {
+    document.body.classList.add("profile-ready");
+    if (profileLoading) profileLoading.style.display = "none";
+    if (profileMainContent) profileMainContent.hidden = false;
+    if (profileNavActions) profileNavActions.classList.remove("is-auth-pending");
+    if (navAuthPending) navAuthPending.style.display = "none";
+    if (navSignInBuyer) navSignInBuyer.style.display = "none";
+    if (logoutButton) logoutButton.style.display = "inline-flex";
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      window.location.href = "buyer-login.html";
+      window.location.replace("buyer-login.html");
       return;
     }
     await reload(user);
     if (!user.emailVerified) {
       sessionStorage.setItem("gb_verify_role", "buyer");
-      window.location.href = "verify-email.html";
+      window.location.replace("verify-email.html");
       return;
     }
+    showAuthenticatedChrome();
     currentUser = user;
     try {
-      await ensureUserRecord(user.uid, user.email, "buyer");
+      await ensureUserRecord(user.uid, authUserPrimaryEmail(user), "buyer");
       const profile = await getBuyerProfile(user.uid);
       if (!profile) {
         const basic = {
@@ -522,8 +571,8 @@
       avatarInput.value = "";
       return;
     }
-    if (Number(file.size || 0) > BUYER_AVATAR_MAX_BYTES) {
-      showMessage("Photo must be under 2 MB. Try resizing or compressing the image.", true);
+    if (Number(file.size || 0) > BUYER_AVATAR_PICK_MAX_BYTES) {
+      showMessage("This file is too large to open in the browser (over 35 MB). Please choose a different photo.", true);
       avatarInput.value = "";
       return;
     }
@@ -569,7 +618,7 @@
         const raw = String(loadedProfilePicture || "");
         if (raw.startsWith("data:") && raw.length > 700000) {
           showMessage(
-            "Your saved photo is too large. Please choose a new JPG, PNG, or WebP under 2 MB.",
+            "Your saved photo is too large. Please choose a new JPG, PNG, or WebP under 6 MB.",
             true
           );
           return;
@@ -601,7 +650,7 @@
       const code = err && err.code ? String(err.code) : "";
       if (code === "storage/unauthorized") {
         showMessage(
-          "Could not upload photo (Storage blocked). Sign out and sign in again, then retry.",
+          "Could not upload photo (access denied). Confirm your email is verified, then hard-refresh this page and try again. If it persists, sign out and sign back in.",
           true
         );
         return;

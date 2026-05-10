@@ -110,6 +110,24 @@
 
   .nav-buyer-links a:hover { color: var(--green-mid); }
 
+  #navAuthPending {
+    display: none;
+    min-width: 92px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    box-sizing: border-box;
+    align-self: center;
+  }
+  .nav-cta.is-auth-pending #navAuthPending {
+    display: inline-block !important;
+  }
+  .nav-cta.is-auth-pending .nav-buyer-links,
+  .nav-cta.is-auth-pending #navProfileLink {
+    display: none !important;
+  }
+
   @media (max-width: 900px) {
     .nav-buyer-links {
       border-right: none;
@@ -912,9 +930,10 @@
     <li><a href="#results">Verified Listings</a></li>
     <li><a href="dealers.html">Top Dealers</a></li>
   </ul>
-  <div class="nav-cta">
+  <div class="nav-cta is-auth-pending">
     <button id="listingsBackBtn" type="button" class="btn-nav-soft">Back</button>
     <a href="index.html" class="btn-nav-soft">Home</a>
+    <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true"></span>
     <div id="navBuyerLinks" class="nav-buyer-links">
       <a href="buyer-login.html">Sign In</a>
     </div>
@@ -1860,6 +1879,8 @@
 
   const navBuyerLinks = document.getElementById("navBuyerLinks");
   const navProfileLink = document.getElementById("navProfileLink");
+  const navAuthPending = document.getElementById("navAuthPending");
+  const navCta = document.querySelector("nav .nav-cta");
 
   function setSignedInUi(isSignedIn) {
     if (!navBuyerLinks || !navProfileLink) return;
@@ -1872,19 +1893,21 @@
     }
   }
 
-  const hasSessionHint = !!localStorage.getItem("gb_last_signed_in_uid");
-  if (hasSessionHint) setSignedInUi(true);
-
-  onAuthStateChanged(auth, (user) => {
+  function resolveBuyerNavAuth(user) {
+    if (navCta) navCta.classList.remove("is-auth-pending");
+    if (navAuthPending) navAuthPending.style.display = "none";
     if (user) {
       localStorage.setItem("gb_last_signed_in_uid", user.uid);
       localStorage.setItem("gb_last_signed_in_email", user.email || "");
       setSignedInUi(true);
     } else {
-      const stillHasHint = !!localStorage.getItem("gb_last_signed_in_uid");
-      setSignedInUi(stillHasHint);
+      localStorage.removeItem("gb_last_signed_in_uid");
+      localStorage.removeItem("gb_last_signed_in_email");
+      setSignedInUi(false);
     }
-  });
+  }
+
+  onAuthStateChanged(auth, resolveBuyerNavAuth);
 </script>
 <script src="theme.js"></script>
 

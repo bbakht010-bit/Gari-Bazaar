@@ -25,18 +25,6 @@ service firebase.storage {
       return hasDealerAccess();
     }
 
-    function hasBuyerAccess() {
-      return isSignedIn() &&
-        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-        (
-          userDoc().get("buyer", false) == true ||
-          userDoc().role == "buyer" ||
-          userDoc().role == "Buyer" ||
-          userDoc().role == "BUYER" ||
-          (userDoc().role is string && userDoc().role.matches('(?i)^buyer$'))
-        );
-    }
-
     function dealerApprovedForListingMedia() {
       return firestore.exists(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)) &&
         firestore.get(/databases/(default)/documents/dealerProfiles/$(request.auth.uid)).data.get('suspended', false) == false &&
@@ -51,7 +39,7 @@ service firebase.storage {
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
         dealerApprovedForListingMedia() &&
-        request.resource.size < 12 * 1024 * 1024 &&
+        request.resource.size < 6 * 1024 * 1024 &&
         (
           request.resource.contentType.matches('image/.*') ||
           fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
@@ -62,7 +50,7 @@ service firebase.storage {
       allow read: if true;
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
-        request.resource.size < 12 * 1024 * 1024 &&
+        request.resource.size < 6 * 1024 * 1024 &&
         (
           request.resource.contentType.matches('image/.*') ||
           fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
@@ -73,7 +61,7 @@ service firebase.storage {
       allow read: if isDealerUser() && request.auth.uid == dealerId;
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
-        request.resource.size < 12 * 1024 * 1024 &&
+        request.resource.size < 6 * 1024 * 1024 &&
         (
           request.resource.contentType.matches('application/pdf') ||
           request.resource.contentType.matches('image/.*') ||
@@ -85,18 +73,21 @@ service firebase.storage {
       allow read: if true;
       allow write: if isDealerUser() &&
         request.auth.uid == dealerId &&
-        request.resource.size < 8 * 1024 * 1024 &&
+        request.resource.size < 6 * 1024 * 1024 &&
         (
           request.resource.contentType.matches('image/.*') ||
           fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
         );
     }
 
+    // Buyer avatar: trust Auth UID + verified email only. Do not require Firestore `users` buyer flags
+    // (dual-role / legacy docs often lacked `buyer:true`, which caused storage/unauthorized).
     match /buyers/{uid}/avatar/{fileName} {
       allow read: if true;
-      allow write: if hasBuyerAccess() &&
+      allow write: if isSignedIn() &&
         request.auth.uid == uid &&
-        request.resource.size < 2 * 1024 * 1024 &&
+        request.auth.token.email_verified == true &&
+        request.resource.size < 6 * 1024 * 1024 &&
         (
           request.resource.contentType == "image/jpeg" ||
           request.resource.contentType == "image/png" ||

@@ -381,7 +381,7 @@
           <div class="field full">
             <label>Car Photos * (Buyer can view these in original quality)</label>
             <input id="car-images" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" multiple>
-            <p class="note" style="margin-top:4px;">You can select multiple photos at once. Photos are uploaded to Firebase Storage in high quality.</p>
+            <p class="note" style="margin-top:4px;">Select multiple photos if you like. Each file must be under 6 MB (JPG, PNG, WebP).</p>
           </div>
           <div class="field">
             <label>Cover Photo Number *</label>
@@ -468,6 +468,7 @@
     uploadDealerProfileImage,
     uploadListingCarImages,
     resolveImageFileContentType,
+    DEALER_MEDIA_MAX_BYTES,
     getUserRecord,
     userHasDealerAccess,
     getDealerProfile,
@@ -1336,8 +1337,8 @@
         setError(dealerProfilePictureError, 'Please select a JPG, PNG, WebP, or similar image (on Windows, files with no extension may be rejected).');
         return;
       }
-      if (file.size > 12 * 1024 * 1024) {
-        setError(dealerProfilePictureError, 'Image is too large. Please choose a file under 12 MB.');
+      if (file.size > DEALER_MEDIA_MAX_BYTES) {
+        setError(dealerProfilePictureError, 'Image is too large. Please choose a file under ' + DEALER_MEDIA_MAX_BYTES / (1024 * 1024) + ' MB.');
         return;
       }
       try {
@@ -1361,7 +1362,7 @@
         if (lowerMsg.includes('permission')) {
           friendlyMsg = 'Could not update profile picture: missing permissions. Please log in again as dealer and retry.';
         } else if (lowerMsg.includes('quota') || lowerMsg.includes('size') || lowerMsg.includes('too large')) {
-          friendlyMsg = 'Could not update profile picture: image is too large. Please use a smaller file under 12 MB.';
+          friendlyMsg = 'Could not update profile picture: image is too large. Please use a file under ' + DEALER_MEDIA_MAX_BYTES / (1024 * 1024) + ' MB.';
         } else {
           friendlyMsg = 'Could not update profile picture: ' + rawMsg;
         }

@@ -3,37 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="brand.css">
 <title>Browse Cars — GariBazaar</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green-dark: #0a4a2a;
-    --green-mid: #166534;
-    --green-main: #15803d;
-    --green-light: #22c55e;
-    --green-pale: #dcfce7;
-    --green-faint: #f0fdf4;
-    --gold: #ca8a04;
-    --gold-light: #fef08a;
-    --white: #ffffff;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
-    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
-  }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     font-family: 'DM Sans', sans-serif;
     color: var(--gray-900);
-    background: var(--white);
+    background: var(--page-bg);
     overflow-x: hidden;
   }
 
@@ -944,9 +923,9 @@
 
 <section class="page-hero">
   <div class="hero-inner">
-    <div class="hero-badge"><span class="badge-dot"></span>Verified Dealer Listings Across Pakistan</div>
-    <h1>Find Your Next Car From Trusted Dealerships</h1>
-    <p>Browse verified inventory with transparent pricing, quick filters, and direct contact options for real dealerships only.</p>
+    <div class="hero-badge"><span class="badge-dot"></span>Verified dealer stock</div>
+    <h1>Cars from trusted showrooms</h1>
+    <p>Filters, PKR ranges, WhatsApp-ready contacts.</p>
   </div>
 </section>
 
@@ -954,8 +933,8 @@
   <div class="top-filter-inner">
     <div class="top-filter-header">
       <div>
-        <h2>Search and Refine</h2>
-        <p>Use detailed filters to narrow down exactly what you want.</p>
+        <h2>Refine results</h2>
+        <p>City · make · price · mileage</p>
       </div>
     </div>
 
@@ -1112,7 +1091,7 @@
     <div class="results-top">
       <div>
         <h3 id="resultsCount">13 Verified Cars</h3>
-        <p>Showing trusted dealer listings with direct contact options.</p>
+        <p>Dealer contact on every card.</p>
       </div>
       <div class="field sort-control">
         <label for="sort">Sort By</label>
@@ -1127,8 +1106,8 @@
 
     <div class="car-grid"></div>
     <div class="browse-all-note" id="browseAllNote">
-      <p id="browseAllText">Looking for more options from other cities? Browse all available cars.</p>
-      <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Browse More Cars</button>
+      <p id="browseAllText">Widen city / filters to see more.</p>
+      <button class="browse-all-btn" id="browseAllCarsBtn" type="button">Show more</button>
     </div>
   </section>
 </main>
@@ -1137,7 +1116,7 @@
   <div class="footer-grid">
     <div class="footer-brand">
       <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
-      <p>Pakistan's only verified dealer-only car platform. Connecting trusted dealerships with genuine buyers.</p>
+      <p>Dealer-listed cars. Made in Pakistan.</p>
     </div>
     <div class="footer-col">
       <h4>For Buyers</h4>

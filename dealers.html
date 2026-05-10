@@ -3,26 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="brand.css">
 <title>All Dealers — GariBazaar</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --green-dark: #0a4a2a;
-    --green-mid: #166534;
-    --green-main: #15803d;
-    --green-light: #22c55e;
-    --green-pale: #dcfce7;
-    --green-faint: #f0fdf4;
-    --gold: #ca8a04;
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-500: #6b7280;
-    --gray-700: #374151;
-    --gray-900: #111827;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: #fff; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--gray-900); background: var(--page-bg); }
   nav {
     position: fixed; top: 0; width: 100%; z-index: 100;
     background: rgba(255,255,255,0.97); backdrop-filter: blur(12px);
@@ -125,14 +111,14 @@
 
 <section class="hero">
   <div class="hero-inner">
-    <h1>All Verified Dealers</h1>
-    <p>Explore all verified dealerships on GariBazaar. Compare ratings, cities, inventory size, and open any public dealer profile.</p>
+    <h1>Verified dealers</h1>
+    <p>Search by city or name — open a profile to call or WhatsApp.</p>
   </div>
 </section>
 
 <main class="content">
   <div id="sellCtaBanner" class="sell-cta">
-    Want to sell your car? Explore verified dealers below and open a dealer profile to contact them directly.
+    Selling your car? Pick a dealer below and message them from their profile.
   </div>
   <div class="search-row">
     <input id="dealerSearchInput" type="text" placeholder="Search dealers by name, city, or speciality">

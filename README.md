@@ -1,134 +1,100 @@
 # GariBazaar
 
-Static multi-page car marketplace built on Firebase (Hosting, Auth, Firestore, Storage, Functions).
+Static Firebase Hosting site for verified dealer listings in Pakistan: buyers browse live inventory; dealers onboard, upload media, and manage dashboards through Firebase Auth, Firestore, and Storage.
 
-## What This Project Does
+## Quick start (new developer)
 
-- Lets buyers browse verified dealer inventory.
-- Lets dealers onboard, manage listings, and track sold history.
-- Lets admins approve dealers, moderate listings, process dealer change requests, suspend dealers (and remove their listings), or fully delete a dealership record.
-- Uses **email verification** for password sign-ups before buyers or dealers can continue (Firebase `sendEmailVerification`).
-- Keeps listing/dealer URLs stable using ID-only query parameters.
+1. **Install tools**
+   - [Node.js 20](https://nodejs.org/) (matches GitHub Actions; avoid relying on mismatched npm lockfiles).
+   - Firebase CLI: `npm install -g firebase-tools`, then `firebase login`.
 
-## Tech Stack
+2. **Clone and install**
 
-- Frontend: HTML, CSS, vanilla JavaScript (no bundler).
-- Firebase Auth: buyer, dealer, admin login and role gating.
-- Firestore: users, profiles, listings, moderation/change-request data.
-- Firebase Storage: dealer/listing images and verification docs.
-- Firebase Functions: callable `markListingSold` and Firestore-triggered `syncUserAdminClaim` (admin custom claims).
-- Testing/CI: Playwright smoke tests, Lighthouse CI, URL guard checks.
-- Monitoring: Sentry browser SDK bootstrapped from runtime config.
+   ```bash
+   git clone <your-repo-url>
+   cd Gari-Bazaar
+   npm ci
+   ```
 
-## Key Runtime Files
+   If `npm ci` fails with “lock file out of sync”, run `npm install` once, commit `package-lock.json`, then use `npm ci` again.
 
-- `firebase-client.js` - Firebase init, shared auth/profile/storage helpers, role helpers (`userHasBuyerAccess`, `userHasDealerAccess`, `userIsAdmin`, `verifyFirebaseAdminAccess`), post-login paths, email verification helpers.
-- `marketplace-firestore.js` - ID builders, data normalization, and fetch helpers.
-- `url-utils.js` - Stable/canonical URL helpers (`listingId`, `dealerId` only).
-- `theme.js` - Theme toggle and Sentry bootstrap.
-- `sentry-config.json` - Runtime Sentry config (set DSN to enable).
+3. **Firebase project**
 
-## Authentication and Roles
+   - Create or select a Firebase project whose config matches `firebase-client.js` (or replace with your project’s web app snippet from **Project settings → Your apps**).
+   - Enable **Authentication** (Google/email as needed), **Firestore**, **Storage**, and **Hosting** when you migrate to your own project.
 
-### Email verification
+4. **Run checks (same as CI)**
 
-- After email/password sign-up, users are sent to `verify-email.html` until `emailVerified` is true.
-- Google sign-in users are usually already verified; the same gate still applies if not.
+   ```bash
+   npm ci
+   npm run check:stable-urls
+   npm run check:login-ux
+   npm run test:e2e
+   ```
 
-### Same email: buyer and dealer
+   Tier 1 E2E tests hit production `BASE_URL` from `playwright.config.js` unless you override env `BASE_URL` / GitHub variable `E2E_BASE_URL`. Tier 2 dealer flows may need `E2E_DEALER_EMAIL` / `E2E_DEALER_PASSWORD` in CI secrets.
 
-- Firebase allows **one Auth user per email**. The app supports **both** buyer and dealer access on that account using `users/{uid}` fields:
-  - **`role`**: legacy primary role string (`buyer`, `dealer`, or `admin`).
-  - **`buyer`**, **`dealer`**: booleans for capabilities (e.g. buyer first, then dealer login adds `dealer: true` without removing buyer access).
-- Helpers in `firebase-client.js` decide portal access; Firestore/Storage rules treat `role == "dealer"` **or** `dealer == true` as dealer access.
+## Theming & new pages
 
-### Admin access
+- **Global palette & fonts** live in **`brand.css`** (loaded by every root `*.html`). Use warm greens, `--page-bg`, and **Plus Jakarta Sans**; **`lang="ur"`** / **`lang="ur-PAK"`** can use **Noto Nastaliq Urdu** from the same sheet.
+- **`theme.css`** adds shared radii, light/dark toggle behaviour, and small layout polish.
+- **Adding a new HTML page:** run `python scripts/apply-brand-to-html.py` so the file gets `<link rel="stylesheet" href="brand.css">` and drops a duplicate inline `:root { … }` block. Then keep page-specific rules in that page’s `<style>` using the existing CSS variables (`--green-main`, `--gray-600`, etc.).
 
-- **Only** users with Firestore `users/{uid}.role == "admin"` (set in **Firebase Console** or Admin SDK—never from the public client create/update rules for self-serve promotion to admin).
-- `admin-login.html` and `admin.html` use **`verifyFirebaseAdminAccess()`** (refreshes ID token + reads Firestore).
-- **Custom claim `admin`**: Cloud Function **`syncUserAdminClaim`** watches `users/{uid}` and syncs `admin: true/false` on the Auth user. Firestore rules allow admin operations if **`request.auth.token.admin`** **or** Firestore role is admin (covers propagation delay).
-- Rules block normal users from changing their own document to **`role: admin`** (`ownerEscalatesToAdmin`).
-- Admin pages include **`noindex`** meta to reduce casual discovery (not a substitute for Console-side grants).
+## Deploy (production)
 
-## Pages and Responsibilities
+**Important:** `firebase deploy --only hosting` updates the website only. It does **not** publish Firestore rules, Storage rules, or Cloud Functions.
 
-- `index.html` - Homepage with live stats and featured listings.
-- `listings.html` - Main catalog with filtering/search/sort.
-- `car-detail.html` - Listing details hydrated from IDs and Firestore.
-- `dealers.html` - Verified dealer directory.
-- `dealer-profile.html` - Dealer profile and active inventory.
-- `buyer-signup.html`, `buyer-login.html`, `buyer-profile.html` - Buyer auth/profile flows.
-- `dealer-login.html`, `register.html`, `dealer-application-pending.html`, `dealer-dashboard.html` - Dealer auth/onboarding/dashboard flows.
-- `verify-email.html` - Pending email verification; resend / continue after verify.
-- `admin-login.html`, `admin.html` - Admin gateway and moderation dashboard.
-- `about.html`, `contact.html`, `privacy.html`, `terms.html` - Static policy/info pages.
+| Goal | Command |
+|------|---------|
+| Site (HTML, JS, CSS, `brand.css`) | `firebase deploy --only hosting` |
+| Firestore + Storage rules only | `npm run deploy:rules` or `firebase deploy --only firestore:rules,storage` |
+| Everything in `firebase.json` | `npm run deploy` or `firebase deploy` |
 
-## Firestore Collections
+Hosting predeploy runs `check:stable-urls` and `check:login-ux`; fix failures before the deploy finishes.
 
-- `users` - `email`, `role`, optional **`buyer`** / **`dealer`** flags, timestamps. Admin rows use `role: "admin"` (grant only via Console/Admin SDK).
-- `buyerProfiles` - buyer profile data.
-- `dealerProfiles` - public dealer profile + verification status.
-- `dealerPrivate` - private dealer fields (CNIC, sold history).
-- `listings` - live inventory and listing metadata (`dealerId` links to dealer UID).
-- `dealerChangeRequests` - admin-reviewed dealer profile changes.
+## Custom domain & auth (checklist)
 
-## Admin Panel Behavior
+Use this when `*.web.app` works but your own domain misbehaves (login, uploads, or stale UI).
 
-- **Suspend** dealer: confirms, **deletes all `listings`** with `dealerId` matching that dealer, then sets `suspended` on `dealerProfiles`.
-- **Delete dealer**: confirms, deletes listings, **`dealerChangeRequests`** for that dealer, then **`dealerPrivate`**, **`dealerProfiles`**, **`users/{uid}`**. Does **not** delete the Firebase Authentication user (do that in Console if needed). Listing **Storage** images may remain unless cleaned separately.
+1. **Firebase Console → Authentication → Settings → Authorized domains**  
+   Add your apex and `www` hostnames (e.g. `garibazaarpk.com`, `www.garibazaarpk.com`).
 
-## Storage Paths
+2. **Google Cloud Console → APIs & Services → Credentials → Web client (auto-created for Firebase)**  
+   Under **Authorized JavaScript origins**, add `https://your-domain` and `https://www.your-domain` if you use `www`.  
+   Under **Authorized redirect URIs**, include Firebase handler URLs, e.g. `https://<project>.firebaseapp.com/__/auth/handler`, `https://<project>.web.app/__/auth/handler`, and `https://your-domain/__/auth/handler` (and `www` if needed).
 
-- `dealers/{dealerId}/profile/*`
-- `dealers/{dealerId}/verification/*`
-- `dealers/{dealerId}/gallery/*`
-- `listings/{dealerId}/{listingId}/*`
+3. **Sessions**  
+   Sign-in state is **per origin**. Logging in on `*.firebaseapp.com` does not log you in on your custom domain until you sign in there too.
 
-## URL Contract (Important)
+4. **CDN**  
+   If Cloudflare (or similar) fronts your domain, purge cache after deploys or use short HTML cache; otherwise you may see old JS/HTML.
 
-- Car details: `car-detail?listingId=<id>&dealerId=<id>`
-- Dealer profile: `dealer-profile?dealerId=<id>`
-- Do not put mutable listing payload (price/contact/panel marks/etc.) in URLs.
-- Legacy shared links are canonicalized to the ID-only format at runtime.
+## Dealer uploads & Storage
 
-## Security and Rules
+- Dealer application uploads require **Storage rules** deployed and a Firestore **`users/{uid}`** document with **`dealer: true`** or **`role: "dealer"`** (see `storage.rules` and `firebase-client.js` `prepareDealerStorageWrites`).
+- After changing **`storage.rules`**, run `firebase deploy --only storage` (not only Hosting).
 
-- Firestore rules: `firestore.rules` (`isAdmin`, `hasDealerAccess`, anti–self-promotion to admin on `users` updates).
-- Storage rules: `storage.rules` (dealer uploads require dealer access consistent with Firestore).
-- Functions: `functions/index.js`
-  - **`markListingSold`** - HTTPS callable, region **`asia-south1`** (trusted sold-path mutation).
-  - **`syncUserAdminClaim`** - Firestore **`users/{uid}`** write trigger; deployed in **`us-central1`** so it matches the default Firestore database region used by Cloud Functions Gen1 triggers. If your Firestore database is in another region, adjust `FIRESTORE_TRIGGER_REGION` in `functions/index.js` and redeploy.
+## Local emulators (optional)
 
-## Local Commands
+```bash
+npm run emulators
+```
 
-- `npm run check:stable-urls` - fails on URL payload regressions.
-- `npm run check:login-ux` - login/signup UX guard (runs on `firebase deploy` via `predeploy`).
-- `npm run test:e2e` - Playwright smoke tests.
-- `npm run deploy:rules` - deploy Firestore/Storage rules only.
-- `npm run deploy` - full Firebase deploy (`predeploy` checks first).
-- `npm run wipe:dev-auth` - **destructive**: bulk-delete Auth users (see `scripts/wipe-dev-auth.mjs`); optional `--also-firestore` to wipe main collections. Requires **`GOOGLE_APPLICATION_CREDENTIALS`** and `--confirm <projectId>`.
+Uses ports from `firebase.json` (Hosting 5000, etc.). Wire `firebase-client.js` or env to emulator hosts only when developing against emulators.
 
-### Functions folder
+## Useful scripts
 
-- Before deploying Cloud Functions, install deps: **`cd functions && npm install`**.
+| Script | Purpose |
+|--------|---------|
+| `npm run check:stable-urls` | Guard for stable internal URLs |
+| `npm run check:login-ux` | Login/signup UX invariants |
+| `npm run test:e2e` | Playwright smoke tests |
+| `npm run deploy:rules` | Firestore + Storage rules |
+| `npm run deploy` | Full Firebase deploy per `firebase.json` |
 
-## CI Workflows
+## Repo layout (short)
 
-- `.github/workflows/e2e-smoke.yml` - Playwright smoke tests.
-- `.github/workflows/lighthouse-ci.yml` - Lighthouse checks on key pages.
-
-## Sentry Setup
-
-Edit `sentry-config.json`:
-
-- Set `dsn` to your Sentry Browser DSN.
-- Keep low sample rates unless actively profiling traffic.
-
-If DSN is empty, Sentry stays disabled safely.
-
-## Maintainer Notes
-
-- Grant **admin** only by editing **`users/{uid}`** in Firestore (set `role` to `"admin"`). After deploy of **`syncUserAdminClaim`**, the user may need a fresh sign-in so the **`admin`** custom claim appears on the token.
-- `ensureUserRecord(uid, email, null)` on admin login syncs email only and does **not** grant dealer/buyer capabilities.
-- Buyer avatar is stored as Data URL in Firestore profile docs.
-- `firestore.indexes.json` may gain compound indexes if new queries require them; deploy indexes when Firestore prompts.
+- **`firebase-client.js`** — Firebase init, Auth helpers, Storage upload helpers.
+- **`url-utils.js`**, **`theme.js`**, **`theme.css`**, **`brand.css`** — routing helpers, theme toggle, shared UI.
+- **`functions/`** — Firebase Cloud Functions (if used in your project).
+- **`tests/`** — Playwright specs.

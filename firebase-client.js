@@ -103,10 +103,36 @@ export { app, auth, db, storage };
  */
 export async function uploadDealerProfileImage(uid, file) {
   if (!uid || !file) return "";
+  const ct = resolveImageFileContentType(file);
+  if (!ct) {
+    throw new Error("Please choose a JPG, PNG, WebP, GIF, or HEIC image.");
+  }
   const safeName = String(file.name || "profile.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = "dealers/" + uid + "/profile/" + Date.now() + "_" + safeName;
   const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file, { contentType: file.type || "image/jpeg" });
+  await uploadBytes(storageRef, file, { contentType: ct });
+  return await getDownloadURL(storageRef);
+}
+
+/** Matches `storage.rules` (`buyers/{id}/avatar/*`): JPG, PNG, or WebP only; max 2MB. */
+export const BUYER_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Buyer profile avatar → `buyers/{uid}/avatar/…` (public read).
+ */
+export async function uploadBuyerProfileImage(uid, file) {
+  if (!uid || !file) return "";
+  if (Number(file.size || 0) > BUYER_AVATAR_MAX_BYTES) {
+    throw new Error("Profile photo must be under 2 MB.");
+  }
+  const ct = resolveImageFileContentType(file);
+  if (!ct || !/^(image\/jpeg|image\/png|image\/webp)$/i.test(ct)) {
+    throw new Error("Profile photo must be JPG, PNG, or WebP.");
+  }
+  const safeName = safeStorageObjectName(file.name, "avatar.jpg");
+  const path = "buyers/" + uid + "/avatar/" + Date.now() + "_" + safeName;
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, file, { contentType: ct });
   return await getDownloadURL(storageRef);
 }
 
@@ -133,6 +159,26 @@ function inferredImageContentType(file) {
   if (n.endsWith(".heic")) return "image/heic";
   if (n.endsWith(".heif")) return "image/heif";
   return "";
+}
+
+/**
+ * Many desktop browsers (especially on Windows) leave `File.type` empty. Rules and uploads need a real `image/*`
+ * Content-Type; we infer from extension when the browser omits MIME data.
+ * @returns {string} Non-empty image/* MIME, or "" if the file does not look like an allowed image.
+ */
+export function resolveImageFileContentType(file) {
+  if (!file) return "";
+  const direct = inferredImageContentType(file);
+  if (String(direct).startsWith("image/")) return direct;
+  const safeBase = safeStorageObjectName(file.name, "image.jpg");
+  const lower = safeBase.toLowerCase();
+  if (!/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(lower)) return "";
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  if (lower.endsWith(".heic")) return "image/heic";
+  if (lower.endsWith(".heif")) return "image/heif";
+  return "image/jpeg";
 }
 
 function inferredVerificationContentType(file, safeNameLower) {
@@ -197,26 +243,15 @@ export async function uploadDealerGallery(uid, files) {
         'Dealership photo "' + (file.name || "image") + '" is ' + sizeMb + "MB. Max is 8MB."
       );
     }
-    const mime = inferredImageContentType(file);
+    const ct = resolveImageFileContentType(file);
     const safeBase = safeStorageObjectName(file.name, "photo.jpg");
-    const lower = safeBase.toLowerCase();
-    const allowedExt = /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(lower);
-    if (!mime.startsWith("image/") && !allowedExt) {
+    if (!ct) {
       throw new Error(
         'Dealership photo "' + (file.name || "") + "\" must be an image (JPG, PNG, WebP, HEIC, etc.)."
       );
     }
     const path = "dealers/" + uid + "/gallery/" + Date.now() + "_" + safeBase;
     const fileRef = ref(storage, path);
-    let ct = mime;
-    if (!ct) {
-      if (lower.endsWith(".png")) ct = "image/png";
-      else if (lower.endsWith(".webp")) ct = "image/webp";
-      else if (lower.endsWith(".gif")) ct = "image/gif";
-      else if (lower.endsWith(".heic")) ct = "image/heic";
-      else if (lower.endsWith(".heif")) ct = "image/heif";
-      else ct = "image/jpeg";
-    }
     await uploadBytes(fileRef, file, { contentType: ct });
     urls.push(await getDownloadURL(fileRef));
   }
@@ -232,8 +267,13 @@ export async function uploadListingCarImages(dealerUid, listingId, fileList) {
   const files = Array.from(fileList || []);
   const results = [];
   for (const file of files) {
-    if (!String(file.type || "").startsWith("image/")) {
-      throw new Error("Only image files are allowed for car photos.");
+    const ct = resolveImageFileContentType(file);
+    if (!ct) {
+      throw new Error(
+        'Car photo "' +
+          (file.name || "file") +
+          "\" must be an image (JPG, PNG, WebP, etc.). If the file is correct, rename it with an extension like .jpg."
+      );
     }
     if (Number(file.size || 0) > LISTING_CAR_IMAGE_MAX_BYTES) {
       const sizeMb = (Number(file.size || 0) / (1024 * 1024)).toFixed(1);
@@ -242,7 +282,7 @@ export async function uploadListingCarImages(dealerUid, listingId, fileList) {
     const safeName = String(file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = "listings/" + dealerUid + "/" + listingId + "/" + Date.now() + "_" + safeName;
     const imageRef = ref(storage, path);
-    await uploadBytes(imageRef, file, { contentType: file.type || "image/jpeg" });
+    await uploadBytes(imageRef, file, { contentType: ct });
     const url = await getDownloadURL(imageRef);
     if (url) results.push(url);
   }

@@ -440,6 +440,32 @@
     transform: translateY(-1px);
   }
 
+  .submit-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  #register-submit-status {
+    display: none;
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  #register-submit-status.show {
+    display: block;
+  }
+
+  #register-submit-status.err {
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #9f1239;
+  }
+
   /* SIDEBAR */
   .sidebar { display: flex; flex-direction: column; gap: 20px; }
 
@@ -782,7 +808,10 @@
     <!-- FOOTER -->
     <div class="form-footer">
       <p>All fields marked with <span style="color:#dc2626">*</span> are required</p>
-      <button class="submit-btn">Submit Application</button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;width:100%;max-width:420px;">
+        <div id="register-submit-status" role="alert" aria-live="polite"></div>
+        <button type="button" class="submit-btn" id="dealer-register-submit">Submit Application</button>
+      </div>
     </div>
 
   </div>
@@ -873,13 +902,31 @@
     uploadDealerVerificationDoc,
     uploadDealerGallery,
     DEALER_VERIFICATION_MAX_BYTES,
-    DEALER_GALLERY_MAX_BYTES
+    DEALER_GALLERY_MAX_BYTES,
+    authUserPrimaryEmail,
+    resolveImageFileContentType
   } from "./firebase-client.js";
   let currentUser = null;
   let currentDealerProfile = null;
   let isProfileUpdateMode = false;
   const ownerEmailReadonly = document.getElementById('owner-email-readonly');
-  const submitBtn = document.querySelector('.submit-btn');
+  const submitBtn = document.getElementById("dealer-register-submit");
+  const submitStatusEl = document.getElementById("register-submit-status");
+
+  function showSubmitStatus(message, isError) {
+    if (!submitStatusEl) return;
+    submitStatusEl.textContent = message;
+    submitStatusEl.className = isError ? "show err" : "show";
+    if (isError) {
+      submitStatusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
+
+  function hideSubmitStatus() {
+    if (!submitStatusEl) return;
+    submitStatusEl.textContent = "";
+    submitStatusEl.className = "";
+  }
   const registerNavBack = document.getElementById('register-nav-back');
   const registerNavBackText = document.getElementById('register-nav-back-text');
   const pageTitle = document.querySelector('.page-header h1');
@@ -903,7 +950,7 @@
       return;
     }
     currentUser = user;
-    const record = await ensureUserRecord(user.uid, user.email, "dealer");
+    const record = await ensureUserRecord(user.uid, authUserPrimaryEmail(user), "dealer");
     if (!userHasDealerAccess(record)) {
       window.location.href = "index.html";
       return;
@@ -1032,22 +1079,80 @@
     });
   }
 
-  // Upload area feedback
-  document.querySelectorAll('input[type="file"]').forEach(input => {
-    input.addEventListener('change', function() {
-      const label = this.closest('.upload-area');
-      const files = this.files;
-      if (files.length > 0) {
-        label.querySelector('h4').textContent = files.length === 1 ? files[0].name : `${files.length} files selected`;
-        label.style.borderColor = '#15803d';
-        label.style.background = '#f0fdf4';
+  function applyUploadAreaOk(input, label) {
+    if (!label) return;
+    const files = input.files;
+    if (files && files.length > 0) {
+      label.querySelector("h4").textContent =
+        files.length === 1 ? files[0].name : files.length + " files selected";
+      label.style.borderColor = "#15803d";
+      label.style.background = "#f0fdf4";
+    }
+  }
+
+  // Upload area feedback + early validation (Windows often omits MIME types; submit still validates).
+  document.querySelectorAll('input[type="file"]').forEach((input) => {
+    input.addEventListener("change", function () {
+      hideSubmitStatus();
+      const label = this.closest(".upload-area");
+
+      if (this.id === "dealer-profile-picture") {
+        const f = this.files && this.files[0];
+        if (f && !resolveImageFileContentType(f)) {
+          showSubmitStatus("Profile photo must be a JPG, PNG, WebP, GIF, or HEIC file (include the extension in the filename).", true);
+          this.value = "";
+          if (label) {
+            label.style.borderColor = "";
+            label.style.background = "";
+          }
+          return;
+        }
+        applyUploadAreaOk(this, label);
+        return;
       }
+
+      if (this.id === "photos-upload") {
+        const list = this.files ? Array.from(this.files) : [];
+        for (const f of list) {
+          if (!resolveImageFileContentType(f)) {
+            showSubmitStatus(
+              "Each dealership photo must be a recognizable image (.jpg, .png, .webp, etc.).",
+              true
+            );
+            this.value = "";
+            if (label) {
+              label.style.borderColor = "";
+              label.style.background = "";
+            }
+            return;
+          }
+          if (f.size > DEALER_GALLERY_MAX_BYTES) {
+            showSubmitStatus(
+              "One photo exceeds " + DEALER_GALLERY_MAX_BYTES / (1024 * 1024) + " MB. Remove or compress it.",
+              true
+            );
+            this.value = "";
+            if (label) {
+              label.style.borderColor = "";
+              label.style.background = "";
+            }
+            return;
+          }
+        }
+        applyUploadAreaOk(this, label);
+        return;
+      }
+
+      applyUploadAreaOk(this, label);
     });
   });
 
-  // Submit button
+  if (!submitBtn) {
+    console.error("Dealer register: submit button #dealer-register-submit not found.");
+  } else {
   submitBtn.addEventListener('click', async function() {
     clearFieldErrors();
+    hideSubmitStatus();
 
     const requiredFields = [
       { id: 'dealer-name', message: 'Dealership name is required.' },
@@ -1167,10 +1272,18 @@
     }
 
     if (!currentUser) {
-      alert('Your dealer session has expired. Please sign in again.');
-      window.location.href = 'dealer-login.html';
+      showSubmitStatus(
+        "Your sign-in session is still loading or you are not signed in as a dealer. Wait a moment and try again, or open dealer-login.html and sign in.",
+        true
+      );
       return;
     }
+
+    const defaultSubmitLabel = isProfileUpdateMode ? "Submit Change Request" : "Submit Application";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Please wait…";
+
+    try {
 
     const existingProfile = currentDealerProfile || await getDealerProfile(currentUser.uid);
     const existingStatus = String((existingProfile && existingProfile.verificationStatus) || "").toLowerCase();
@@ -1209,7 +1322,7 @@
       ownerCnic: document.getElementById('owner-cnic').value.trim(),
       phone: document.getElementById('owner-phone').value.trim(),
       whatsapp: document.getElementById('owner-whatsapp').value.trim() || document.getElementById('owner-phone').value.trim(),
-      email: currentUser.email || '',
+      email: authUserPrimaryEmail(currentUser) || String(currentUser.email || ""),
       profilePicture: profilePicture,
       registrationDocumentUrl: registrationDocumentUrl,
       dealershipPhotos: dealershipPhotos,
@@ -1251,16 +1364,32 @@
       localStorage.setItem('gb_dealer_profile_' + currentUser.uid, JSON.stringify(dealerProfile));
     }
 
-    this.textContent = isProfileUpdateMode ? 'Change Request Submitted!' : 'Application Submitted!';
-    this.style.background = '#166534';
-    this.disabled = true;
+    submitBtn.textContent = isProfileUpdateMode ? "Change Request Submitted!" : "Application Submitted!";
+    submitBtn.style.background = "#166534";
+    hideSubmitStatus();
     setTimeout(() => {
       if (isProfileUpdateMode) {
         localStorage.setItem('gb_dealer_flash_message', 'Change request submitted successfully. It is now pending admin approval.');
       }
       window.location.href = isProfileUpdateMode ? 'dealer-dashboard.html' : 'dealer-application-pending.html';
     }, 500);
+    } catch (error) {
+      console.error("Dealer application submit failed:", error);
+      const code = error && error.code ? String(error.code) : "";
+      const msg = error && error.message ? String(error.message) : "Something went wrong.";
+      let friendly =
+        code === "storage/unauthorized"
+          ? "Upload was blocked (Storage rules). Confirm you are signed in as a dealer and try again."
+          : code === "permission-denied" || code === "firestore/permission-denied"
+            ? "Firestore rejected the save — check rules or sign out and sign in again as a dealer."
+            : msg;
+      showSubmitStatus(friendly, true);
+      submitBtn.disabled = false;
+      submitBtn.textContent = defaultSubmitLabel;
+      submitBtn.style.background = "";
+    }
   });
+  }
 
 </script>
 <script src="theme.js"></script>

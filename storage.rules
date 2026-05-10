@@ -12,11 +12,29 @@ service firebase.storage {
     function hasDealerAccess() {
       return isSignedIn() &&
         firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-        (userDoc().role == "dealer" || userDoc().get("dealer", false) == true);
+        (
+          userDoc().get("dealer", false) == true ||
+          userDoc().role == "dealer" ||
+          userDoc().role == "Dealer" ||
+          userDoc().role == "DEALER" ||
+          (userDoc().role is string && userDoc().role.matches('(?i)^dealer$'))
+        );
     }
 
     function isDealerUser() {
       return hasDealerAccess();
+    }
+
+    function hasBuyerAccess() {
+      return isSignedIn() &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        (
+          userDoc().get("buyer", false) == true ||
+          userDoc().role == "buyer" ||
+          userDoc().role == "Buyer" ||
+          userDoc().role == "BUYER" ||
+          (userDoc().role is string && userDoc().role.matches('(?i)^buyer$'))
+        );
     }
 
     function dealerApprovedForListingMedia() {
@@ -34,7 +52,10 @@ service firebase.storage {
         request.auth.uid == dealerId &&
         dealerApprovedForListingMedia() &&
         request.resource.size < 12 * 1024 * 1024 &&
-        request.resource.contentType.matches('image/.*');
+        (
+          request.resource.contentType.matches('image/.*') ||
+          fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
+        );
     }
 
     match /dealers/{dealerId}/profile/{fileName} {
@@ -68,6 +89,19 @@ service firebase.storage {
         (
           request.resource.contentType.matches('image/.*') ||
           fileName.matches('(?i).+\\.(jpg|jpeg|png|webp|gif|heic|heif)$')
+        );
+    }
+
+    match /buyers/{uid}/avatar/{fileName} {
+      allow read: if true;
+      allow write: if hasBuyerAccess() &&
+        request.auth.uid == uid &&
+        request.resource.size < 2 * 1024 * 1024 &&
+        (
+          request.resource.contentType == "image/jpeg" ||
+          request.resource.contentType == "image/png" ||
+          request.resource.contentType == "image/webp" ||
+          fileName.matches('(?i).+\\.(jpg|jpeg|png|webp)$')
         );
     }
   }

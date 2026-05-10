@@ -467,6 +467,7 @@
     FIREBASE_FUNCTIONS_REGION,
     uploadDealerProfileImage,
     uploadListingCarImages,
+    resolveImageFileContentType,
     getUserRecord,
     userHasDealerAccess,
     getDealerProfile,
@@ -1331,8 +1332,8 @@
         setError(dealerProfilePictureError, 'Please select an image first.');
         return;
       }
-      if (!(file.type || '').toLowerCase().startsWith('image/')) {
-        setError(dealerProfilePictureError, 'Please select a valid image file.');
+      if (!resolveImageFileContentType(file)) {
+        setError(dealerProfilePictureError, 'Please select a JPG, PNG, WebP, or similar image (on Windows, files with no extension may be rejected).');
         return;
       }
       if (file.size > 12 * 1024 * 1024) {

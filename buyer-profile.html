@@ -301,7 +301,7 @@
       <form id="buyer-profile-form">
         <div class="field">
           <label for="profilePicture">Profile picture</label>
-          <input id="profilePicture" type="file" accept="image/png,image/jpeg,image/webp">
+          <input id="profilePicture" type="file" accept="image/*,.jpg,.jpeg,.png,.webp">
         </div>
         <p class="avatar-note">Upload JPG, PNG, or WEBP. Recommended square image.</p>
 
@@ -373,7 +373,15 @@
 
 <script type="module">
   import { onAuthStateChanged, signOut, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth, ensureUserRecord, getBuyerProfile, upsertBuyerProfile } from "./firebase-client.js";
+  import {
+    auth,
+    ensureUserRecord,
+    getBuyerProfile,
+    upsertBuyerProfile,
+    resolveImageFileContentType,
+    uploadBuyerProfileImage,
+    BUYER_AVATAR_MAX_BYTES
+  } from "./firebase-client.js";
 
   const form = document.getElementById("buyer-profile-form");
   const msg = document.getElementById("profile-msg");
@@ -446,7 +454,11 @@
 
   let currentUser = null;
   let isExistingProfile = false;
-  let pendingProfilePicture = "";
+  /** Last saved `profilePicture` from Firestore (URL, data URL legacy, or empty). */
+  let loadedProfilePicture = "";
+  /** New file chosen by user, not yet uploaded. */
+  let pendingAvatarFile = null;
+  let avatarPreviewObjectUrl = "";
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -475,13 +487,25 @@
           profilePicture: "",
           email: user.email || ""
         };
+        loadedProfilePicture = "";
+        if (avatarPreviewObjectUrl) {
+          URL.revokeObjectURL(avatarPreviewObjectUrl);
+          avatarPreviewObjectUrl = "";
+        }
+        pendingAvatarFile = null;
+        if (avatarInput) avatarInput.value = "";
         fillForm(basic, user);
-        pendingProfilePicture = "";
         updateSummary(basic, user.email || "");
         return;
       }
       isExistingProfile = true;
-      pendingProfilePicture = profile.profilePicture || "";
+      loadedProfilePicture = profile.profilePicture || "";
+      if (avatarPreviewObjectUrl) {
+        URL.revokeObjectURL(avatarPreviewObjectUrl);
+        avatarPreviewObjectUrl = "";
+      }
+      pendingAvatarFile = null;
+      if (avatarInput) avatarInput.value = "";
       fillForm(profile, user);
       updateSummary(profile, user.email || "");
     } catch (_error) {
@@ -492,18 +516,21 @@
   avatarInput.addEventListener("change", () => {
     const file = avatarInput.files && avatarInput.files[0];
     if (!file) return;
-    const isValidType = /^image\/(png|jpeg|webp)$/.test(file.type);
-    if (!isValidType) {
-      showMessage("Please upload PNG, JPG, or WEBP image only.", true);
+    const ct = resolveImageFileContentType(file);
+    if (!ct || !/^(image\/jpeg|image\/png|image\/webp)$/i.test(ct)) {
+      showMessage("Please upload a JPG, PNG, or WebP image. If Windows hides the type, use a file ending in .jpg, .png, or .webp.", true);
       avatarInput.value = "";
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      pendingProfilePicture = String(reader.result || "");
-      avatarPreview.src = pendingProfilePicture || defaultAvatar(fullNameInput.value || "Buyer");
-    };
-    reader.readAsDataURL(file);
+    if (Number(file.size || 0) > BUYER_AVATAR_MAX_BYTES) {
+      showMessage("Photo must be under 2 MB. Try resizing or compressing the image.", true);
+      avatarInput.value = "";
+      return;
+    }
+    pendingAvatarFile = file;
+    if (avatarPreviewObjectUrl) URL.revokeObjectURL(avatarPreviewObjectUrl);
+    avatarPreviewObjectUrl = URL.createObjectURL(file);
+    avatarPreview.src = avatarPreviewObjectUrl || defaultAvatar(fullNameInput.value || "Buyer");
   });
 
   form.addEventListener("submit", async (event) => {
@@ -528,6 +555,28 @@
 
     try {
       const wasExistingProfile = isExistingProfile;
+      let profilePicture = loadedProfilePicture;
+      if (pendingAvatarFile) {
+        profilePicture = await uploadBuyerProfileImage(currentUser.uid, pendingAvatarFile);
+        loadedProfilePicture = profilePicture;
+        pendingAvatarFile = null;
+        if (avatarInput) avatarInput.value = "";
+        if (avatarPreviewObjectUrl) {
+          URL.revokeObjectURL(avatarPreviewObjectUrl);
+          avatarPreviewObjectUrl = "";
+        }
+      } else {
+        const raw = String(loadedProfilePicture || "");
+        if (raw.startsWith("data:") && raw.length > 700000) {
+          showMessage(
+            "Your saved photo is too large. Please choose a new JPG, PNG, or WebP under 2 MB.",
+            true
+          );
+          return;
+        }
+        profilePicture = raw.trim() ? raw : defaultAvatar(fullName);
+      }
+
       const profile = {
         fullName: fullName,
         phone: phone,
@@ -536,18 +585,27 @@
         dateOfBirth: dateOfBirth,
         address: address,
         about: about,
-        profilePicture: pendingProfilePicture || avatarPreview.src || defaultAvatar(fullName),
+        profilePicture: profilePicture,
         email: currentUser.email || "",
         updatedAt: new Date().toISOString()
       };
       await upsertBuyerProfile(currentUser.uid, profile);
+      loadedProfilePicture = profile.profilePicture;
       isExistingProfile = true;
       updateSummary(profile, currentUser.email || "");
       showMessage("Profile saved successfully and synced with Firebase.", false);
       if (!wasExistingProfile) {
         window.location.href = "index.html";
       }
-    } catch (_error) {
+    } catch (err) {
+      const code = err && err.code ? String(err.code) : "";
+      if (code === "storage/unauthorized") {
+        showMessage(
+          "Could not upload photo (Storage blocked). Sign out and sign in again, then retry.",
+          true
+        );
+        return;
+      }
       showMessage("Could not save profile right now. Please try again.", true);
     }
   });

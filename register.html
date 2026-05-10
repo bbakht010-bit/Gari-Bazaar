@@ -1379,7 +1379,7 @@
       const msg = error && error.message ? String(error.message) : "Something went wrong.";
       let friendly =
         code === "storage/unauthorized"
-          ? "Upload was blocked (Storage rules). Confirm you are signed in as a dealer and try again."
+          ? "Upload denied: Firebase Storage rules blocked this file (code storage/unauthorized). See the browser console (F12) for the full error. Your Firestore users document usually needs dealer: true or role == dealer for dealer uploads."
           : code === "permission-denied" || code === "firestore/permission-denied"
             ? "Firestore rejected the save — check rules or sign out and sign in again as a dealer."
             : msg;

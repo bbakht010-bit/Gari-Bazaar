@@ -1,7 +1,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getAuth, reload, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocFromServer,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  deleteField
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /** Must match Firebase Console → Project settings → Your apps → SDK snippet (`firebase apps:sdkconfig WEB`). */
@@ -106,10 +115,30 @@ export const DEALER_GALLERY_MAX_BYTES = DEALER_MEDIA_MAX_BYTES;
 const LISTING_CAR_IMAGE_MAX_BYTES = DEALER_MEDIA_MAX_BYTES;
 
 /**
+ * Storage rules (`storage.rules`) read Firestore `users/{uid}` for dealer uploads. Ensures `dealer: true`
+ * is persisted and refreshes the ID token immediately before uploads so reads in rules match the client.
+ */
+export async function prepareDealerStorageWrites(uid) {
+  const u = auth.currentUser;
+  if (!u || !uid || u.uid !== uid) {
+    throw new Error("You must stay signed in to upload dealership files.");
+  }
+  await ensureUserRecord(uid, authUserPrimaryEmail(u), "dealer");
+  const record = await getUserRecordFromServer(uid);
+  if (!userHasDealerAccess(record)) {
+    throw new Error(
+      "Your account is not authorized for dealer uploads. Sign out, open dealer-login.html, sign in again, then retry."
+    );
+  }
+  await u.getIdToken(true);
+}
+
+/**
  * Dealer profile photo → Storage (public read). Falls back to caller if Storage is disabled.
  */
 export async function uploadDealerProfileImage(uid, file) {
   if (!uid || !file) return "";
+  await prepareDealerStorageWrites(uid);
   const size = Number(file.size || 0);
   if (size > DEALER_MEDIA_MAX_BYTES) {
     throw new Error(
@@ -283,6 +312,7 @@ function inferredVerificationContentType(file, safeNameLower) {
  */
 export async function uploadDealerVerificationDoc(uid, file) {
   if (!uid || !file) return "";
+  await prepareDealerStorageWrites(uid);
   const size = Number(file.size || 0);
   if (size > DEALER_VERIFICATION_MAX_BYTES) {
     throw new Error(
@@ -316,6 +346,7 @@ export async function uploadDealerVerificationDoc(uid, file) {
  */
 export async function uploadDealerGallery(uid, files) {
   if (!uid) return [];
+  await prepareDealerStorageWrites(uid);
   const list = Array.from(files || []);
   const urls = [];
   for (const file of list) {
@@ -353,6 +384,7 @@ export async function uploadDealerGallery(uid, files) {
  */
 export async function uploadListingCarImages(dealerUid, listingId, fileList) {
   if (!dealerUid || !listingId) return [];
+  await prepareDealerStorageWrites(dealerUid);
   const files = Array.from(fileList || []);
   const results = [];
   for (const file of files) {
@@ -392,11 +424,21 @@ export async function getUserRecord(uid) {
   return snap.exists() ? snap.data() : null;
 }
 
+/** Same as `getUserRecord` but reads from the server — used before Storage uploads so rules see committed dealer flags. */
+export async function getUserRecordFromServer(uid) {
+  const ref = doc(db, "users", uid);
+  const snap = await getDocFromServer(ref);
+  return snap.exists() ? snap.data() : null;
+}
+
 /** True if this account may use dealer-only features (dashboard, listings, Storage dealer paths). */
 export function userHasDealerAccess(record) {
   if (!record) return false;
   if (record.role === "admin") return false;
-  if (record.dealer === true) return true;
+  // Firestore may deserialize legacy/admin-edited values loosely; stay aligned with `storage.rules` intent.
+  if (record.dealer === true || record.dealer === 1 || String(record.dealer).toLowerCase() === "true") {
+    return true;
+  }
   const r = trim(record.role).toLowerCase();
   return r === "dealer";
 }

@@ -5,20 +5,34 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function userDoc() {
-      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data;
+    /** Must stay aligned with Firestore `users/{uid}` + `firebase-client.js` `userHasDealerAccess`. */
+    function usersDocPath() {
+      return /databases/(default)/documents/users/$(request.auth.uid);
+    }
+
+    function usersData() {
+      return firestore.get(usersDocPath()).data;
+    }
+
+    function dealerRoleIsDealer() {
+      let r = usersData().get("role", "");
+      return r == "dealer" ||
+        r == "Dealer" ||
+        r == "DEALER" ||
+        (r is string && r.matches("(?i)^dealer$"));
+    }
+
+    function dealerFlagIsTrue() {
+      let d = usersData();
+      return d.get("dealer", false) == true ||
+        d.get("dealer", "") == "true" ||
+        d.get("dealer", 0) == 1;
     }
 
     function hasDealerAccess() {
       return isSignedIn() &&
-        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-        (
-          userDoc().get("dealer", false) == true ||
-          userDoc().role == "dealer" ||
-          userDoc().role == "Dealer" ||
-          userDoc().role == "DEALER" ||
-          (userDoc().role is string && userDoc().role.matches('(?i)^dealer$'))
-        );
+        firestore.exists(usersDocPath()) &&
+        (dealerRoleIsDealer() || dealerFlagIsTrue());
     }
 
     function isDealerUser() {

@@ -13,6 +13,7 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "firebase-admin": "^13.0.2",
-    "firebase-tools": "^13.29.1"
+    "firebase-tools": "^13.29.1",
+    "picomatch": "^4.0.4"
   }
 }

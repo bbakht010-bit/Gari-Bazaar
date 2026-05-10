@@ -411,9 +411,11 @@
     upsertBuyerProfile,
     resolveImageFileContentType,
     uploadBuyerProfileImage,
-    BUYER_AVATAR_PICK_MAX_BYTES,
     authUserPrimaryEmail
   } from "./firebase-client.js";
+
+  /** Must match `BUYER_AVATAR_PICK_MAX_BYTES` in firebase-client.js (max before in-browser resize). */
+  const BUYER_AVATAR_PICK_MAX_BYTES = 35 * 1024 * 1024;
 
   const form = document.getElementById("buyer-profile-form");
   const msg = document.getElementById("profile-msg");

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -195,7 +195,7 @@
     margin-bottom: 12px;
   }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Buyer authentication and entry into buyer-only flows. -->
@@ -223,7 +223,7 @@
           </div>
           <button class="btn-login" type="submit">Sign in</button>
           <button id="buyer-google-login" class="btn-google" type="button">Continue with Google</button>
-          <button id="buyer-create-email" class="btn-create" type="button">New here? Create account with Email</button>
+          <button id="buyer-create-email" class="btn-create" type="button">New here? Complete buyer sign up</button>
         </form>
         <p class="alt-links">
           Dealer? <a href="dealer-login.html">Dealer login</a>
@@ -421,11 +421,9 @@
     }
   }
 
-  if (createEmailButton && signupExpand) {
+  if (createEmailButton) {
     createEmailButton.addEventListener("click", function () {
-      hideError();
-      clearBuyerSignupFields();
-      setBuyerSignupExpanded(true);
+      window.location.href = "buyer-signup.html";
     });
   }
 
@@ -516,6 +514,6 @@
     .catch(() => {});
 
 </script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 </body>
 </html>

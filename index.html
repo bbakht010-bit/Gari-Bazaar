@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GariBazaar — Pakistan's Trusted Dealer Network</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --green-dark: #0a4a2a;
@@ -25,13 +25,15 @@
     --gray-700: #374151;
     --gray-800: #1f2937;
     --gray-900: #111827;
-    --font-numbers: 'Space Grotesk', 'DM Sans', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+    --font-display: 'Cormorant Garamond', serif;
+    --font-numbers: 'Space Grotesk', var(--font-body);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     color: var(--gray-900);
     background: var(--white);
     overflow-x: hidden;
@@ -49,7 +51,7 @@
   }
 
   .logo {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 26px; font-weight: 700;
     color: var(--green-mid);
     display: flex; align-items: center; gap: 8px;
@@ -176,7 +178,7 @@
     border-radius: 10px;
     font-size: 14px; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -196,7 +198,7 @@
     border-radius: 10px;
     font-size: 14px; font-weight: 600;
     cursor: pointer; transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -257,7 +259,7 @@
   }
 
   .hero h1 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: clamp(38px, 6vw, 72px);
     font-weight: 700;
     color: white;
@@ -292,7 +294,7 @@
     border-radius: 12px;
     font-size: 16px; font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     transition: all 0.2s;
     text-decoration: none;
   }
@@ -311,7 +313,7 @@
     border-radius: 12px;
     font-size: 16px; font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     transition: all 0.2s;
     text-decoration: none;
   }
@@ -369,7 +371,7 @@
   }
 
   .search-wrapper h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 32px;
     color: var(--gray-900);
     margin-bottom: 8px;
@@ -392,7 +394,7 @@
 
   .search-bar select, .search-bar input {
     border: none; outline: none;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 15px;
     color: var(--gray-800);
     background: transparent;
@@ -415,7 +417,7 @@
     border: none;
     font-size: 15px; font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     margin: 6px;
     border-radius: 8px;
     transition: background 0.2s;
@@ -453,7 +455,7 @@
   }
 
   .section-header h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 34px;
     color: var(--gray-900);
   }
@@ -505,7 +507,7 @@
     border: 1.5px solid var(--gray-200);
     border-radius: 9px;
     padding: 9px 11px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     outline: none;
   }
@@ -637,7 +639,7 @@
   }
 
   .car-price span {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 13px; font-weight: 400;
     color: var(--gray-400);
   }
@@ -650,7 +652,7 @@
     border-radius: 8px;
     font-size: 13px; font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     transition: background 0.2s;
   }
 
@@ -737,7 +739,7 @@
   }
 
   .how-section h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 38px; color: white;
     margin-bottom: 12px;
   }
@@ -878,7 +880,7 @@
   }
 
   .pricing-section h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 38px; margin-bottom: 12px;
   }
 
@@ -939,7 +941,7 @@
   }
 
   .plan-price small {
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     font-size: 14px; font-weight: 400;
     color: var(--gray-400);
   }
@@ -968,7 +970,7 @@
     border-radius: 10px;
     font-size: 15px; font-weight: 600;
     cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
+    font-family: var(--font-body);
     transition: all 0.2s;
   }
 
@@ -996,7 +998,7 @@
   }
 
   .cta-section h2 {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-display);
     font-size: 42px; color: white;
     margin-bottom: 16px; max-width: 600px;
     margin-left: auto; margin-right: auto;
@@ -1067,141 +1069,762 @@
     .search-bar select { border-right: none; border-bottom: 1px solid var(--gray-200); }
     .featured-actions { justify-content: flex-start; }
   }
+
+  /* Sketch layout override */
+  .home-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    min-height: 72px;
+    height: auto;
+    padding: 14px 5%;
+  }
+
+  .home-nav .logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 0;
+  }
+
+  .home-nav .nav-links {
+    display: none;
+  }
+
+  .menu-toggle {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1.5px solid var(--gray-200);
+    background: #ffffff;
+    color: var(--green-mid);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-toggle:hover {
+    background: var(--green-faint);
+    border-color: var(--green-main);
+  }
+
+  .home-nav .nav-cta {
+    justify-self: end;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+
+  .home-nav .nav-buyer-links {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: none;
+    gap: 8px;
+  }
+
+  .home-nav .nav-buyer-links a,
+  .home-nav .nav-profile-link {
+    min-height: 38px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1.5px solid var(--gray-200);
+    background: #ffffff;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-nav .nav-buyer-links a:hover,
+  .home-nav .nav-profile-link:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
+
+  .home-nav .nav-signup-link {
+    background: var(--green-main);
+    border-color: var(--green-main);
+    color: white;
+  }
+
+  .home-nav .nav-signup-link:hover {
+    background: var(--green-mid);
+    color: white;
+    border-color: var(--green-mid);
+  }
+
+  .home-nav #navAuthPending {
+    min-width: 140px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .nav-menu-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 5%;
+    width: min(320px, 90vw);
+    background: #ffffff;
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    box-shadow: 0 18px 40px rgba(17,24,39,0.12);
+    padding: 12px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .nav-menu-panel[hidden] {
+    display: none !important;
+  }
+
+  .nav-menu-panel a {
+    text-decoration: none;
+    color: var(--gray-700);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 12px;
+    border-radius: 12px;
+  }
+
+  .nav-menu-panel a:hover {
+    background: var(--green-faint);
+    color: var(--green-mid);
+  }
+
+  .home-hero {
+    min-height: auto;
+    background: linear-gradient(180deg, #ffffff 0%, var(--green-faint) 100%);
+    padding: 118px 5% 34px;
+    text-align: center;
+  }
+
+  .home-hero::before {
+    display: none;
+  }
+
+  .home-hero .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .home-hero .hero-greeting {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--green-mid);
+    font-family: var(--font-display);
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+  }
+
+  .home-hero .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3.8vw, 40px);
+    line-height: 1.2;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+
+  .home-hero .hero-subtitle {
+    max-width: 520px;
+    margin: 0 auto 26px;
+    color: var(--gray-600);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .home-search-bar {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 16px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(17,24,39,0.06);
+  }
+
+  .home-search-bar select {
+    width: 160px;
+    border: none;
+    border-right: 1px solid var(--gray-200);
+    outline: none;
+    background: transparent;
+    padding: 0 16px;
+    font-size: 15px;
+    color: var(--gray-700);
+    font-family: var(--font-body);
+    cursor: pointer;
+  }
+
+  .home-search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 15px 18px;
+    font-size: 15px;
+    color: var(--gray-800);
+    font-family: var(--font-body);
+  }
+
+  .home-search-bar button {
+    min-width: 146px;
+    border: none;
+    border-left: 1px solid var(--gray-200);
+    background: var(--green-main);
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 18px;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: var(--font-body);
+  }
+
+  .home-search-bar button:hover {
+    background: var(--green-mid);
+  }
+
+  .home-search-suggestions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .search-chip {
+    border: 1px solid var(--gray-200);
+    border-radius: 999px;
+    background: #ffffff;
+    color: var(--gray-700);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.2s ease;
+  }
+
+  .search-chip:hover {
+    border-color: var(--green-main);
+    color: var(--green-mid);
+    background: var(--green-faint);
+  }
+
+  .home-hero .hero-buttons {
+    margin-top: 18px;
+    gap: 12px;
+  }
+
+  .home-hero .btn-hero-primary,
+  .home-hero .btn-hero-secondary {
+    min-width: 180px;
+    min-height: 46px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .home-hero .btn-hero-primary {
+    background: var(--green-main);
+    color: #ffffff;
+  }
+
+  .home-hero .btn-hero-primary:hover {
+    background: var(--green-mid);
+    box-shadow: 0 10px 24px rgba(21,128,61,0.18);
+  }
+
+  .home-hero .btn-hero-secondary {
+    background: #ffffff;
+    border-color: var(--green-main);
+    color: var(--green-mid);
+  }
+
+  .home-hero .btn-hero-secondary:hover {
+    background: var(--green-faint);
+    border-color: var(--green-mid);
+  }
+
+  .home-hero .hero-note {
+    margin-top: 12px;
+    color: var(--gray-600);
+    font-size: 13px;
+  }
+
+  .home-hero .hero-stats {
+    margin-top: 20px;
+    gap: 12px;
+  }
+
+  .home-hero .stat {
+    min-width: 150px;
+    padding: 12px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.85);
+  }
+
+  .home-hero .stat-number {
+    color: var(--green-mid);
+    font-size: 26px;
+  }
+
+  .home-hero .stat-label {
+    color: var(--gray-600);
+    font-size: 11px;
+  }
+
+  .home-featured {
+    padding-top: 34px;
+  }
+
+  .section-divider {
+    position: relative;
+  }
+
+  .section-divider::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 5%;
+    right: 5%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(21,128,61,0.22) 18%, rgba(21,128,61,0.32) 50%, rgba(21,128,61,0.22) 82%, transparent 100%);
+  }
+
+  .home-featured .section-header {
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .home-featured .section-header p {
+    color: var(--gray-600);
+  }
+
+  .home-featured .featured-subline,
+  .home-featured .featured-actions {
+    display: none;
+  }
+
+  .home-featured .view-all {
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 12px;
+    color: var(--green-mid);
+  }
+
+  .home-featured .car-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  .home-featured .car-card {
+    border-radius: 28px;
+    overflow: hidden;
+  }
+
+  .home-featured .car-img {
+    height: 230px;
+  }
+
+  .home-featured .car-body {
+    padding: 16px;
+  }
+
+  .home-featured .car-name {
+    font-size: 16px;
+  }
+
+  .home-join {
+    background: #ffffff;
+    padding: 28px 5% 20px;
+  }
+
+  .join-card {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px;
+    border: 1px solid var(--gray-200);
+    border-radius: 28px;
+    background: linear-gradient(180deg, #ffffff 0%, var(--green-faint) 100%);
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .join-card h2 {
+    font-family: var(--font-display);
+    font-size: 38px;
+    color: var(--gray-900);
+    margin-bottom: 10px;
+  }
+
+  .join-card p {
+    color: var(--gray-600);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .join-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .join-actions .btn-hero-primary,
+  .join-actions .btn-hero-secondary {
+    min-height: 48px;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .join-actions .btn-hero-primary {
+    background: var(--green-main);
+    color: #ffffff;
+  }
+
+  .join-actions .btn-hero-secondary {
+    background: #ffffff;
+    color: var(--green-mid);
+    border-color: var(--green-main);
+  }
+
+  .home-how {
+    background: #ffffff;
+    padding-top: 28px;
+    color: var(--gray-900);
+  }
+
+  .home-how h2 {
+    color: var(--gray-900);
+  }
+
+  .home-how > p {
+    color: var(--gray-600);
+  }
+
+  .home-how .steps-grid {
+    max-width: 1040px;
+  }
+
+  .home-how .step {
+    background: var(--green-faint);
+    border: 1px solid #bbf7d0;
+    text-align: left;
+  }
+
+  .home-how .step-icon {
+    margin: 0 0 18px;
+  }
+
+  .home-how .step h3 {
+    color: var(--gray-900);
+  }
+
+  .home-how .step p {
+    color: var(--gray-600);
+  }
+
+  @media (max-width: 900px) {
+    .home-nav .nav-buyer-links {
+      width: auto;
+      justify-content: flex-end;
+    }
+
+    .join-card {
+      grid-template-columns: 1fr;
+    }
+
+    .join-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .home-nav {
+      grid-template-columns: auto 1fr auto;
+      min-height: 72px;
+      padding: 12px 5%;
+    }
+
+    .home-nav .logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      justify-self: auto;
+      order: initial;
+    }
+
+    .home-nav .nav-cta {
+      grid-column: auto;
+      justify-self: end;
+      justify-content: flex-end;
+      flex-wrap: nowrap !important;
+    }
+
+    .home-hero {
+      padding-top: 104px;
+    }
+
+    .home-featured .car-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .home-nav {
+      min-height: 68px;
+      padding: 10px 5%;
+    }
+
+    .home-nav .nav-cta {
+      overflow: visible;
+    }
+
+    .home-nav .nav-buyer-links {
+      flex-wrap: nowrap !important;
+      justify-content: flex-end;
+    }
+
+    .home-nav .nav-buyer-links a,
+    .home-nav .nav-profile-link {
+      min-height: 36px;
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    .home-nav .nav-signup-link {
+      display: none;
+    }
+
+    .menu-toggle {
+      width: 40px;
+      height: 40px;
+    }
+
+    .home-nav .logo {
+      font-size: 23px;
+    }
+
+    .home-search-bar {
+      flex-direction: column;
+      border-radius: 14px;
+    }
+
+    .home-search-bar select {
+      width: 100%;
+      min-height: 52px;
+      border-right: none;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .home-search-bar button {
+      width: 100%;
+      min-height: 52px;
+      border-left: none;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .home-featured .car-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .join-actions {
+      flex-direction: column;
+    }
+
+    .join-actions .btn-hero-primary,
+    .join-actions .btn-hero-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .home-nav .nav-buyer-links a,
+    .home-nav .nav-profile-link {
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
+    .home-hero {
+      padding-top: 96px;
+    }
+  }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Homepage with live marketplace highlights and entry points to listings/dealers. -->
 
 <!-- NAV -->
-<nav>
+<nav class="home-nav">
+  <button id="navMenuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="navMenuPanel" aria-label="Open navigation menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
   <a href="index.html" class="logo">Gari<span class="logo-dot">Bazaar</span></a>
-  <ul class="nav-links">
-    <li><a href="listings.html">Browse Cars</a></li>
-    <li><a href="dealers.html">Dealers</a></li>
-    <li><a href="#how">How it Works</a></li>
-  </ul>
   <div class="nav-cta is-auth-pending">
     <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true" title=""></span>
     <div id="navBuyerLinks" class="nav-buyer-links">
-      <a id="navBuyerSignIn" href="buyer-login.html">Sign In</a>
+      <a id="navBuyerSignIn" href="auth-choice.html?mode=signin">Sign In</a>
+      <a id="navBuyerSignUp" class="nav-signup-link" href="auth-choice.html?mode=signup">Sign Up</a>
     </div>
     <a id="navProfileLink" class="nav-profile-link" href="buyer-profile.html">My Profile</a>
-    <a href="dealer-login.html" class="btn-outline">Dealer Access</a>
+  </div>
+  <div id="navMenuPanel" class="nav-menu-panel" hidden>
+    <a href="listings.html">Browse Cars</a>
+    <a href="dealers.html">Browse Dealers</a>
+    <a href="auth-choice.html?mode=signin">Sign In</a>
+    <a href="auth-choice.html?mode=signup">Sign Up</a>
+    <a href="dealer-login.html?mode=signup">Join as Dealer</a>
+    <a href="buyer-signup.html">Join as Buyer</a>
+    <a href="#how">How It Works</a>
   </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-badge">
-    <div class="badge-dot"></div>
-    Pakistan's Verified Dealer Network
-  </div>
-  <div id="heroGreeting" class="hero-greeting"></div>
-  <h1>Buy Cars From <span>Trusted</span> Dealerships Only</h1>
-  <p>GariBazaar connects you with verified, government-registered car dealerships across Pakistan. No middlemen, no fake listings — just real dealers.</p>
-  <div class="hero-buttons">
-    <a href="listings.html" class="btn-hero-primary">Browse Verified Cars</a>
-    <a href="dealers.html?sell=1" class="btn-hero-secondary">Want to sell your car? Explore dealers now</a>
-  </div>
-  <p class="hero-note">Need quick help? Use WhatsApp support for direct assistance.</p>
-  <div class="hero-stats">
-    <div class="stat">
-      <div class="stat-number" id="heroVerifiedDealers">0</div>
-      <div class="stat-label">Verified Dealers</div>
-    </div>
-    <div class="stat">
-      <div class="stat-number" id="heroCarsListed">0</div>
-      <div class="stat-label">Cars Listed</div>
-    </div>
-    <div class="stat" title="Total buyer count isn’t shown publicly for privacy">
-      <div class="stat-number" id="heroBuyersCount">—</div>
-      <div class="stat-label">Registered Buyers</div>
-    </div>
-    <div class="stat">
-      <div class="stat-number" id="heroCitiesCount">0</div>
-      <div class="stat-label">Major Cities</div>
-    </div>
-  </div>
-</section>
-
-<!-- SEARCH -->
-<section class="search-section" id="cars">
-  <div class="search-wrapper">
-    <h2>Find Your Next Car</h2>
-    <p>Search from hundreds of verified dealership listings across Pakistan</p>
-    <div class="search-bar">
-      <select id="homeCitySelect">
+<section class="hero home-hero">
+  <div class="hero-inner">
+    <div id="heroGreeting" class="hero-greeting">Welcome to GariBazaar</div>
+    <h1 class="hero-title">Search new or used cars</h1>
+    <p class="hero-subtitle">Only from trusted, verified dealerships across Pakistan.</p>
+    <div class="home-search-bar">
+      <select id="homeCitySelect" aria-label="Select city">
         <option>All Cities</option>
         <option>Islamabad</option>
         <option>Rawalpindi</option>
+        <option>Lahore</option>
+        <option>Karachi</option>
+        <option>Peshawar</option>
+        <option>Multan</option>
       </select>
-      <input id="homeSearchInput" type="text" placeholder="Search by make, model or dealer...">
-      <button id="homeSearchBtn" type="button">Search Cars</button>
+      <input id="homeSearchInput" type="text" placeholder="Search by make, model or dealer..." list="homeSearchSuggestions">
+      <datalist id="homeSearchSuggestions">
+        <option value="Toyota Corolla"></option>
+        <option value="Honda Civic"></option>
+        <option value="Suzuki Alto"></option>
+        <option value="Hyundai Tucson"></option>
+      </datalist>
+      <button id="homeSearchBtn" type="button" aria-label="Search cars">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+        </svg>
+        <span>Search Cars</span>
+      </button>
     </div>
-    <div class="search-tags">
-      <span class="tag">Toyota Corolla</span>
-      <span class="tag">Honda Civic</span>
-      <span class="tag">Suzuki Alto</span>
-      <span class="tag">Hyundai Tucson</span>
-      <span class="tag">Under 30 Lakh</span>
-      <span class="tag">New Cars</span>
+    <div class="home-search-suggestions" aria-label="Popular search suggestions">
+      <button class="search-chip" type="button" data-query="Toyota Corolla">Toyota Corolla</button>
+      <button class="search-chip" type="button" data-query="Honda Civic">Honda Civic</button>
+      <button class="search-chip" type="button" data-query="Suzuki Alto">Suzuki Alto</button>
+      <button class="search-chip" type="button" data-query="Hyundai Tucson">Hyundai Tucson</button>
+      <button class="search-chip" type="button" data-query="Under 30 Lakh" data-price-max="3000000">Under 30 Lakh</button>
+      <button class="search-chip" type="button" data-query="New Cars" data-condition="New">New Cars</button>
+    </div>
+    <div class="hero-buttons">
+      <a href="listings.html" class="btn-hero-primary">Browse Cars</a>
+      <a href="dealers.html" class="btn-hero-secondary">Browse Dealers</a>
+    </div>
+    <p class="hero-note">Explore live dealer stock, then contact the dealer directly.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-number" id="heroVerifiedDealers">0</div>
+        <div class="stat-label">Verified Dealers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="heroCarsListed">0</div>
+        <div class="stat-label">Cars Listed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number" id="heroCitiesCount">0</div>
+        <div class="stat-label">Cities</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="how-section" id="how">
-  <h2>How GariBazaar Works</h2>
-  <p>Simple, transparent and trusted — from verified dealership to your driveway</p>
-  <div class="steps-grid">
-    <div class="step">
-      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-      <h3>Browse Listings</h3>
-      <p>Search cars from verified dealerships across your city. Filter by price, model, and condition.</p>
-    </div>
-    <div class="step">
-      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <h3>Verified Dealers Only</h3>
-      <p>Every dealership on GariBazaar is government-registered and personally verified by our team.</p>
-    </div>
-    <div class="step">
-      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-      <h3>Contact Directly</h3>
-      <p>Chat with the assigned dealer employee via in-app chat, WhatsApp or phone — your choice.</p>
-    </div>
-    <div class="step">
-      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M14 17H1"/></svg></div>
-      <h3>Drive Home Happy</h3>
-      <p>Visit the dealership, inspect the car, and complete your purchase with full confidence.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="featured-home">
+<section class="section home-featured section-divider" id="featured-home">
   <div class="section-header">
     <div>
       <h2>Featured Cars</h2>
-      <p>Random live picks from verified dealers</p>
-      <p class="featured-subline">Buy with confidence: every featured listing is tied to a real dealer profile with direct call and WhatsApp contact.</p>
+      <p>Live picks from verified dealers</p>
     </div>
-    <div class="featured-actions">
-      <a href="dealers.html" class="btn-outline">Explore Dealers</a>
-      <a href="listings.html" class="btn-outline">View All Cars</a>
-    </div>
+    <a href="listings.html" class="view-all">View All Cars</a>
   </div>
   <div class="car-grid" id="featuredCarsGrid">
     <p class="note">Featured cars will appear here when live listings are available.</p>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="cta-section">
-  <h2>Ready to Grow Your Dealership?</h2>
-  <p>Join Pakistan's most trusted dealer-only car platform</p>
-  <div class="hero-buttons">
-    <a href="dealer-login.html" class="btn-hero-primary">Dealer Access</a>
-    <a href="listings.html" class="btn-hero-secondary">Browse Cars First</a>
+<section class="cta-section home-join section-divider">
+  <div class="join-card">
+    <div>
+      <h2>Join Us</h2>
+      <p>Dealers can list and manage stock. Buyers can create an account to save cars and use future buyer features.</p>
+    </div>
+    <div class="join-actions">
+      <a href="dealer-login.html?mode=signup" class="btn-hero-primary">Join as Dealer</a>
+      <a href="buyer-signup.html" class="btn-hero-secondary">Join as Buyer</a>
+    </div>
+  </div>
+</section>
+
+<section class="how-section home-how section-divider" id="how">
+  <h2>How We Work</h2>
+  <p>Simple, dealer-first and easy to follow.</p>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+      <h3>Search Cars</h3>
+      <p>Browse new or used cars from verified dealers in your city.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h3>Verified Dealers</h3>
+      <p>Listings come from real dealerships approved by the GariBazaar team.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <h3>Contact Directly</h3>
+      <p>Call or WhatsApp the dealer or assigned employee on each listing.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5"/><circle cx="7" cy="20" r="1"/><circle cx="17" cy="20" r="1"/><path d="M14 17H1"/></svg></div>
+      <h3>Visit and Buy</h3>
+      <p>Visit the showroom, inspect the car, and complete the deal with confidence.</p>
+    </div>
   </div>
 </section>
 
@@ -1218,16 +1841,16 @@
         <li><a href="buyer-login.html">Buyer Sign In</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
-        <li><a href="listings.html">Search by City</a></li>
-        <li><a href="listings.html">New Cars</a></li>
-        <li><a href="listings.html">Used Cars</a></li>
+        <li><a href="listings.html">Browse All Cities</a></li>
+        <li><a href="listings.html?condition=New">New Cars</a></li>
+        <li><a href="listings.html?condition=Used">Used Cars</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h4>For Dealers</h4>
       <ul>
         <li><a href="dealer-login.html">Dealer Access</a></li>
-        <li><a href="dealer-login.html">Pricing &amp; registration</a></li>
+        <li><a href="dealer-login.html?mode=signup">Apply as Dealer</a></li>
         <li><a href="index.html#how">How It Works</a></li>
       </ul>
     </div>
@@ -1237,7 +1860,7 @@
         <li><a href="about.html">About Us</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="privacy.html">Privacy Policy</a></li>
-        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="terms.html">Dealer Terms</a></li>
       </ul>
     </div>
   </div>
@@ -1248,22 +1871,26 @@
 </footer>
 
 <script>
-  function runHomeSearchRedirect() {
+  function runHomeSearchRedirect(extraParams = {}) {
     const input = document.getElementById('homeSearchInput');
     const city = document.getElementById('homeCitySelect');
-    if (!input || !city) return;
-    const q = encodeURIComponent(input.value.trim());
-    const cityValue = city.value === 'All Cities' ? '' : encodeURIComponent(city.value);
+    if (!input) return;
+    const queryText = typeof extraParams.query === 'string' ? extraParams.query : input.value.trim();
+    const q = encodeURIComponent(queryText);
+    const cityValue = city && city.value !== 'All Cities' ? encodeURIComponent(city.value) : '';
     let target = 'listings.html';
     const params = [];
     if (q) params.push('q=' + q);
     if (cityValue) params.push('city=' + cityValue);
+    if (extraParams.condition) params.push('condition=' + encodeURIComponent(extraParams.condition));
+    if (extraParams.priceMax) params.push('priceMax=' + encodeURIComponent(extraParams.priceMax));
     if (params.length) target += '?' + params.join('&');
     window.location.href = target;
   }
 
   const homeSearchInput = document.getElementById('homeSearchInput');
   const homeSearchBtn = document.getElementById('homeSearchBtn');
+  const homeSearchChips = Array.from(document.querySelectorAll('.search-chip'));
   if (homeSearchInput && homeSearchBtn) {
     homeSearchBtn.addEventListener('click', runHomeSearchRedirect);
     homeSearchInput.addEventListener('keydown', (event) => {
@@ -1273,6 +1900,20 @@
       }
     });
   }
+
+  homeSearchChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      if (!homeSearchInput) return;
+      homeSearchInput.value = chip.getAttribute('data-query') || chip.textContent.trim();
+      homeSearchInput.focus();
+      const usesStructuredFilter = chip.hasAttribute('data-condition') || chip.hasAttribute('data-price-max');
+      runHomeSearchRedirect({
+        query: usesStructuredFilter ? '' : homeSearchInput.value.trim(),
+        condition: chip.getAttribute('data-condition') || '',
+        priceMax: chip.getAttribute('data-price-max') || ''
+      });
+    });
+  });
 
   // Homepage now routes users directly to live listings/dealers pages.
 
@@ -1285,16 +1926,13 @@
   import { db } from "./firebase-client.js";
   import { auth, getBuyerProfile } from "./firebase-client.js";
 
-  const navBuyerLinks = document.getElementById("navBuyerLinks");
-  const navProfileLink = document.getElementById("navProfileLink");
-  const navAuthPending = document.getElementById("navAuthPending");
-  const navCta = document.querySelector("nav .nav-cta");
   const heroGreeting = document.getElementById("heroGreeting");
   const heroVerifiedDealers = document.getElementById("heroVerifiedDealers");
   const heroCarsListed = document.getElementById("heroCarsListed");
   const heroBuyersCount = document.getElementById("heroBuyersCount");
   const heroCitiesCount = document.getElementById("heroCitiesCount");
   const featuredCarsGrid = document.getElementById("featuredCarsGrid");
+  const homeSearchSuggestions = document.getElementById("homeSearchSuggestions");
 
   let liveDealers = [];
   let liveListings = [];
@@ -1336,6 +1974,47 @@
       arr[j] = temp;
     }
     return arr;
+  }
+
+  function renderHomeSearchSuggestions() {
+    if (!homeSearchSuggestions) return;
+    const suggestions = [];
+    const seen = new Set();
+
+    function pushSuggestion(value) {
+      const text = clean(value);
+      if (!text) return;
+      const key = text.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      suggestions.push(text);
+    }
+
+    [
+      "Toyota Corolla",
+      "Honda Civic",
+      "Suzuki Alto",
+      "Hyundai Tucson",
+      "Islamabad",
+      "Rawalpindi"
+    ].forEach(pushSuggestion);
+
+    liveListings.forEach((listing) => {
+      pushSuggestion(listing.carName || listing.name || "");
+      pushSuggestion(listing.make || "");
+      pushSuggestion(listing.model || "");
+      pushSuggestion(listing.city || "");
+    });
+
+    liveDealers.forEach((dealer) => {
+      pushSuggestion(dealer.businessName || dealer.dealerName || "");
+      pushSuggestion(dealer.city || "");
+    });
+
+    homeSearchSuggestions.innerHTML = suggestions
+      .slice(0, 12)
+      .map((value) => '<option value="' + esc(value) + '"></option>')
+      .join("");
   }
 
   function renderHeroStats() {
@@ -1442,68 +2121,41 @@
   async function updateHeroGreeting(user) {
     if (!heroGreeting) return;
     if (!user) {
-      heroGreeting.style.display = "none";
-      heroGreeting.textContent = "";
+      heroGreeting.style.display = "block";
+      heroGreeting.textContent = "Welcome to GariBazaar";
       return;
     }
     const profile = await getBuyerProfile(user.uid);
     if (!profile) {
-      heroGreeting.style.display = "none";
-      heroGreeting.textContent = "";
+      heroGreeting.style.display = "block";
+      heroGreeting.textContent = "Welcome to GariBazaar";
       return;
     }
     const name = (profile.fullName || "").trim();
     if (!name) {
-      heroGreeting.style.display = "none";
-      heroGreeting.textContent = "";
+      heroGreeting.style.display = "block";
+      heroGreeting.textContent = "Welcome to GariBazaar";
       return;
     }
-    heroGreeting.textContent = "Hello, " + name;
+    heroGreeting.textContent = "Welcome back, " + name;
     heroGreeting.style.display = "block";
   }
 
-  function setSignedInUi(isSignedIn) {
-    if (!navBuyerLinks || !navProfileLink) return;
-    if (isSignedIn) {
-      navBuyerLinks.style.display = "none";
-      navProfileLink.style.display = "inline-flex";
-    } else {
-      navBuyerLinks.style.display = "flex";
-      navProfileLink.style.display = "none";
-    }
-  }
-
-  function resolveBuyerNavAuth(user) {
-    if (navCta) navCta.classList.remove("is-auth-pending");
-    if (navAuthPending) {
-      navAuthPending.style.display = "none";
-    }
-    if (user) {
-      localStorage.setItem("gb_last_signed_in_uid", user.uid);
-      localStorage.setItem("gb_last_signed_in_email", user.email || "");
-      setSignedInUi(true);
-      updateHeroGreeting(user);
-    } else {
-      localStorage.removeItem("gb_last_signed_in_uid");
-      localStorage.removeItem("gb_last_signed_in_email");
-      setSignedInUi(false);
-      updateHeroGreeting(null);
-    }
-  }
-
-  onAuthStateChanged(auth, resolveBuyerNavAuth);
+  onAuthStateChanged(auth, updateHeroGreeting);
 
   onSnapshot(collection(db, "dealerProfiles"), (snap) => {
     liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
     renderHeroStats();
     renderFeaturedCars();
+    renderHomeSearchSuggestions();
   });
   onSnapshot(collection(db, "listings"), (snap) => {
     liveListings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
     renderHeroStats();
     renderFeaturedCars();
+    renderHomeSearchSuggestions();
   });
 </script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 </body>
 </html>

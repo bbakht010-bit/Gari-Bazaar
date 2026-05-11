@@ -34,6 +34,14 @@
       {
         "source": "/firebase-client.js",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+      },
+      {
+        "source": "/theme.js",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      },
+      {
+        "source": "/theme.css",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
       }
     ],
     "ignore": [

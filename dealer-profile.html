@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -131,6 +131,10 @@
   .car-card:hover .car-expanded {
     max-height: 340px; opacity: 1; padding: 12px;
   }
+  .car-card.expanded .car-expanded,
+  .car-card:focus-within .car-expanded {
+    max-height: 340px; opacity: 1; padding: 12px;
+  }
   .car-expanded p { font-size: 12px; color: var(--gray-700); margin-bottom: 7px; line-height: 1.5; }
   .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
   .card-btn {
@@ -149,7 +153,7 @@
     .dealer-gallery { grid-template-columns: 1fr 1fr; }
   }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Dealer profile with verified inventory, contact actions, and quick search. -->
@@ -263,6 +267,65 @@
     return String(value);
   }
 
+  function disableContactActions(message) {
+    const waBtn = document.querySelector("aside.card .action.wa");
+    const callBtn = document.querySelector("aside.card .action.call");
+    [waBtn, callBtn].forEach((link) => {
+      if (!link) return;
+      link.href = "#";
+      link.setAttribute("aria-disabled", "true");
+      link.style.opacity = "0.55";
+      link.onclick = function (event) { event.preventDefault(); };
+    });
+    const contactCardLine = document.querySelector("aside.card .line");
+    if (contactCardLine) contactCardLine.textContent = message;
+  }
+
+  function renderDealerNotFound(message) {
+    const heroTitle = document.querySelector(".hero-title h1");
+    const heroDesc = document.querySelector(".hero p");
+    const heroLogo = document.querySelector(".hero-logo");
+    const verifiedBadge = document.querySelector(".verified");
+    const overviewLine = document.querySelector("main .card .line");
+    const ratingLine = document.querySelector(".rating");
+    const statNumbers = document.querySelectorAll(".stats .stat h3");
+
+    if (heroTitle) heroTitle.textContent = "Dealer not found";
+    if (heroDesc) heroDesc.textContent = message;
+    if (heroLogo) heroLogo.style.display = "none";
+    if (verifiedBadge) verifiedBadge.textContent = "Unavailable";
+    if (overviewLine) overviewLine.textContent = "This dealer profile could not be loaded from live data.";
+    if (ratingLine) ratingLine.textContent = "Profile unavailable";
+    statNumbers.forEach((node) => { node.textContent = "0"; });
+    disableContactActions("Contact details are hidden because this dealer profile is unavailable.");
+    if (dealerCarsGrid) {
+      dealerCarsGrid.innerHTML =
+        '<div class="card" style="border-style:dashed;background:#f9fafb;">' +
+          '<h3 style="font-size:18px;margin-bottom:8px;">Dealer profile unavailable</h3>' +
+          '<p class="line" style="margin-bottom:12px;">' + esc(message) + '</p>' +
+          '<a class="details-btn" href="dealers.html">Browse verified dealers</a>' +
+        '</div>';
+    }
+  }
+
+  function bindDealerCardExpansion() {
+    if (!dealerCarsGrid) return;
+    dealerCarsGrid.querySelectorAll(".car-card").forEach((card) => {
+      card.tabIndex = 0;
+      card.addEventListener("click", (event) => {
+        if (!window.matchMedia("(hover: none)").matches) return;
+        if (event.target.closest("a, button")) return;
+        card.classList.toggle("expanded");
+      });
+      card.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        if (event.target.closest("a, button")) return;
+        event.preventDefault();
+        card.classList.toggle("expanded");
+      });
+    });
+  }
+
   (async function hydrateDealerFromFirestoreId() {
     const params = new URLSearchParams(window.location.search);
     let dealerId = (params.get("dealerId") || "").trim();
@@ -271,11 +334,17 @@
       const dealerCity = params.get("city") || "";
       dealerId = buildDealerId(dealerName, dealerCity);
     }
-    if (!dealerId) return;
+    if (!dealerId) {
+      renderDealerNotFound("Use a live dealer link or go back to the dealers page to continue browsing.");
+      return;
+    }
     // Normalize old shared links (name/city) to canonical dealerId URL.
     GB_URLS.canonicalizeDealerUrl(dealerId);
     const dealer = await fetchDealerProfileById(dealerId);
-    if (!dealer) return;
+    if (!dealer) {
+      renderDealerNotFound("This dealer link is no longer valid or the profile has not been published yet.");
+      return;
+    }
 
     const heroTitle = document.querySelector(".hero-title h1");
     const heroDesc = document.querySelector(".hero p");
@@ -319,6 +388,9 @@
     if (waBtn) waBtn.href = "https://wa.me/" + normalizePkPhone(clean(dealer.phone)) + "?text=" + encodeURIComponent("Assalamualaikum, I want to inquire about your cars.");
     const callBtn = document.querySelector("aside.card .action.call");
     if (callBtn) callBtn.href = "tel:+" + normalizePkPhone(clean(dealer.phone));
+    if (!normalizePkPhone(clean(dealer.phone))) {
+      disableContactActions("This dealer has not added a public phone number yet.");
+    }
     const gallery = document.querySelector(".dealer-gallery");
     if (gallery) {
       const photos = Array.isArray(dealer.dealershipPhotos) ? dealer.dealershipPhotos.filter(Boolean).slice(0, 6) : [];
@@ -405,6 +477,7 @@
         }).join("");
       }
     }
+    bindDealerCardExpansion();
 
     // Lightweight client-side search over rendered dealer inventory cards.
     function runDealerProfileSearch() {
@@ -427,6 +500,6 @@
     }
   })();
 </script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 </body>
 </html>

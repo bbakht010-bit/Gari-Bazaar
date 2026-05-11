@@ -1,0 +1,282 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="brand.css">
+<title>Choose Account Type — GariBazaar</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: var(--gray-900);
+  background: linear-gradient(180deg, #ffffff 0%, var(--green-faint) 100%);
+  min-height: 100vh;
+}
+nav {
+  height: 72px;
+  border-bottom: 1px solid var(--gray-200);
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(10px);
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--green-mid);
+  text-decoration: none;
+}
+.logo span { color: var(--gold); }
+.back-link {
+  text-decoration: none;
+  color: var(--gray-700);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 9px 14px;
+  min-height: 38px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.back-link:hover {
+  background: var(--green-faint);
+  border-color: var(--green-main);
+  color: var(--green-mid);
+}
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 44px 5% 60px;
+}
+.hero {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 28px;
+}
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #bbf7d0;
+  background: var(--green-faint);
+  color: var(--green-mid);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-light);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(34px, 5vw, 50px);
+  line-height: 1.12;
+  color: var(--gray-900);
+}
+.hero p {
+  margin-top: 12px;
+  color: var(--gray-600);
+  font-size: 16px;
+  line-height: 1.7;
+}
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 30px;
+}
+.choice-card {
+  border: 1px solid var(--gray-200);
+  border-radius: 26px;
+  background: #ffffff;
+  padding: 28px;
+  box-shadow: 0 14px 32px rgba(17,24,39,0.07);
+}
+.choice-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+.choice-card.buyer .choice-icon {
+  background: var(--green-faint);
+  color: var(--green-mid);
+}
+.choice-card.dealer .choice-icon {
+  background: #fff7ed;
+  color: #b45309;
+}
+.choice-card h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+.choice-card p {
+  color: var(--gray-600);
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+.choice-points {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.choice-points li {
+  color: var(--gray-700);
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  gap: 8px;
+}
+.choice-points li::before {
+  content: "•";
+  color: var(--green-main);
+  font-weight: 700;
+}
+.choice-btn {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.choice-btn.primary {
+  background: var(--green-main);
+  color: #ffffff;
+}
+.choice-btn.primary:hover {
+  background: var(--green-mid);
+}
+.choice-btn.secondary {
+  background: #ffffff;
+  color: var(--green-mid);
+  border: 1.5px solid var(--green-main);
+}
+.choice-btn.secondary:hover {
+  background: var(--green-faint);
+}
+.foot-note {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 14px;
+}
+.foot-note a {
+  color: var(--green-main);
+  font-weight: 700;
+  text-decoration: none;
+}
+.foot-note a:hover { text-decoration: underline; }
+@media (max-width: 760px) {
+  .choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+<link rel="stylesheet" href="theme.css?v=20260512e">
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">Gari<span>Bazaar</span></a>
+    <a class="back-link" href="index.html">Back to Home</a>
+  </nav>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><span class="dot"></span><span id="authEyebrow">Choose your sign in</span></div>
+      <h1 id="authChoiceTitle">Choose how you want to sign in</h1>
+      <p id="authChoiceSubtitle">Continue to the right page for buyers or dealers without changing the current color scheme or flow.</p>
+    </section>
+
+    <section class="choice-grid">
+      <article class="choice-card buyer">
+        <div class="choice-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M20 21a8 8 0 1 0-16 0"></path>
+            <circle cx="12" cy="8" r="4"></circle>
+          </svg>
+        </div>
+        <h2>Buyer</h2>
+        <p id="buyerCardText">Sign in to your buyer account, save favourites and keep your browsing progress in one place.</p>
+        <ul class="choice-points">
+          <li>Browse and manage your buyer account</li>
+          <li>Save time when new buyer features roll out</li>
+          <li>Best if you are here to explore cars</li>
+        </ul>
+        <a id="buyerChoiceBtn" class="choice-btn primary" href="buyer-login.html">Continue as Buyer</a>
+      </article>
+
+      <article class="choice-card dealer">
+        <div class="choice-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 21h18"></path>
+            <path d="M5 21V7l7-4 7 4v14"></path>
+            <path d="M9 9h6"></path>
+            <path d="M9 13h6"></path>
+          </svg>
+        </div>
+        <h2>Dealer</h2>
+        <p id="dealerCardText">Access your dealership tools, inventory, employee assignments and listing management pages.</p>
+        <ul class="choice-points">
+          <li>Manage live listings and dealership profile</li>
+          <li>Handle assigned employees and lead routing</li>
+          <li>Best if you are posting or managing stock</li>
+        </ul>
+        <a id="dealerChoiceBtn" class="choice-btn secondary" href="dealer-login.html">Continue as Dealer</a>
+      </article>
+    </section>
+
+    <p class="foot-note" id="authModeSwitch">
+      New here? <a href="auth-choice.html?mode=signup">Choose a sign up path</a>.
+    </p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode') === 'signup' ? 'signup' : 'signin';
+    const authEyebrow = document.getElementById('authEyebrow');
+    const authChoiceTitle = document.getElementById('authChoiceTitle');
+    const authChoiceSubtitle = document.getElementById('authChoiceSubtitle');
+    const buyerChoiceBtn = document.getElementById('buyerChoiceBtn');
+    const dealerChoiceBtn = document.getElementById('dealerChoiceBtn');
+    const buyerCardText = document.getElementById('buyerCardText');
+    const dealerCardText = document.getElementById('dealerCardText');
+    const authModeSwitch = document.getElementById('authModeSwitch');
+
+    if (mode === 'signup') {
+      document.title = 'Choose Sign Up Type — GariBazaar';
+      authEyebrow.textContent = 'Choose your sign up';
+      authChoiceTitle.textContent = 'Choose how you want to join';
+      authChoiceSubtitle.textContent = 'Buyers can create their account directly. Dealers start by creating a dealer account, then continue into registration and verification.';
+      buyerCardText.textContent = 'Create a buyer account to save time and keep your buyer details ready for future features.';
+      dealerCardText.textContent = 'Start by creating your dealer account, then continue into registration, verification and dealership setup.';
+      buyerChoiceBtn.textContent = 'Join as Buyer';
+      buyerChoiceBtn.href = 'buyer-signup.html';
+      dealerChoiceBtn.textContent = 'Join as Dealer';
+      dealerChoiceBtn.href = 'dealer-login.html?mode=signup';
+      authModeSwitch.innerHTML = 'Already registered? <a href="auth-choice.html?mode=signin">Choose a sign in path</a>.';
+    }
+  </script>
+  <script src="theme.js?v=20260512e"></script>
+</body>
+</html>

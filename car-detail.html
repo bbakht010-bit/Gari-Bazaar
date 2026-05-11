@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -201,7 +201,7 @@
     .detail-row:nth-last-child(2) { border-bottom: 1px solid var(--gray-100); }
   }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Car detail view hydrated from stable listing/dealer IDs and Firestore data. -->
@@ -541,7 +541,7 @@
     if (document.getElementById('gb-quick-nav')) return;
     const hostNav = document.querySelector('nav');
     if (!hostNav) return;
-    if (hostNav.querySelector('.back-link, .nav-back')) return;
+    if (hostNav.querySelector('.back-link, .nav-back, .btn')) return;
     if (hostNav.querySelector('.nav-actions, .nav-cta, .nav-right')) return;
     const mountPoint = hostNav.querySelector('.nav-cta, .nav-right') || hostNav;
     const nav = document.createElement('div');
@@ -792,6 +792,6 @@
     }
   })();
 </script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 </body>
 </html>

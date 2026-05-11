@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -236,9 +236,9 @@
   }
 
   .top-filter-area {
-    background: var(--gray-50);
+    background: linear-gradient(180deg, #ffffff 0%, var(--gray-50) 100%);
     border-bottom: 1px solid var(--gray-200);
-    padding: 30px 5%;
+    padding: 26px 5% 20px;
   }
 
   .top-filter-inner {
@@ -249,9 +249,9 @@
   .top-filter-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: center;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
   }
 
@@ -266,6 +266,12 @@
     font-size: 14px;
   }
 
+  .listing-search-toolbar {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+  }
+
   .listing-search-bar {
     display: flex;
     align-items: center;
@@ -274,7 +280,8 @@
     border: 1px solid var(--gray-200);
     border-radius: 11px;
     padding: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
+    flex: 1;
   }
 
   .listing-search-bar input {
@@ -296,6 +303,19 @@
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
+  }
+
+  .top-filters-panel {
+    margin-top: 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.96);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    padding: 16px;
+  }
+
+  .top-filters-panel[hidden] {
+    display: none !important;
   }
 
   .field {
@@ -384,6 +404,28 @@
 
   .listing-search-btn:hover { background: var(--green-mid); }
 
+  .filter-toggle-btn {
+    min-width: 150px;
+    border: 1.5px solid var(--green-main);
+    background: #fff;
+    color: var(--green-main);
+    border-radius: 12px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .filter-toggle-btn:hover {
+    background: var(--green-faint);
+    color: var(--green-mid);
+  }
+
   .mobile-filter-toggle {
     display: none;
     margin-top: 14px;
@@ -404,8 +446,8 @@
     margin: 26px auto 0;
     padding: 0 5% 72px;
     display: grid;
-    grid-template-columns: 290px 1fr;
-    gap: 24px;
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .sidebar {
@@ -413,29 +455,44 @@
     border: 1px solid var(--gray-200);
     border-radius: 14px;
     padding: 18px;
-    position: sticky;
-    top: 88px;
-    height: fit-content;
     box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  }
+
+  .sidebar[hidden] { display: none !important; }
+  .sidebar.open { display: block; }
+
+  .sidebar-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-head p {
+    color: var(--gray-600);
+    font-size: 13px;
+  }
+
+  .sidebar-groups {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
   }
 
   .sidebar h3 {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
-    margin-bottom: 16px;
+    margin-bottom: 0;
     color: var(--gray-900);
   }
 
   .filter-group {
-    border-top: 1px solid var(--gray-100);
-    padding-top: 14px;
-    margin-top: 14px;
-  }
-
-  .filter-group:first-of-type {
-    border-top: none;
-    padding-top: 0;
-    margin-top: 0;
+    border: 1px solid var(--gray-100);
+    border-radius: 14px;
+    padding: 14px;
+    background: var(--gray-50);
   }
 
   .filter-group h4 {
@@ -873,30 +930,39 @@
 
   @media (max-width: 1080px) {
     .top-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .content-wrap { grid-template-columns: 250px 1fr; }
+    .sidebar-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 900px) {
-    .nav-links { display: none; }
+    .nav-links {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      max-width: 100%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
     .top-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .content-wrap { grid-template-columns: 1fr; }
-    .sidebar { position: static; display: none; }
-    .sidebar.open { display: block; }
-    .mobile-filter-toggle { display: inline-block; }
+    .sidebar-groups { grid-template-columns: 1fr 1fr; }
   }
 
   @media (max-width: 768px) {
+    .listing-search-toolbar { flex-direction: column; }
+    .filter-toggle-btn { width: 100%; min-height: 46px; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .car-grid { grid-template-columns: 1fr 1fr; }
   }
 
   @media (max-width: 560px) {
     .top-filter-grid { grid-template-columns: 1fr; }
+    .sidebar-groups { grid-template-columns: 1fr; }
     .car-grid { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
   }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Browse, filter, and sort verified live listings loaded from Firestore. -->
@@ -914,7 +980,7 @@
     <a href="index.html" class="btn-nav-soft">Home</a>
     <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true"></span>
     <div id="navBuyerLinks" class="nav-buyer-links">
-      <a href="buyer-login.html">Sign In</a>
+      <a href="auth-choice.html?mode=signin">Sign In</a>
     </div>
     <a id="navProfileLink" href="buyer-profile.html" class="btn-primary" style="display:none;">My Profile</a>
     <a href="dealer-login.html" class="btn-outline">Dealer Access</a>
@@ -933,125 +999,137 @@
   <div class="top-filter-inner">
     <div class="top-filter-header">
       <div>
-        <h2>Refine results</h2>
-        <p>City · make · price · mileage</p>
+        <h2>Search inventory</h2>
+        <p>Use search first, then open filters only when you want to narrow the list.</p>
       </div>
     </div>
 
-    <div class="listing-search-bar">
-      <input id="listingSearchInput" type="text" placeholder="Search by make, model, dealer, city">
-      <button class="listing-search-btn" id="listingSearchBtn" type="button">Search</button>
+    <div class="listing-search-toolbar">
+      <div class="listing-search-bar">
+        <input id="listingSearchInput" type="text" placeholder="Search by make, model, dealer, city">
+        <button class="listing-search-btn" id="listingSearchBtn" type="button">Search</button>
+      </div>
+      <button class="filter-toggle-btn" id="toggleFilters" type="button" aria-expanded="false" aria-controls="topFiltersPanel">Filters</button>
     </div>
 
-    <div class="top-filter-grid">
-      <div class="field">
-        <label for="city">City</label>
-        <select id="city">
-          <option>All Cities</option>
-          <option>Islamabad</option>
-          <option>Rawalpindi</option>
-        </select>
+    <div class="top-filters-panel" id="topFiltersPanel" hidden>
+      <div class="top-filter-grid">
+        <div class="field">
+          <label for="city">City</label>
+          <select id="city">
+            <option>All Cities</option>
+            <option>Islamabad</option>
+            <option>Rawalpindi</option>
+            <option>Lahore</option>
+            <option>Karachi</option>
+            <option>Peshawar</option>
+            <option>Multan</option>
+            <option>Faisalabad</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="make">Make</label>
+          <select id="make">
+            <option>Any Make</option>
+            <option>Toyota</option>
+            <option>Honda</option>
+            <option>Suzuki</option>
+            <option>Hyundai</option>
+            <option>Kia</option>
+            <option>MG</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="model">Model</label>
+          <input id="model" type="text" placeholder="e.g., Civic, Alto">
+        </div>
+        <div class="field">
+          <label for="condition">Condition</label>
+          <select id="condition">
+            <option>Any Condition</option>
+            <option>New</option>
+            <option>Used</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="priceMin">Price Min (PKR)</label>
+          <input id="priceMin" type="number" placeholder="e.g., 1500000">
+        </div>
+        <div class="field">
+          <label for="priceMax">Price Max (PKR)</label>
+          <input id="priceMax" type="number" placeholder="e.g., 12000000">
+        </div>
+        <div class="field">
+          <label for="year">Minimum year</label>
+          <select id="year">
+            <option value="">Any Year</option>
+            <option>2025</option>
+            <option>2024</option>
+            <option>2023</option>
+            <option>2022</option>
+            <option>2021</option>
+            <option>2020</option>
+            <option>2019</option>
+            <option>2018</option>
+            <option>2017</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mileage">Mileage</label>
+          <select id="mileage">
+            <option>Any Mileage</option>
+            <option>0 - 10,000 km</option>
+            <option>10,000 - 30,000 km</option>
+            <option>30,000 - 60,000 km</option>
+            <option>60,000+ km</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="transmission">Transmission</label>
+          <select id="transmission">
+            <option>Any Transmission</option>
+            <option>Automatic</option>
+            <option>Manual</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="bodyType">Body type</label>
+          <select id="bodyType">
+            <option>Any</option>
+            <option>Sedan</option>
+            <option>SUV</option>
+            <option>Hatchback</option>
+            <option>Crossover</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="assembly">Assembly</label>
+          <select id="assembly">
+            <option>Any</option>
+            <option>Local</option>
+            <option>Imported</option>
+          </select>
+        </div>
       </div>
-      <div class="field">
-        <label for="make">Make</label>
-        <select id="make">
-          <option>Any Make</option>
-          <option>Toyota</option>
-          <option>Honda</option>
-          <option>Suzuki</option>
-          <option>Hyundai</option>
-          <option>Kia</option>
-          <option>MG</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="model">Model</label>
-        <input id="model" type="text" placeholder="e.g., Civic, Alto">
-      </div>
-      <div class="field">
-        <label for="condition">Condition</label>
-        <select id="condition">
-          <option>Any Condition</option>
-          <option>New</option>
-          <option>Used</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="priceMin">Price Min (PKR)</label>
-        <input id="priceMin" type="number" placeholder="e.g., 1500000">
-      </div>
-      <div class="field">
-        <label for="priceMax">Price Max (PKR)</label>
-        <input id="priceMax" type="number" placeholder="e.g., 12000000">
-      </div>
-      <div class="field">
-        <label for="year">Minimum year</label>
-        <select id="year">
-          <option value="">Any Year</option>
-          <option>2025</option>
-          <option>2024</option>
-          <option>2023</option>
-          <option>2022</option>
-          <option>2021</option>
-          <option>2020</option>
-          <option>2019</option>
-          <option>2018</option>
-          <option>2017</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="mileage">Mileage</label>
-        <select id="mileage">
-          <option>Any Mileage</option>
-          <option>0 - 10,000 km</option>
-          <option>10,000 - 30,000 km</option>
-          <option>30,000 - 60,000 km</option>
-          <option>60,000+ km</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="transmission">Transmission</label>
-        <select id="transmission">
-          <option>Any Transmission</option>
-          <option>Automatic</option>
-          <option>Manual</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="bodyType">Body type</label>
-        <select id="bodyType">
-          <option>Any</option>
-          <option>Sedan</option>
-          <option>SUV</option>
-          <option>Hatchback</option>
-          <option>Crossover</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="assembly">Assembly</label>
-        <select id="assembly">
-          <option>Any</option>
-          <option>Local</option>
-          <option>Imported</option>
-        </select>
+
+      <div class="filter-actions">
+        <button class="btn-filter-reset" id="resetFiltersBtn" type="button">Reset</button>
+        <button class="btn-filter-primary" id="applyFiltersBtn" type="button">Apply Filters</button>
       </div>
     </div>
-
-    <div class="filter-actions">
-      <button class="btn-filter-reset" id="resetFiltersBtn" type="button">Reset</button>
-      <button class="btn-filter-primary" id="applyFiltersBtn" type="button">Apply Filters</button>
-    </div>
-
-    <button class="mobile-filter-toggle" id="toggleFilters" type="button" aria-expanded="false" aria-controls="filterSidebar">
-      Show Sidebar Filters
-    </button>
   </div>
 </section>
 
 <main class="content-wrap" id="results">
-  <aside class="sidebar" id="filterSidebar">
-    <h3>Quick Filters</h3>
+  <aside class="sidebar" id="filterSidebar" hidden>
+    <div class="sidebar-head">
+      <div>
+        <h3>Popular filters</h3>
+        <p>Fast checkboxes for common narrowing.</p>
+      </div>
+    </div>
 
+    <div class="sidebar-groups">
     <div class="filter-group">
       <h4>Condition</h4>
       <ul class="option-list">
@@ -1084,6 +1162,7 @@
         <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="60-100"> 60 - 100 Lakh</span><span id="countPrice60to100" class="count">0</span></label></li>
         <li><label><span class="option-left"><input type="checkbox" class="sidebar-price" value="100p"> 100+ Lakh</span><span id="countPrice100p" class="count">0</span></label></li>
       </ul>
+    </div>
     </div>
   </aside>
 
@@ -1124,16 +1203,16 @@
         <li><a href="buyer-login.html">Buyer Sign In</a></li>
         <li><a href="listings.html">Browse Cars</a></li>
         <li><a href="dealers.html">Find Dealers</a></li>
-        <li><a href="listings.html">Search by City</a></li>
-        <li><a href="listings.html">New Cars</a></li>
-        <li><a href="listings.html">Used Cars</a></li>
+        <li><a href="listings.html">Browse All Cities</a></li>
+        <li><a href="listings.html?condition=New">New Cars</a></li>
+        <li><a href="listings.html?condition=Used">Used Cars</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h4>For Dealers</h4>
       <ul>
         <li><a href="dealer-login.html">Dealer Access</a></li>
-        <li><a href="dealer-login.html">Pricing &amp; registration</a></li>
+        <li><a href="dealer-login.html?mode=signup">Apply as Dealer</a></li>
         <li><a href="index.html#how">How It Works</a></li>
       </ul>
     </div>
@@ -1143,7 +1222,7 @@
         <li><a href="about.html">About Us</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="privacy.html">Privacy Policy</a></li>
-        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="terms.html">Dealer Terms</a></li>
       </ul>
     </div>
   </div>
@@ -1185,6 +1264,9 @@
   const browseAllNote = document.getElementById('browseAllNote');
   const browseAllText = document.getElementById('browseAllText');
   const browseAllCarsBtn = document.getElementById('browseAllCarsBtn');
+  const toggleFilters = document.getElementById('toggleFilters');
+  const topFiltersPanel = document.getElementById('topFiltersPanel');
+  const filterSidebar = document.getElementById('filterSidebar');
 
   function normalize(value) {
     return (value || '').toLowerCase().trim();
@@ -1416,6 +1498,40 @@
     resultsCount.textContent = visibleCount + ' ' + label;
   }
 
+  function countActiveFilters() {
+    let count = 0;
+    if (citySelect && citySelect.value !== 'All Cities') count += 1;
+    if (makeSelect && makeSelect.value !== 'Any Make') count += 1;
+    if (modelInput && modelInput.value.trim()) count += 1;
+    if (conditionSelect && conditionSelect.value !== 'Any Condition') count += 1;
+    if (priceMinInput && priceMinInput.value.trim()) count += 1;
+    if (priceMaxInput && priceMaxInput.value.trim()) count += 1;
+    if (yearSelect && yearSelect.value) count += 1;
+    if (mileageSelect && mileageSelect.value !== 'Any Mileage') count += 1;
+    if (transmissionSelect && transmissionSelect.value !== 'Any Transmission') count += 1;
+    if (bodyTypeSelect && bodyTypeSelect.value !== 'Any') count += 1;
+    if (assemblySelect && assemblySelect.value !== 'Any') count += 1;
+    count += document.querySelectorAll('#filterSidebar input[type="checkbox"]:checked').length;
+    return count;
+  }
+
+  function syncFilterToggleLabel(isOpen) {
+    if (!toggleFilters) return;
+    const count = countActiveFilters();
+    const label = isOpen ? 'Hide Filters' : 'Filters';
+    toggleFilters.textContent = count ? label + ' (' + count + ')' : label;
+    toggleFilters.setAttribute('aria-expanded', String(isOpen));
+  }
+
+  function setFiltersOpen(open) {
+    if (topFiltersPanel) topFiltersPanel.hidden = !open;
+    if (filterSidebar) {
+      filterSidebar.hidden = !open;
+      filterSidebar.classList.toggle('open', open);
+    }
+    syncFilterToggleLabel(open);
+  }
+
   // Single source of truth for all filter/search/sort controls in this page.
   function runListingsSearch() {
     const keyword = normalize(listingSearchInput ? listingSearchInput.value : '');
@@ -1538,6 +1654,7 @@
         browseAllNote.classList.remove('show');
       }
     }
+    syncFilterToggleLabel(topFiltersPanel ? !topFiltersPanel.hidden : false);
   }
 
   function resetListingFilters() {
@@ -1599,13 +1716,6 @@
   if (applyFiltersBtn) applyFiltersBtn.addEventListener('click', runListingsSearch);
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetListingFilters);
   if (browseAllCarsBtn) browseAllCarsBtn.addEventListener('click', browseMoreCars);
-  const listingsBackBtn = document.getElementById('listingsBackBtn');
-  if (listingsBackBtn) {
-    listingsBackBtn.addEventListener('click', () => {
-      if (window.history.length > 1) window.history.back();
-      else window.location.href = 'index.html';
-    });
-  }
 
   ['priceMin', 'priceMax', 'year', 'mileage', 'transmission', 'bodyType', 'assembly'].forEach((id) => {
     const el = document.getElementById(id);
@@ -1616,14 +1726,29 @@
   });
   if (sortSelect) sortSelect.addEventListener('change', runListingsSearch);
 
+  function ensureSelectOption(select, value) {
+    if (!select || !value) return;
+    const existing = Array.from(select.options).some((option) => option.value === value);
+    if (existing) return;
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  }
+
   const params = new URLSearchParams(window.location.search);
   const prefillQ = params.get('q');
   const prefillCity = params.get('city');
+  const prefillCondition = params.get('condition');
+  const prefillPriceMax = params.get('priceMax');
   if (prefillQ && listingSearchInput) listingSearchInput.value = prefillQ;
   if (prefillCity && citySelect) {
-    const cityOptions = Array.from(citySelect.options).map((option) => option.value);
-    if (cityOptions.includes(prefillCity)) citySelect.value = prefillCity;
+    ensureSelectOption(citySelect, prefillCity);
+    citySelect.value = prefillCity;
   }
+  if (prefillCondition && conditionSelect) conditionSelect.value = prefillCondition;
+  if (prefillPriceMax && priceMaxInput) priceMaxInput.value = prefillPriceMax;
+  setFiltersOpen(Boolean(prefillCity || prefillCondition || prefillPriceMax));
   runListingsSearch();
   updateSidebarCounts();
 
@@ -1641,13 +1766,10 @@
     });
   });
 
-  const toggleFilters = document.getElementById('toggleFilters');
-  const filterSidebar = document.getElementById('filterSidebar');
-  if (toggleFilters && filterSidebar) {
+  if (toggleFilters) {
     toggleFilters.addEventListener('click', () => {
-      const isOpen = filterSidebar.classList.toggle('open');
-      toggleFilters.setAttribute('aria-expanded', String(isOpen));
-      toggleFilters.textContent = isOpen ? 'Hide Sidebar Filters' : 'Show Sidebar Filters';
+      const shouldOpen = topFiltersPanel ? topFiltersPanel.hidden : true;
+      setFiltersOpen(shouldOpen);
     });
   }
 
@@ -1851,44 +1973,7 @@
   });
 </script>
 
-<script type="module">
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { auth } from "./firebase-client.js";
-  // Small nav auth-state toggles for signed-in buyer UX.
-
-  const navBuyerLinks = document.getElementById("navBuyerLinks");
-  const navProfileLink = document.getElementById("navProfileLink");
-  const navAuthPending = document.getElementById("navAuthPending");
-  const navCta = document.querySelector("nav .nav-cta");
-
-  function setSignedInUi(isSignedIn) {
-    if (!navBuyerLinks || !navProfileLink) return;
-    if (isSignedIn) {
-      navBuyerLinks.style.display = "none";
-      navProfileLink.style.display = "inline-flex";
-    } else {
-      navBuyerLinks.style.display = "flex";
-      navProfileLink.style.display = "none";
-    }
-  }
-
-  function resolveBuyerNavAuth(user) {
-    if (navCta) navCta.classList.remove("is-auth-pending");
-    if (navAuthPending) navAuthPending.style.display = "none";
-    if (user) {
-      localStorage.setItem("gb_last_signed_in_uid", user.uid);
-      localStorage.setItem("gb_last_signed_in_email", user.email || "");
-      setSignedInUi(true);
-    } else {
-      localStorage.removeItem("gb_last_signed_in_uid");
-      localStorage.removeItem("gb_last_signed_in_email");
-      setSignedInUi(false);
-    }
-  }
-
-  onAuthStateChanged(auth, resolveBuyerNavAuth);
-</script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 
 </body>
 </html>

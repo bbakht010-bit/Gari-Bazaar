@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -262,11 +262,20 @@
     .profile-sidebar { position: static; }
   }
   @media (max-width: 780px) {
-    .nav-links { display: none; }
+    .nav-links {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 8px;
+      max-width: 100%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
     .row { grid-template-columns: 1fr; }
   }
 </style>
-<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="theme.css?v=20260512e">
 </head>
 <body>
   <!-- Page purpose: Buyer profile management and saved account information. -->
@@ -280,7 +289,7 @@
   </ul>
   <div class="nav-actions is-auth-pending" id="profileNavActions">
     <span id="navAuthPending" class="nav-auth-pending" aria-hidden="true"></span>
-    <a id="navSignInBuyer" href="buyer-login.html" class="btn">Sign In</a>
+    <a id="navSignInBuyer" href="auth-choice.html?mode=signin" class="btn">Sign In</a>
     <button id="profile-logout" class="btn" type="button">Log out</button>
   </div>
 </nav>
@@ -406,9 +415,6 @@
   const logoutButton = document.getElementById("profile-logout");
   const profileMainContent = document.getElementById("profileMainContent");
   const profileLoading = document.getElementById("profileLoading");
-  const profileNavActions = document.getElementById("profileNavActions");
-  const navAuthPending = document.getElementById("navAuthPending");
-  const navSignInBuyer = document.getElementById("navSignInBuyer");
   const avatarInput = document.getElementById("profilePicture");
   const avatarPreview = document.getElementById("profileAvatarPreview");
 
@@ -483,14 +489,11 @@
   let pendingAvatarFile = null;
   let avatarPreviewObjectUrl = "";
 
-  /** Nav used to show "Log out" in static HTML before Firebase ran — confusing for signed-out visitors. */
+  /** Reveal the profile only after Firebase confirms the signed-in session. */
   function showAuthenticatedChrome() {
     document.body.classList.add("profile-ready");
     if (profileLoading) profileLoading.style.display = "none";
     if (profileMainContent) profileMainContent.hidden = false;
-    if (profileNavActions) profileNavActions.classList.remove("is-auth-pending");
-    if (navAuthPending) navAuthPending.style.display = "none";
-    if (navSignInBuyer) navSignInBuyer.style.display = "none";
     if (logoutButton) logoutButton.style.display = "inline-flex";
   }
 
@@ -645,17 +648,19 @@
     }
   });
 
-  logoutButton.addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      localStorage.removeItem("gb_last_signed_in_uid");
-      localStorage.removeItem("gb_last_signed_in_email");
-      window.location.href = "index.html";
-    } catch (_error) {
-      showMessage("Could not log out. Please try again.", true);
-    }
-  });
+  if (logoutButton) {
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        localStorage.removeItem("gb_last_signed_in_uid");
+        localStorage.removeItem("gb_last_signed_in_email");
+        window.location.href = "index.html";
+      } catch (_error) {
+        showMessage("Could not log out. Please try again.", true);
+      }
+    });
+  }
 </script>
-<script src="theme.js"></script>
+<script src="theme.js?v=20260512e"></script>
 </body>
 </html>

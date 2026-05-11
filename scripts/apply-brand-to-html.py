@@ -27,10 +27,6 @@ def patch(text: str) -> str:
             break
         text = new
 
-    text = text.replace("Playfair Display", "Plus Jakarta Sans")
-    text = text.replace("'DM Sans'", "'Plus Jakarta Sans'")
-    text = text.replace('"DM Sans"', '"Plus Jakarta Sans"')
-
     return text
 
 

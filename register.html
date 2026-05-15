@@ -954,7 +954,8 @@
       const ownerCnic = document.getElementById('owner-cnic');
       const ownerPhone = document.getElementById('owner-phone');
       const ownerWhatsapp = document.getElementById('owner-whatsapp');
-      const planInput = document.querySelector('input[name="plan"][value="' + (currentDealerProfile.plan || "") + '"]');
+      const selectedPlanValue = currentDealerProfile.planPreference || currentDealerProfile.plan || "";
+      const planInput = document.querySelector('input[name="plan"][value="' + selectedPlanValue + '"]');
       if (dealerName) dealerName.value = currentDealerProfile.businessName || "";
       if (dealerCity) dealerCity.value = currentDealerProfile.city || "";
       if (dealerArea) dealerArea.value = currentDealerProfile.area || "";
@@ -1165,7 +1166,13 @@
     const regUploadArea = document.getElementById('reg-upload-area');
     const photosUploadArea = document.getElementById('photos-upload-area');
 
-    const existingRegDoc = String((currentDealerProfile && currentDealerProfile.registrationDocumentUrl) || "");
+    const existingRegDoc = String(
+      (currentDealerProfile &&
+        currentDealerProfile.verificationDocument &&
+        (currentDealerProfile.verificationDocument.storagePath ||
+          currentDealerProfile.verificationDocument.legacyDownloadUrl)) ||
+        ""
+    );
     const existingDealerPhotos = Array.isArray(currentDealerProfile && currentDealerProfile.dealershipPhotos)
       ? currentDealerProfile.dealershipPhotos.filter(Boolean)
       : [];
@@ -1277,12 +1284,11 @@
       profilePicture = await uploadDealerProfileImage(currentUser.uid, selectedProfilePic);
     }
 
-    let registrationDocumentUrl = existingProfile && existingProfile.registrationDocumentUrl
-      ? String(existingProfile.registrationDocumentUrl)
-      : "";
+    let verificationDocument =
+      existingProfile && existingProfile.verificationDocument ? existingProfile.verificationDocument : null;
     const selectedRegDoc = regUpload && regUpload.files && regUpload.files[0];
     if (selectedRegDoc) {
-      registrationDocumentUrl = await uploadDealerVerificationDoc(currentUser.uid, selectedRegDoc);
+      verificationDocument = await uploadDealerVerificationDoc(currentUser.uid, selectedRegDoc);
     }
     let dealershipPhotos = Array.isArray(existingProfile && existingProfile.dealershipPhotos)
       ? existingProfile.dealershipPhotos.filter(Boolean)
@@ -1305,9 +1311,10 @@
       whatsapp: document.getElementById('owner-whatsapp').value.trim() || document.getElementById('owner-phone').value.trim(),
       email: authUserPrimaryEmail(currentUser) || String(currentUser.email || ""),
       profilePicture: profilePicture,
-      registrationDocumentUrl: registrationDocumentUrl,
+      verificationDocument: verificationDocument,
       dealershipPhotos: dealershipPhotos,
-      plan: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
+      planPreference: (document.querySelector('input[name="plan"]:checked') || { value: 'free' }).value,
+      plan: (existingProfile && existingProfile.plan) || "free",
       verificationStatus: nextStatus,
       createdAt: (existingProfile && existingProfile.createdAt) || new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -1318,25 +1325,33 @@
       dealerProfile.phone = (existingProfile && existingProfile.phone) || "";
       dealerProfile.whatsapp = (existingProfile && existingProfile.whatsapp) || "";
       dealerProfile.plan = (existingProfile && existingProfile.plan) || dealerProfile.plan;
+      dealerProfile.planPreference = (existingProfile && existingProfile.planPreference) || dealerProfile.planPreference;
     }
     if (isProfileUpdateMode) {
       const changeRequestSafe = { ...dealerProfile };
+      const changeRequestPrivate = {};
       delete changeRequestSafe.verificationStatus;
       delete changeRequestSafe.suspended;
       delete changeRequestSafe.carsSold;
       delete changeRequestSafe.soldHistory;
+      delete changeRequestSafe.verificationDocument;
       delete changeRequestSafe.ownerName;
       delete changeRequestSafe.ownerCnic;
       delete changeRequestSafe.phone;
       delete changeRequestSafe.whatsapp;
       delete changeRequestSafe.email;
       delete changeRequestSafe.plan;
+      delete changeRequestSafe.planPreference;
+      if (selectedRegDoc && dealerProfile.verificationDocument) {
+        changeRequestPrivate.verificationDocument = dealerProfile.verificationDocument;
+      }
       await addDoc(collection(db, "dealerChangeRequests"), {
         dealerId: currentUser.uid,
         dealerName: dealerProfile.businessName,
         currentVerificationStatus: existingStatus || "verified",
         status: "pending",
         changes: changeRequestSafe,
+        privateChanges: changeRequestPrivate,
         submittedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });

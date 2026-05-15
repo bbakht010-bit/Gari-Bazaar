@@ -6,11 +6,12 @@ const hasDealerE2E = Boolean(process.env.E2E_DEALER_EMAIL && process.env.E2E_DEA
 
 /** Specs handled only by dealer projects (never run in anonymous chromium project). */
 const dealerOnlySpecs = [/auth\.dealer\.setup\.js$/, /dealer\.e2e\.spec\.js$/];
+const nonPlaywrightSpecs = [/tests[\\/](firebase)[\\/].+\.spec\.js$/];
 
 const projects = [
   {
     name: "chromium",
-    testIgnore: dealerOnlySpecs,
+    testIgnore: dealerOnlySpecs.concat(nonPlaywrightSpecs),
     use: { ...devices["Desktop Chrome"] }
   }
 ];

@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   deleteField
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 /** Must match Firebase Console → Project settings → Your apps → SDK snippet (`firebase apps:sdkconfig WEB`). */
@@ -24,8 +25,22 @@ const firebaseConfig = {
   measurementId: "G-7LT0S01NPP"
 };
 
+function readGlobalString(name) {
+  try {
+    const value = window && window[name];
+    return typeof value === "string" ? value.trim() : "";
+  } catch (_error) {
+    return "";
+  }
+}
+
 /** Paste your reCAPTCHA v3 site key after: Firebase Console → App Check → Apps → Web app → Register reCAPTCHA. */
-const APP_CHECK_RECAPTCHA_SITE_KEY = "";
+const APP_CHECK_RECAPTCHA_SITE_KEY = readGlobalString("GARI_BAZAAR_APP_CHECK_SITE_KEY");
+const APP_CHECK_DEBUG_TOKEN = readGlobalString("GARI_BAZAAR_APP_CHECK_DEBUG_TOKEN");
+
+if (APP_CHECK_DEBUG_TOKEN) {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = APP_CHECK_DEBUG_TOKEN === "true" ? true : APP_CHECK_DEBUG_TOKEN;
+}
 
 const app = initializeApp(firebaseConfig);
 
@@ -41,6 +56,7 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 export const FIREBASE_FUNCTIONS_REGION = "asia-south1";
+const functionsClient = getFunctions(app, FIREBASE_FUNCTIONS_REGION);
 
 /** Email for Firestore `users/{uid}` and rules (Google may omit `user.email` until profile loads). */
 export function authUserPrimaryEmail(user) {
@@ -103,6 +119,55 @@ function trim(value) {
 function normalizeUserRole(role) {
   const cleanRole = trim(role).toLowerCase();
   return cleanRole === "dealer" ? "dealer" : "buyer";
+}
+
+function normalizePlanValue(value) {
+  const cleanPlan = trim(value).toLowerCase();
+  if (cleanPlan === "growth") return "growth";
+  if (cleanPlan === "pro" || cleanPlan === "professional") return "pro";
+  return "free";
+}
+
+function parseStoragePathFromDownloadUrl(url) {
+  const rawUrl = trim(url);
+  if (!rawUrl) return "";
+  try {
+    const parsed = new URL(rawUrl);
+    const parts = parsed.pathname.split("/o/");
+    if (parts.length < 2) return "";
+    return decodeURIComponent(parts[1]);
+  } catch (_error) {
+    return "";
+  }
+}
+
+function normalizeVerificationDocument(value) {
+  if (!value) return null;
+  if (typeof value === "string") {
+    const legacyUrl = trim(value);
+    if (!legacyUrl) return null;
+    const storagePath = parseStoragePathFromDownloadUrl(legacyUrl);
+    const fileName = storagePath ? storagePath.split("/").pop() || "" : "";
+    return {
+      storagePath,
+      fileName,
+      legacyDownloadUrl: legacyUrl
+    };
+  }
+  if (typeof value !== "object") return null;
+  const storagePath = trim(value.storagePath);
+  const fileName = trim(value.fileName || (storagePath ? storagePath.split("/").pop() : ""));
+  const contentType = trim(value.contentType);
+  const uploadedAt = trim(value.uploadedAt);
+  const legacyDownloadUrl = trim(value.legacyDownloadUrl);
+  if (!storagePath && !legacyDownloadUrl) return null;
+  return {
+    storagePath,
+    fileName,
+    contentType,
+    uploadedAt,
+    legacyDownloadUrl
+  };
 }
 
 export { app, auth, db, storage };
@@ -338,7 +403,12 @@ export async function uploadDealerVerificationDoc(uid, file) {
   const storageRef = ref(storage, path);
   const contentType = mime || (lower.endsWith(".pdf") ? "application/pdf" : "image/jpeg");
   await uploadBytes(storageRef, file, { contentType });
-  return await getDownloadURL(storageRef);
+  return {
+    storagePath: path,
+    fileName: safeBase,
+    contentType,
+    uploadedAt: new Date().toISOString()
+  };
 }
 
 /**
@@ -670,6 +740,21 @@ export async function getDealerProfile(uid) {
       if (Array.isArray(p.soldHistory)) {
         data = { ...data, soldHistory: p.soldHistory };
       }
+      if (normalizeVerificationDocument(p.verificationDocument)) {
+        data = { ...data, verificationDocument: normalizeVerificationDocument(p.verificationDocument) };
+      }
+      if (Array.isArray(p.employees)) {
+        data = { ...data, employees: p.employees };
+      }
+      if (trim(p.plan)) {
+        data = { ...data, plan: normalizePlanValue(p.plan) };
+      }
+      if (trim(p.planPreference)) {
+        data = { ...data, planPreference: normalizePlanValue(p.planPreference) };
+      }
+      if (trim(p.paymentStatus)) {
+        data = { ...data, paymentStatus: trim(p.paymentStatus) };
+      }
     }
   }
   return data;
@@ -681,6 +766,8 @@ export async function upsertDealerProfile(uid, profile) {
   const raw = profile || {};
   const snap = await getDoc(ref);
   const existing = snap.exists() ? snap.data() : {};
+  const privSnap = await getDoc(privRef);
+  const existingPriv = privSnap.exists() ? privSnap.data() || {} : {};
 
   if (trim(existing.ownerCnic)) {
     await setDoc(
@@ -689,15 +776,57 @@ export async function upsertDealerProfile(uid, profile) {
       { merge: true }
     );
   }
+  const legacyVerificationDocument = normalizeVerificationDocument(
+    existingPriv.verificationDocument || existing.verificationDocument || existing.registrationDocumentUrl
+  );
+  const legacyEmployees = Array.isArray(existing.employees) ? existing.employees : [];
+  const legacyPlanPreference = trim(existingPriv.planPreference || existing.planPreference || existing.plan);
+  const legacyPlan = trim(existingPriv.plan);
+  const legacyPaymentStatus = trim(existingPriv.paymentStatus || existing.paymentStatus);
 
   const ownerCnicNew = raw.ownerCnic !== undefined ? trim(String(raw.ownerCnic)) : undefined;
+  const verificationDocumentNew = normalizeVerificationDocument(raw.verificationDocument || raw.registrationDocumentUrl);
+  const employeesNew = Array.isArray(raw.employees) ? raw.employees : undefined;
+  const planPreferenceNew =
+    raw.planPreference !== undefined || raw.plan !== undefined
+      ? normalizePlanValue(raw.planPreference !== undefined ? raw.planPreference : raw.plan)
+      : undefined;
   const pub = { ...raw };
   delete pub.ownerCnic;
   delete pub.soldHistory;
+  delete pub.registrationDocumentUrl;
+  delete pub.verificationDocument;
+  delete pub.employees;
+  delete pub.plan;
+  delete pub.planPreference;
+  delete pub.paymentStatus;
 
+  const nextPrivate = { updatedAt: serverTimestamp() };
   if (ownerCnicNew !== undefined) {
-    await setDoc(privRef, { ownerCnic: ownerCnicNew, updatedAt: serverTimestamp() }, { merge: true });
+    nextPrivate.ownerCnic = ownerCnicNew;
+  } else if (!trim(existingPriv.ownerCnic) && trim(existing.ownerCnic)) {
+    nextPrivate.ownerCnic = trim(existing.ownerCnic);
   }
+  if (verificationDocumentNew) {
+    nextPrivate.verificationDocument = verificationDocumentNew;
+  } else if (legacyVerificationDocument) {
+    nextPrivate.verificationDocument = legacyVerificationDocument;
+  }
+  if (employeesNew !== undefined) {
+    nextPrivate.employees = employeesNew;
+  } else if (!Array.isArray(existingPriv.employees) && legacyEmployees.length) {
+    nextPrivate.employees = legacyEmployees;
+  }
+  if (planPreferenceNew !== undefined) {
+    nextPrivate.planPreference = planPreferenceNew;
+  } else if (!trim(existingPriv.planPreference) && legacyPlanPreference) {
+    nextPrivate.planPreference = normalizePlanValue(legacyPlanPreference);
+  }
+  if (legacyPaymentStatus && !trim(existingPriv.paymentStatus)) {
+    nextPrivate.paymentStatus = legacyPaymentStatus;
+  }
+  nextPrivate.plan = legacyPlan ? normalizePlanValue(legacyPlan) : "free";
+  await setDoc(privRef, nextPrivate, { merge: true });
 
   await setDoc(
     ref,
@@ -715,6 +844,58 @@ export async function upsertDealerProfile(uid, profile) {
 
   await updateDoc(ref, {
     ownerCnic: deleteField(),
-    soldHistory: deleteField()
+    soldHistory: deleteField(),
+    registrationDocumentUrl: deleteField(),
+    verificationDocument: deleteField(),
+    employees: deleteField(),
+    plan: deleteField(),
+    planPreference: deleteField(),
+    paymentStatus: deleteField()
   });
+}
+
+function callable(name) {
+  return httpsCallable(functionsClient, name);
+}
+
+export async function getDealerVerificationDocumentAccess(dealerId, changeRequestId = "") {
+  const fn = callable("getDealerVerificationDocumentAccess");
+  const result = await fn({
+    dealerId: trim(dealerId),
+    changeRequestId: trim(changeRequestId)
+  });
+  return result && result.data ? result.data : null;
+}
+
+export async function saveDealerEmployees(employees) {
+  const fn = callable("saveDealerEmployees");
+  const result = await fn({ employees: Array.isArray(employees) ? employees : [] });
+  return result && result.data ? result.data : null;
+}
+
+export async function upsertDealerListing(payload) {
+  const fn = callable("upsertDealerListing");
+  const result = await fn(payload || {});
+  return result && result.data ? result.data : null;
+}
+
+export async function deleteDealerListing(listingId) {
+  const fn = callable("deleteDealerListing");
+  const result = await fn({ listingId: trim(listingId) });
+  return result && result.data ? result.data : null;
+}
+
+export async function setDealerListingAssignment(listingId, assigneeId) {
+  const fn = callable("setDealerListingAssignment");
+  const result = await fn({
+    listingId: trim(listingId),
+    assigneeId: trim(assigneeId)
+  });
+  return result && result.data ? result.data : null;
+}
+
+export async function markDealerListingSold(listingId) {
+  const fn = callable("markListingSold");
+  const result = await fn({ listingId: trim(listingId) });
+  return result && result.data ? result.data : null;
 }

@@ -32,8 +32,8 @@ test("homepage loads and links to listings", async ({ page }) => {
   const assertClean = attachConsoleCollector(page);
   await page.goto("/");
   await expect(page.locator("text=GariBazaar").first()).toBeVisible();
-  const browseCars = page.locator('a[href*="listings"]');
-  await expect(browseCars.first()).toBeVisible();
+  const browseCars = page.locator('a[href*="listings"]:visible').first();
+  await expect(browseCars).toBeVisible();
   await assertClean();
 });
 

@@ -39,16 +39,6 @@ service cloud.firestore {
       return signedIn() && hasDealerAccess();
     }
 
-    // Listing + listing-image writes must match dashboard intent: verified (or legacy approved) dealership, not suspended.
-    function dealerApprovedForListingWrites() {
-      return exists(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.get('suspended', false) == false &&
-        (
-          get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'verified' ||
-          get(/databases/$(database)/documents/dealerProfiles/$(request.auth.uid)).data.verificationStatus == 'approved'
-        );
-    }
-
     function validUserRole(role) {
       return role in ["buyer", "dealer", "admin"];
     }
@@ -59,43 +49,65 @@ service cloud.firestore {
     }
 
     function dealerPublicProfilePayloadClean() {
-      return !request.resource.data.keys().hasAny(['ownerCnic', 'soldHistory']);
+      return !request.resource.data.keys().hasAny([
+        'ownerCnic',
+        'soldHistory',
+        'registrationDocumentUrl',
+        'verificationDocument',
+        'employees',
+        'plan',
+        'planPreference',
+        'paymentStatus'
+      ]);
     }
 
     function dealerCarsSoldProgressValid() {
       let oldValue = resource.data.get('carsSold', 0);
       let newValue = request.resource.data.get('carsSold', 0);
-      return newValue == oldValue || newValue == oldValue + 1;
+      return newValue == oldValue;
     }
 
-    function listingCoreStringsValid() {
-      return request.resource.data.carName is string &&
-        request.resource.data.carName.size() > 0 &&
-        request.resource.data.carName.size() <= 200 &&
-        request.resource.data.dealerName is string &&
-        request.resource.data.dealerName.size() <= 200 &&
-        request.resource.data.phone is string &&
-        request.resource.data.phone.size() <= 24 &&
-        request.resource.data.contactName is string &&
-        request.resource.data.contactName.size() <= 120 &&
-        request.resource.data.contactRole is string &&
-        request.resource.data.contactRole.size() <= 120 &&
-        request.resource.data.priceLakh is string &&
-        request.resource.data.priceLakh.size() <= 32 &&
-        request.resource.data.mileage is string &&
-        request.resource.data.mileage.size() <= 96 &&
-        request.resource.data.transmission is string &&
-        request.resource.data.transmission.size() <= 40 &&
-        request.resource.data.condition is string &&
-        request.resource.data.condition.size() <= 40 &&
-        request.resource.data.city is string &&
-        request.resource.data.city.size() <= 80 &&
-        (!('description' in request.resource.data) ||
-          (request.resource.data.description is string && request.resource.data.description.size() <= 8000)) &&
-        (!('bodyNote' in request.resource.data) ||
-          (request.resource.data.bodyNote is string && request.resource.data.bodyNote.size() <= 2000)) &&
-        request.resource.data.get('features', []).size() <= 72 &&
-        request.resource.data.get('carImages', []).size() <= 28;
+    function planPreferenceValid(docData) {
+      return !('planPreference' in docData) ||
+        docData.planPreference in ['free', 'growth', 'pro', 'professional'];
+    }
+
+    function verificationDocumentValid(docData) {
+      return !('verificationDocument' in docData) || (
+        docData.verificationDocument is map &&
+        docData.verificationDocument.get('storagePath', '') is string &&
+        docData.verificationDocument.get('storagePath', '').size() <= 500 &&
+        docData.verificationDocument.get('fileName', '') is string &&
+        docData.verificationDocument.get('fileName', '').size() <= 200 &&
+        docData.verificationDocument.get('contentType', '') is string &&
+        docData.verificationDocument.get('contentType', '').size() <= 120 &&
+        docData.verificationDocument.get('uploadedAt', '') is string &&
+        docData.verificationDocument.get('uploadedAt', '').size() <= 80 &&
+        docData.verificationDocument.get('legacyDownloadUrl', '') is string &&
+        docData.verificationDocument.get('legacyDownloadUrl', '').size() <= 2000
+      );
+    }
+
+    function dealerPrivateOwnerCreateValid() {
+      return request.resource.data.get('soldHistory', []).size() == 0 &&
+        request.resource.data.get('employees', []).size() == 0 &&
+        request.resource.data.get('plan', 'free') == 'free' &&
+        request.resource.data.get('paymentStatus', '') == '' &&
+        (!('ownerCnic' in request.resource.data) ||
+          (request.resource.data.ownerCnic is string && request.resource.data.ownerCnic.size() <= 24)) &&
+        planPreferenceValid(request.resource.data) &&
+        verificationDocumentValid(request.resource.data);
+    }
+
+    function dealerPrivateOwnerUpdateValid() {
+      return request.resource.data.get('soldHistory', []) == resource.data.get('soldHistory', []) &&
+        request.resource.data.get('employees', []) == resource.data.get('employees', []) &&
+        request.resource.data.get('plan', 'free') == resource.data.get('plan', 'free') &&
+        request.resource.data.get('paymentStatus', '') == resource.data.get('paymentStatus', '') &&
+        (!('ownerCnic' in request.resource.data) ||
+          (request.resource.data.ownerCnic is string && request.resource.data.ownerCnic.size() <= 24)) &&
+        planPreferenceValid(request.resource.data) &&
+        verificationDocumentValid(request.resource.data);
     }
 
     match /users/{uid} {
@@ -120,15 +132,11 @@ service cloud.firestore {
       allow read: if isOwner(uid) || isAdmin();
       allow create: if isAdmin() || (
         isOwner(uid) &&
-        request.resource.data.get('soldHistory', []).size() == 0 &&
-        (!('ownerCnic' in request.resource.data) ||
-          (request.resource.data.ownerCnic is string && request.resource.data.ownerCnic.size() <= 24))
+        dealerPrivateOwnerCreateValid()
       );
       allow update: if isAdmin() || (
         isOwner(uid) &&
-        request.resource.data.get('soldHistory', []).size() <= 600 &&
-        (!('ownerCnic' in request.resource.data) ||
-          (request.resource.data.ownerCnic is string && request.resource.data.ownerCnic.size() <= 24))
+        dealerPrivateOwnerUpdateValid()
       );
       allow delete: if isAdmin();
     }
@@ -155,24 +163,7 @@ service cloud.firestore {
 
     match /listings/{listingId} {
       allow read: if true;
-      allow create: if isAdmin() ||
-        (isDealerUser() &&
-          dealerApprovedForListingWrites() &&
-          request.resource.data.dealerId == request.auth.uid &&
-          request.resource.data.moderationStatus == 'live' &&
-          listingCoreStringsValid());
-      allow update: if isAdmin() ||
-        (isDealerUser() &&
-          dealerApprovedForListingWrites() &&
-          resource.data.dealerId == request.auth.uid &&
-          request.resource.data.dealerId == resource.data.dealerId &&
-          resource.data.moderationStatus != 'removed' &&
-          request.resource.data.moderationStatus == 'live' &&
-          listingCoreStringsValid());
-      allow delete: if isAdmin() ||
-        (isDealerUser() &&
-          dealerApprovedForListingWrites() &&
-          resource.data.dealerId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
 
     match /dealerChangeRequests/{requestId} {
@@ -180,7 +171,23 @@ service cloud.firestore {
         request.resource.data.dealerId == request.auth.uid &&
         request.resource.data.status == "pending" &&
         (!('changes' in request.resource.data) || (
-          !request.resource.data.changes.keys().hasAny(['verificationStatus', 'suspended', 'carsSold', 'soldHistory'])
+          !request.resource.data.changes.keys().hasAny([
+            'verificationStatus',
+            'suspended',
+            'carsSold',
+            'soldHistory',
+            'registrationDocumentUrl',
+            'verificationDocument',
+            'employees',
+            'plan',
+            'planPreference',
+            'paymentStatus'
+          ])
+        )) &&
+        (!('privateChanges' in request.resource.data) || (
+          request.resource.data.privateChanges is map &&
+          request.resource.data.privateChanges.keys().hasOnly(['verificationDocument']) &&
+          verificationDocumentValid(request.resource.data.privateChanges)
         ));
       allow read: if isAdmin() ||
         (isDealerUser() && resource.data.dealerId == request.auth.uid);

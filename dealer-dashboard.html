@@ -437,13 +437,10 @@
 
 <script type="module">
   import { onAuthStateChanged, reload } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { collection, deleteDoc, doc, getDocs, runTransaction, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+  import { collection, doc, getDocs, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
   import {
-    app,
     auth,
     db,
-    FIREBASE_FUNCTIONS_REGION,
     uploadDealerProfileImage,
     uploadListingCarImages,
     resolveImageFileContentType,
@@ -451,10 +448,13 @@
     getUserRecord,
     userHasDealerAccess,
     getDealerProfile,
-    isDealerProfileComplete
+    isDealerProfileComplete,
+    saveDealerEmployees,
+    upsertDealerListing,
+    deleteDealerListing,
+    setDealerListingAssignment,
+    markDealerListingSold
   } from "./firebase-client.js";
-
-  const markListingSoldFn = httpsCallable(getFunctions(app, FIREBASE_FUNCTIONS_REGION), "markListingSold");
 
   let dealerUid = "";
   const authReady = new Promise((resolve) => {
@@ -625,57 +625,7 @@
   }
 
   async function persistEmployees() {
-    await updateDoc(doc(db, "dealerProfiles", dealerUid), {
-      employees: state.employees,
-      updatedAt: serverTimestamp()
-    });
-  }
-
-  async function markListingSoldClientFallback(listingId) {
-    await runTransaction(db, async (tx) => {
-      const listingRef = doc(db, "listings", listingId);
-      const profileRef = doc(db, "dealerProfiles", dealerUid);
-      const privateRef = doc(db, "dealerPrivate", dealerUid);
-
-      const listingSnap = await tx.get(listingRef);
-      if (!listingSnap.exists()) throw new Error("Listing not found.");
-      const listing = listingSnap.data() || {};
-      if (String(listing.dealerId || "") !== dealerUid) throw new Error("You can only mark your own listing as sold.");
-
-      const profileSnap = await tx.get(profileRef);
-      if (!profileSnap.exists()) throw new Error("Dealer profile not found.");
-      const profile = profileSnap.data() || {};
-      const status = String(profile.verificationStatus || "").toLowerCase();
-      if (status !== "verified" && status !== "approved") throw new Error("Dealership is not approved.");
-      if (profile.suspended) throw new Error("Dealership is suspended.");
-
-      const privateSnap = await tx.get(privateRef);
-      const existingHistory = privateSnap.exists() && Array.isArray((privateSnap.data() || {}).soldHistory)
-        ? (privateSnap.data() || {}).soldHistory
-        : [];
-      if (existingHistory.length >= 600) throw new Error("Sold history limit reached (600).");
-
-      const soldEntry = {
-        listingId: String(listingId),
-        name: String(listing.carName || listing.name || ""),
-        price: String(listing.priceLakh || listing.price || ""),
-        mileage: String(listing.mileage || ""),
-        transmission: String(listing.transmission || ""),
-        condition: String(listing.condition || ""),
-        city: String(listing.city || ""),
-        soldAt: new Date().toISOString()
-      };
-
-      tx.set(privateRef, {
-        soldHistory: existingHistory.concat([soldEntry]),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-      tx.update(profileRef, {
-        carsSold: Number(profile.carsSold || 0) + 1,
-        updatedAt: serverTimestamp()
-      });
-      tx.delete(listingRef);
-    });
+    await saveDealerEmployees(state.employees);
   }
 
   function byId(list, id) {
@@ -1106,7 +1056,6 @@
       return setError(err, 'Cover photo number must be between 1 and total available photos.');
     }
 
-    const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
     const listingId = editingId || crypto.randomUUID();
     try {
       const uploadedImages = selectedImageFiles.length
@@ -1117,11 +1066,9 @@
       }
       const finalImages = uploadedImages.length ? uploadedImages : existingImages;
       const coverImage = finalImages[Math.max(0, coverIndex - 1)] || finalImages[0] || "";
-      const payload = {
-        dealerId: dealerUid,
-        dealerName: dealerName,
+      await upsertDealerListing({
+        listingId,
         carName: name,
-        priceLakh: String(Math.round(numericPrice)),
         price: String(Math.round(numericPrice)),
         mileage,
         transmission,
@@ -1129,7 +1076,7 @@
         city,
         modelYear: modelYear || "",
         fuelType: fuelType || "",
-        engine: engineDigits ? (engineDigits + 'cc') : "",
+        engine: engineDigits ? engineDigits + 'cc' : "",
         color: color || "",
         registrationCity: registrationCity || city || "",
         bodyType: bodyType || "",
@@ -1139,23 +1086,10 @@
         description,
         features,
         panelMarks: { ...currentPanelMarks },
-        assignedEmployeeId: assigneeId || "",
-        contactName: contact.name,
-        contactRole: contact.role,
-        phone: contact.phone,
+        assigneeId: assigneeId || "",
         carImages: finalImages,
-        coverImage: coverImage,
-        moderationStatus: "live",
-        updatedAt: serverTimestamp()
-      };
-      if (editingId) {
-        await updateDoc(doc(db, "listings", listingId), payload);
-      } else {
-        await setDoc(doc(db, "listings", listingId), {
-          ...payload,
-          createdAt: serverTimestamp()
-        });
-      }
+        coverImage
+      });
       resetCarForm();
       await loadLiveState();
       renderAll();
@@ -1186,19 +1120,6 @@
     state.cars = state.cars.map((car) => ({ ...car, assigneeId: car.assigneeId === id ? '' : car.assigneeId }));
     try {
       await persistEmployees();
-      await Promise.all(
-        state.cars
-          .filter((car) => !car.assigneeId)
-          .map((car) =>
-            updateDoc(doc(db, "listings", car.id), {
-              assignedEmployeeId: "",
-              contactName: ownerContact.name,
-              contactRole: ownerContact.role,
-              phone: ownerContact.phone,
-              updatedAt: serverTimestamp()
-            })
-          )
-      );
       await loadLiveState();
       renderAll();
     } catch (error) {
@@ -1226,36 +1147,18 @@
       const car = byId(state.cars, soldId);
       if (!car) return;
       try {
-        await markListingSoldFn({ listingId: soldId });
+        await markDealerListingSold(soldId);
         await loadLiveState();
         renderAll();
         setSuccess(err, 'Car marked as sold and moved to Sold Cars History.');
       } catch (error) {
-        const code = error && error.code ? String(error.code) : "";
-        const functionUnavailable =
-          code === "functions/not-found" ||
-          code === "functions/unavailable" ||
-          code === "functions/internal" ||
-          code === "not-found";
-        if (functionUnavailable) {
-          try {
-            await markListingSoldClientFallback(soldId);
-            await loadLiveState();
-            renderAll();
-            setSuccess(err, 'Car marked as sold and moved to Sold Cars History.');
-          } catch (fallbackError) {
-            const fallbackMsg = fallbackError && fallbackError.message ? fallbackError.message : "Unknown error";
-            setError(err, "Could not mark car as sold: " + fallbackMsg);
-          }
-          return;
-        }
         const msg = error && error.message ? error.message : "Unknown error";
         setError(err, "Could not mark car as sold: " + msg);
       }
       return;
     }
     try {
-      await deleteDoc(doc(db, "listings", id));
+      await deleteDealerListing(id);
       await loadLiveState();
       renderAll();
     } catch (error) {
@@ -1274,15 +1177,8 @@
     const car = byId(state.cars, id);
     if (!car) return;
     const assigneeId = e.target.value;
-    const contact = assigneeId ? byId(state.employees, assigneeId) || ownerContact : ownerContact;
     try {
-      await updateDoc(doc(db, "listings", id), {
-        assignedEmployeeId: assigneeId || "",
-        contactName: contact.name,
-        contactRole: contact.role,
-        phone: contact.phone,
-        updatedAt: serverTimestamp()
-      });
+      await setDealerListingAssignment(id, assigneeId);
       await loadLiveState();
       renderAll();
     } catch (error) {

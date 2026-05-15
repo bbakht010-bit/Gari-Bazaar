@@ -49,7 +49,6 @@ export function normalizeDealerProfile(id, raw) {
     phone: pick(data, ["phone", "whatsapp"]),
     responseTime: pick(data, ["responseTime"], ""),
     profilePicture: pick(data, ["profilePicture", "logoUrl", "profilePhoto"], ""),
-    registrationDocumentUrl: pick(data, ["registrationDocumentUrl"], ""),
     dealershipPhotos: Array.isArray(data.dealershipPhotos)
       ? data.dealershipPhotos.map((img) => clean(img)).filter(Boolean)
       : []

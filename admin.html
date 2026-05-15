@@ -697,7 +697,13 @@
     where,
     writeBatch
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { auth, db, verifyFirebaseAdminAccess, userHasBuyerAccess } from "./firebase-client.js";
+  import {
+    auth,
+    db,
+    verifyFirebaseAdminAccess,
+    userHasBuyerAccess,
+    getDealerVerificationDocumentAccess
+  } from "./firebase-client.js";
 
   function escapeHtml(value) {
     return String(value || "")
@@ -814,6 +820,7 @@
             "<td>" + escapeHtml(submitted) + "</td>" +
             "<td>" + statusBadge(status, "pending") + "</td>" +
             "<td>" +
+            '<button class="mini-btn" data-doc-action="open-verification-doc" data-dealer-id="' + escapeHtml(d.id) + '">View Doc</button> ' +
             '<button class="mini-btn approve" data-app-action="approve" data-dealer-id="' + escapeHtml(d.id) + '">Approve</button> ' +
             '<button class="mini-btn reject" data-app-action="reject" data-dealer-id="' + escapeHtml(d.id) + '">Reject</button>' +
             "</td>" +
@@ -884,6 +891,7 @@
             "<td>" + escapeHtml(submitted) + "</td>" +
             "<td>" + statusBadge(String(request.status || "pending").toLowerCase(), "pending") + "</td>" +
             "<td>" +
+            '<button class="mini-btn" data-doc-action="open-verification-doc" data-dealer-id="' + escapeHtml(request.dealerId || "") + '" data-change-id="' + escapeHtml(request.id) + '">View Doc</button> ' +
             '<button class="mini-btn approve" data-change-action="approve" data-change-id="' + escapeHtml(request.id) + '" data-change-dealer-id="' + escapeHtml(request.dealerId || "") + '">Approve</button> ' +
             '<button class="mini-btn reject" data-change-action="reject" data-change-id="' + escapeHtml(request.id) + '">Reject</button>' +
             "</td>" +
@@ -935,6 +943,7 @@
   }
 
   let stopDealerSub = null;
+  let stopDealerPrivateSub = null;
   let stopListingSub = null;
   let stopUsersSub = null;
   let stopChangeRequestsSub = null;
@@ -943,6 +952,7 @@
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       if (typeof stopDealerSub === "function") stopDealerSub();
+      if (typeof stopDealerPrivateSub === "function") stopDealerPrivateSub();
       if (typeof stopListingSub === "function") stopListingSub();
       if (typeof stopUsersSub === "function") stopUsersSub();
       if (typeof stopChangeRequestsSub === "function") stopChangeRequestsSub();
@@ -962,18 +972,33 @@
     if (adminPill) adminPill.textContent = "Admin: " + email;
 
     let dealers = [];
+    let dealerPrivateById = {};
     let listings = [];
     let users = [];
     let changeRequests = [];
-    const rerender = () => loadAdminData(dealers, listings, users, changeRequests);
+    const rerender = () => {
+      const mergedDealers = dealers.map((dealer) => ({
+        ...dealer,
+        ...(dealerPrivateById[dealer.id] || {})
+      }));
+      loadAdminData(mergedDealers, listings, users, changeRequests);
+    };
 
     if (typeof stopDealerSub === "function") stopDealerSub();
+    if (typeof stopDealerPrivateSub === "function") stopDealerPrivateSub();
     if (typeof stopListingSub === "function") stopListingSub();
     if (typeof stopUsersSub === "function") stopUsersSub();
     if (typeof stopChangeRequestsSub === "function") stopChangeRequestsSub();
 
     stopDealerSub = onSnapshot(collection(db, "dealerProfiles"), (snap) => {
       dealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+      rerender();
+    });
+    stopDealerPrivateSub = onSnapshot(collection(db, "dealerPrivate"), (snap) => {
+      dealerPrivateById = {};
+      snap.docs.forEach((d) => {
+        dealerPrivateById[d.id] = d.data() || {};
+      });
       rerender();
     });
     stopListingSub = onSnapshot(collection(db, "listings"), (snap) => {
@@ -1019,6 +1044,7 @@
   document.addEventListener("click", async (event) => {
     const appAction = event.target.getAttribute("data-app-action");
     const dealerId = event.target.getAttribute("data-dealer-id");
+    const docAction = event.target.getAttribute("data-doc-action");
     const dealerAction = event.target.getAttribute("data-dealer-action");
     const listingAction = event.target.getAttribute("data-listing-action");
     const listingId = event.target.getAttribute("data-listing-id");
@@ -1026,6 +1052,14 @@
     const changeId = event.target.getAttribute("data-change-id");
     const changeDealerId = event.target.getAttribute("data-change-dealer-id");
     try {
+      if (docAction === "open-verification-doc" && dealerId) {
+        const access = await getDealerVerificationDocumentAccess(dealerId, changeId || "");
+        if (!access || !access.url) {
+          throw new Error("Verification document was not available.");
+        }
+        window.open(access.url, "_blank", "noopener,noreferrer");
+        return;
+      }
       if (appAction && dealerId) {
         const status = appAction === "approve" ? "verified" : "rejected";
         await updateDoc(doc(db, "dealerProfiles", dealerId), { verificationStatus: status, updatedAt: serverTimestamp() });
@@ -1082,6 +1116,7 @@
           const requestInMemory = cachedChangeRequests.find((r) => r.id === changeId);
           if (!requestInMemory || !changeDealerId) return;
           const rawChanges = requestInMemory.changes || {};
+          const privateChanges = requestInMemory.privateChanges || {};
           const ownerCnic = rawChanges.ownerCnic;
           const nextProfile = { ...rawChanges };
           delete nextProfile.ownerCnic;
@@ -1098,18 +1133,23 @@
             "whatsapp",
             "email",
             "profilePicture",
-            "registrationDocumentUrl",
-            "dealershipPhotos",
-            "plan"
+            "dealershipPhotos"
           ];
           const sanitized = {};
           allowedPublic.forEach((key) => {
             if (key in nextProfile) sanitized[key] = nextProfile[key];
           });
+          const nextPrivate = { updatedAt: serverTimestamp() };
           if (ownerCnic !== undefined && ownerCnic !== null && String(ownerCnic).trim()) {
+            nextPrivate.ownerCnic = String(ownerCnic).trim();
+          }
+          if (privateChanges.verificationDocument) {
+            nextPrivate.verificationDocument = privateChanges.verificationDocument;
+          }
+          if (Object.keys(nextPrivate).length > 1) {
             await setDoc(
               doc(db, "dealerPrivate", changeDealerId),
-              { ownerCnic: String(ownerCnic).trim(), updatedAt: serverTimestamp() },
+              nextPrivate,
               { merge: true }
             );
           }
@@ -1117,6 +1157,12 @@
             ...sanitized,
             ownerCnic: deleteField(),
             soldHistory: deleteField(),
+            registrationDocumentUrl: deleteField(),
+            verificationDocument: deleteField(),
+            employees: deleteField(),
+            plan: deleteField(),
+            planPreference: deleteField(),
+            paymentStatus: deleteField(),
             updatedAt: serverTimestamp()
           });
           await updateDoc(doc(db, "dealerChangeRequests", changeId), {

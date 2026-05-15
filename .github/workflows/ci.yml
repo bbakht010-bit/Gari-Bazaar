@@ -21,13 +21,27 @@ jobs:
           node-version: "20"
           cache: npm
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - run: npm ci
+
+      - name: Install Functions dependencies
+        run: npm ci --prefix functions
 
       - name: Stable URL guard
         run: npm run check:stable-urls
 
       - name: Login/signup UX guard
         run: npm run check:login-ux
+
+      - name: Firestore and Storage rules tests
+        run: npm run test:rules
+
+      - name: Functions tests
+        run: npm run test:functions
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium

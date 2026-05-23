@@ -44,11 +44,17 @@ if (APP_CHECK_DEBUG_TOKEN) {
 
 const app = initializeApp(firebaseConfig);
 
+let appCheckInstance = null;
 if (typeof APP_CHECK_RECAPTCHA_SITE_KEY === "string" && APP_CHECK_RECAPTCHA_SITE_KEY.length > 20) {
-  initializeAppCheck(app, {
+  appCheckInstance = initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(APP_CHECK_RECAPTCHA_SITE_KEY),
     isTokenAutoRefreshEnabled: true
   });
+}
+
+/** True when reCAPTCHA App Check is active in this browser session. */
+export function isAppCheckEnabled() {
+  return !!appCheckInstance;
 }
 
 const auth = getAuth(app);

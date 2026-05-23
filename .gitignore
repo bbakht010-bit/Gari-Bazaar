@@ -3,6 +3,8 @@ test-results/
 tests/.auth/
 !tests/.auth/.gitkeep
 
+functions/.app-check-enforce
+
 # Local Firebase Admin service account keys (never commit)
 *-firebase-adminsdk-*.json
 serviceAccount*.json

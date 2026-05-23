@@ -9,7 +9,11 @@
     "singleProjectMode": true
   },
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "predeploy": [
+      "npm run generate:app-check-config",
+      "npm run check:app-check"
+    ]
   },
   "firestore": {
     "rules": "firestore.rules",
@@ -21,6 +25,9 @@
   },
   "hosting": {
     "predeploy": [
+      "npm run generate:app-check-config",
+      "npm run inject:app-check",
+      "npm run check:app-check",
       "npm run check:stable-urls",
       "npm run check:login-ux"
     ],
@@ -34,6 +41,10 @@
       {
         "source": "/firebase-client.js",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+      },
+      {
+        "source": "/app-check-config.js",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
       },
       {
         "source": "/theme.js",
@@ -51,14 +62,24 @@
       ".cursor/**",
       ".firebase/**",
       ".github/**",
+      "/node_modules",
+      "/node_modules/**",
       "node_modules",
       "node_modules/**",
       "**/node_modules/**",
+      "/functions",
       "functions/**",
+      "/scripts",
       "scripts/**",
+      "/tests",
       "tests/**",
       "test-results/**",
       "playwright-report/**",
+      "coverage/**",
+      "firebase-debug.log*",
+      "firestore-debug.log*",
+      "ui-debug.log*",
+      "*.map",
       "playwright.config.js",
       "package.json",
       "package-lock.json",

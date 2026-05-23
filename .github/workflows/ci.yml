@@ -28,6 +28,11 @@ jobs:
 
       - run: npm ci
 
+      - name: App Check config (optional site key from secret)
+        run: npm run generate:app-check-config && npm run inject:app-check
+        env:
+          GARI_BAZAAR_APP_CHECK_SITE_KEY: ${{ secrets.GARI_BAZAAR_APP_CHECK_SITE_KEY }}
+
       - name: Install Functions dependencies
         run: npm ci --prefix functions
 

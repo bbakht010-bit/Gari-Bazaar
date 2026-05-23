@@ -1,5 +1,7 @@
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
+const fs = require("node:fs");
+const path = require("node:path");
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -13,10 +15,22 @@ const REGION = "asia-south1";
 /** Must match your Firestore database location (default DB is often US multi-region → use us-central1 for Gen1 triggers). */
 const FIRESTORE_TRIGGER_REGION = "us-central1";
 /**
- * App Check runtime options can be enabled once the live web app is sending tokens.
- * Keeping this centralized makes the final enforcement flip a one-line change.
+ * Callable App Check enforcement turns on when `scripts/generate-app-check-config.mjs`
+ * detects a site key and writes `functions/.app-check-enforce` (value `1`).
  */
-const CALLABLE_RUNTIME = {};
+function readCallableRuntimeOptions() {
+  try {
+    const flagPath = path.join(__dirname, ".app-check-enforce");
+    if (fs.existsSync(flagPath) && fs.readFileSync(flagPath, "utf8").trim() === "1") {
+      return { enforceAppCheck: true };
+    }
+  } catch (_err) {
+    /* deploy without flag file → enforcement off */
+  }
+  return {};
+}
+
+const CALLABLE_RUNTIME = readCallableRuntimeOptions();
 
 const PLAN_LIMITS = {
   free: { listings: 2, employees: 1 },

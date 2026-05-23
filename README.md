@@ -74,6 +74,12 @@ Use this when `*.web.app` works but your own domain misbehaves (login, uploads, 
 - Dealer application uploads require **Storage rules** deployed and a Firestore **`users/{uid}`** document with **`dealer: true`** or **`role: "dealer"`** (see `storage.rules` and `firebase-client.js` `prepareDealerStorageWrites`).
 - After changing **`storage.rules`**, run `firebase deploy --only storage` (not only Hosting).
 
+## App Check (abuse protection)
+
+- Shared client reads `window.GARI_BAZAAR_APP_CHECK_SITE_KEY` from **`app-check-config.js`** (loaded before Firebase modules on every page).
+- Callable Functions enable **`enforceAppCheck`** automatically when a valid site key is present at deploy time (see **`docs/APPCHECK.md`**).
+- **You must register** the web app in Firebase Console → App Check (reCAPTCHA v3), paste the site key into `app-check-config.js`, deploy, verify dealer/admin flows, then enable enforcement in Console for Firestore, Storage, and Functions.
+
 ## Local emulators (optional)
 
 ```bash
@@ -90,6 +96,9 @@ Uses ports from `firebase.json` (Hosting 5000, etc.). Wire `firebase-client.js` 
 | `npm run check:login-ux` | Login/signup UX invariants |
 | `npm run test:e2e` | Playwright smoke tests |
 | `npm run deploy:rules` | Firestore + Storage rules |
+| `npm run generate:app-check-config` | Write `app-check-config.js` + Functions enforce flag |
+| `npm run inject:app-check` | Add App Check script tag to Firebase HTML pages |
+| `npm run check:app-check` | Warn if site key missing before deploy |
 | `npm run deploy` | Full Firebase deploy per `firebase.json` |
 
 ## Repo layout (short)

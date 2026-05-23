@@ -4,12 +4,16 @@
   "scripts": {
     "check:stable-urls": "node scripts/check-stable-urls.mjs",
     "check:login-ux": "node scripts/check-login-signup-ux.mjs",
+    "check:app-check": "node scripts/check-app-check.mjs",
+    "generate:app-check-config": "node scripts/generate-app-check-config.mjs",
+    "inject:app-check": "node scripts/inject-app-check-script.mjs",
     "test:e2e": "playwright test",
     "test:rules:inner": "node --test tests/firebase/**/*.spec.js",
     "test:rules": "npx -y firebase-tools@latest emulators:exec --only firestore,storage \"npm run test:rules:inner\"",
     "test:functions": "npm --prefix functions test",
     "emulators": "npx firebase-tools@latest emulators:start --only auth,firestore,storage,functions,hosting",
     "deploy:rules": "firebase deploy --only firestore:rules,storage",
+    "predeploy": "npm run generate:app-check-config && npm run inject:app-check && npm run check:app-check",
     "deploy": "firebase deploy",
     "wipe:dev-auth": "node scripts/wipe-dev-auth.mjs"
   },

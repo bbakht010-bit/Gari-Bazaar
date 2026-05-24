@@ -571,12 +571,26 @@
   import { db } from "./firebase-client.js";
   import { fetchDealerProfileById, fetchListingById } from "./marketplace-firestore.js";
 
+  function setDetailLoading(isLoading) {
+    document.querySelectorAll(".hero-photo, .details h1, .details .price, .spec h4, .description, aside.card .contact-meta, .dealer-head h3, .dealer-head p, .rating").forEach((node) => {
+      node.classList.toggle("gb-skeleton", isLoading);
+      node.classList.toggle("gb-skeleton-line", isLoading && !node.classList.contains("hero-photo"));
+      if (isLoading && !node.classList.contains("hero-photo")) node.textContent = "";
+    });
+    document.querySelectorAll(".thumbs .thumb").forEach((node) => {
+      node.classList.toggle("gb-skeleton", isLoading);
+    });
+    document.querySelector("main")?.setAttribute("aria-busy", isLoading ? "true" : "false");
+  }
+
   (async function hydrateFromFirestoreIds() {
+    setDetailLoading(true);
     const params = new URLSearchParams(window.location.search);
     const listingId = (params.get("listingId") || "").trim();
     const dealerIdFromUrl = (params.get("dealerId") || "").trim();
     var hintEl = document.getElementById("gb-detail-hint");
     if (!listingId && !dealerIdFromUrl) {
+      setDetailLoading(false);
       if (hintEl) hintEl.style.display = "block";
       return;
     }
@@ -625,7 +639,20 @@
     const dealerId = dealerIdFromUrl || (listing && listing.dealerId) || "";
     GB_URLS.canonicalizeDetailUrl(listingId || (listing && listing.id), dealerId);
     const dealer = dealerId ? await fetchDealerProfileById(dealerId) : null;
-    if (!listing && !dealer) return;
+    if (!listing && !dealer) {
+      setDetailLoading(false);
+      const detailSection = document.querySelector(".details");
+      if (detailSection) {
+        detailSection.innerHTML =
+          '<div class="gb-empty-state">' +
+            '<h3>Car details unavailable</h3>' +
+            '<p>This listing may have been sold or removed. Browse live dealer inventory to continue.</p>' +
+            '<p style="margin-top:12px;"><a class="profile" href="listings.html">Browse listings</a></p>' +
+          '</div>';
+      }
+      return;
+    }
+    setDetailLoading(false);
 
     const carName = (listing && listing.carName) || (params.get("car") || "");
     const price = (listing && listing.priceLakh) || (params.get("price") || "0");

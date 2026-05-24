@@ -1858,9 +1858,16 @@
     return "Body: " + paintLabel(listing && listing.paintStatus) + " · S" + sprayed + " T" + touched + " R" + repaired;
   }
 
+  function skeletonCards(count) {
+    return Array.from({ length: count || 6 }, () => '<div class="gb-skeleton-card" aria-hidden="true"></div>').join("");
+  }
+
   async function renderLiveListings() {
     const carGrid = document.querySelector(".car-grid");
     if (!carGrid) return;
+    carGrid.classList.add("gb-loading-region", "gb-loading-grid");
+    carGrid.setAttribute("aria-busy", "true");
+    carGrid.innerHTML = skeletonCards(6);
 
     // Load dealers + listings together so cards can include dealer metadata.
     const [dealerSnap, listingSnap] = await Promise.all([
@@ -1888,13 +1895,21 @@
     });
 
     if (!liveListings.length) {
-      carGrid.innerHTML = '<p class="note">No live approved listings available right now. Approve dealers and publish listings from admin panel.</p>';
+      carGrid.classList.remove("gb-loading-grid");
+      carGrid.setAttribute("aria-busy", "false");
+      carGrid.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>No live cars are available right now</h3>' +
+          '<p>Verified dealer inventory will appear here as soon as new cars are approved. Try checking again soon.</p>' +
+        '</div>';
       if (typeof refreshCardCaches === "function") refreshCardCaches();
       if (typeof runListingsSearch === "function") runListingsSearch();
       if (typeof updateSidebarCounts === "function") updateSidebarCounts();
       return;
     }
 
+    carGrid.classList.remove("gb-loading-grid");
+    carGrid.setAttribute("aria-busy", "false");
     carGrid.innerHTML = liveListings.map((entry, index) => {
       const listing = entry.listing;
       const dealer = entry.dealer || {};
@@ -1971,6 +1986,16 @@
   // Non-blocking failure path to avoid breaking page interactivity.
   renderLiveListings().catch((error) => {
     console.error("Failed to load live listings:", error);
+    const carGrid = document.querySelector(".car-grid");
+    if (carGrid) {
+      carGrid.classList.remove("gb-loading-grid");
+      carGrid.setAttribute("aria-busy", "false");
+      carGrid.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>Could not load cars</h3>' +
+          '<p>Please refresh the page. If this keeps happening, we may be updating the marketplace.</p>' +
+        '</div>';
+    }
   });
 </script>
 

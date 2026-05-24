@@ -741,6 +741,26 @@
     return Number.isFinite(number) ? number : 0;
   }
 
+  function renderAdminLoading() {
+    ["kpiPending", "kpiVerifiedDealers", "kpiActiveListings", "kpiPaidSubs", "kpiUnassigned", "kpiBuyers"].forEach((id) => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = "";
+      node.classList.add("gb-skeleton-line");
+    });
+    [
+      ["applicationsBody", 6],
+      ["dealershipsBody", 6],
+      ["listingsBody", 6],
+      ["changeRequestsBody", 5],
+      ["assignmentsBody", 6]
+    ].forEach(([id, cols]) => {
+      const body = document.getElementById(id);
+      if (!body) return;
+      body.innerHTML = Array.from({ length: 3 }, () => '<tr><td colspan="' + cols + '"><div class="gb-skeleton-table-row" aria-hidden="true"></div></td></tr>').join("");
+    });
+  }
+
   function loadAdminData(dealers, listings, users, changeRequests) {
     const applicationsBody = document.getElementById("applicationsBody");
     const dealershipsBody = document.getElementById("dealershipsBody");
@@ -791,6 +811,9 @@
     const paymentFailed = dealers.filter((d) => String(d.paymentStatus || "").toLowerCase() === "failed").length;
     const mrrValue = growthDealers.length * 2500 + proDealers.length * 5000;
 
+    [kpiPending, kpiVerifiedDealers, kpiActiveListings, kpiPaidSubs, kpiUnassigned, kpiBuyers].forEach((node) => {
+      if (node) node.classList.remove("gb-skeleton-line");
+    });
     if (kpiPending) kpiPending.textContent = String(pendingApps.length);
     if (kpiVerifiedDealers) kpiVerifiedDealers.textContent = String(verifiedDealers.length);
     if (kpiActiveListings) kpiActiveListings.textContent = String(activeListings.length);
@@ -807,7 +830,7 @@
 
     if (applicationsBody) {
       if (!pendingApps.length) {
-        applicationsBody.innerHTML = '<tr><td colspan="6">No pending applications right now.</td></tr>';
+        applicationsBody.innerHTML = '<tr><td colspan="6"><div class="gb-empty-state"><h3>No pending applications</h3><p>New dealer applications will appear here for review.</p></div></td></tr>';
       } else {
         applicationsBody.innerHTML = pendingApps.map((d) => {
           const owner = d.ownerName || d.contactName || "Dealer Owner";
@@ -832,7 +855,7 @@
 
     if (dealershipsBody) {
       if (!dealers.length) {
-        dealershipsBody.innerHTML = '<tr><td colspan="6">No dealerships found yet.</td></tr>';
+        dealershipsBody.innerHTML = '<tr><td colspan="6"><div class="gb-empty-state"><h3>No dealerships yet</h3><p>Approved and pending dealer records will appear here.</p></div></td></tr>';
       } else {
         dealershipsBody.innerHTML = dealers.map((d) => {
           const plan = String(d.plan || "free").toLowerCase();
@@ -857,7 +880,7 @@
 
     if (listingsBody) {
       if (!listings.length) {
-        listingsBody.innerHTML = '<tr><td colspan="6">No listings found yet.</td></tr>';
+        listingsBody.innerHTML = '<tr><td colspan="6"><div class="gb-empty-state"><h3>No listings yet</h3><p>Dealer inventory will appear here after cars are added.</p></div></td></tr>';
       } else {
         listingsBody.innerHTML = listings.map((l) => {
           const status = String(l.moderationStatus || "live").toLowerCase();
@@ -882,7 +905,7 @@
     if (changeRequestsBody) {
       const pendingChanges = (changeRequests || []).filter((r) => String(r.status || "pending").toLowerCase() === "pending");
       if (!pendingChanges.length) {
-        changeRequestsBody.innerHTML = '<tr><td colspan="5">No change requests yet.</td></tr>';
+        changeRequestsBody.innerHTML = '<tr><td colspan="5"><div class="gb-empty-state"><h3>No change requests</h3><p>Profile updates submitted by approved dealers will appear here.</p></div></td></tr>';
       } else {
         changeRequestsBody.innerHTML = pendingChanges.map((request) => {
           const submitted = request.submittedAt && request.submittedAt.toDate ? request.submittedAt.toDate().toLocaleString() : "-";
@@ -903,7 +926,7 @@
 
     if (assignmentsBody) {
       if (!listings.length) {
-        assignmentsBody.innerHTML = '<tr><td colspan="6">No assignment data available yet.</td></tr>';
+        assignmentsBody.innerHTML = '<tr><td colspan="6"><div class="gb-empty-state"><h3>No assignment data</h3><p>Contact routing appears here once dealer listings exist.</p></div></td></tr>';
       } else {
         assignmentsBody.innerHTML = listings.map((l) => {
           const role = String(l.contactRole || "Owner");
@@ -977,7 +1000,12 @@
     let listings = [];
     let users = [];
     let changeRequests = [];
+    const loaded = { dealers: false, private: false, listings: false, users: false, changes: false };
     const rerender = () => {
+      if (!loaded.dealers || !loaded.private || !loaded.listings || !loaded.users || !loaded.changes) {
+        renderAdminLoading();
+        return;
+      }
       const mergedDealers = dealers.map((dealer) => ({
         ...dealer,
         ...(dealerPrivateById[dealer.id] || {})
@@ -991,8 +1019,11 @@
     if (typeof stopUsersSub === "function") stopUsersSub();
     if (typeof stopChangeRequestsSub === "function") stopChangeRequestsSub();
 
+    renderAdminLoading();
+
     stopDealerSub = onSnapshot(collection(db, "dealerProfiles"), (snap) => {
       dealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+      loaded.dealers = true;
       rerender();
     });
     stopDealerPrivateSub = onSnapshot(collection(db, "dealerPrivate"), (snap) => {
@@ -1000,19 +1031,23 @@
       snap.docs.forEach((d) => {
         dealerPrivateById[d.id] = d.data() || {};
       });
+      loaded.private = true;
       rerender();
     });
     stopListingSub = onSnapshot(collection(db, "listings"), (snap) => {
       listings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+      loaded.listings = true;
       rerender();
     });
     stopUsersSub = onSnapshot(collection(db, "users"), (snap) => {
       users = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+      loaded.users = true;
       rerender();
     });
     stopChangeRequestsSub = onSnapshot(collection(db, "dealerChangeRequests"), (snap) => {
       changeRequests = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
       cachedChangeRequests = changeRequests.slice();
+      loaded.changes = true;
       rerender();
     });
   });

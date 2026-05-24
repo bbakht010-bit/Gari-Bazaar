@@ -42,6 +42,8 @@ When a valid site key is present, **callable Functions** deploy with `enforceApp
 
 If callables fail with `failed-precondition` / App Check errors, the site key or Console registration is wrong.
 
+Automated/headless browser tests can be rejected by reCAPTCHA v3 risk scoring. The smoke tests ignore only the App Check token-exchange 403 from `content-firebaseappcheck.googleapis.com`; use a Firebase App Check debug token later if you need full protected E2E dealer/admin flows in CI.
+
 ## 5. Turn on Console enforcement (after step 4 works)
 
 Firebase Console → **App Check** → enable enforcement for:

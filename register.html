@@ -569,6 +569,11 @@
 
   <!-- FORM -->
   <div class="form-card">
+    <div id="register-loading-state" class="gb-empty-state" aria-live="polite">
+      <div class="gb-spinner" style="margin:0 auto 12px;"></div>
+      <h3>Preparing your dealership form</h3>
+      <p>We are checking your sign-in, email verification, and any saved dealer profile.</p>
+    </div>
 
     <!-- SECTION 1: DEALERSHIP DETAILS -->
     <div class="form-section">
@@ -919,6 +924,22 @@
   const agreementSection = document.querySelectorAll('.form-section')[5];
   const regUploadLabel = document.querySelector('label[for="reg-upload"]');
   const photosUploadLabel = document.querySelector('label[for="photos-upload"]');
+  const registerLoadingState = document.getElementById('register-loading-state');
+
+  function setRegisterLoading(isLoading) {
+    if (registerLoadingState) registerLoadingState.style.display = isLoading ? "" : "none";
+    document.querySelectorAll('.form-card input, .form-card select, .form-card textarea, .form-card button').forEach((el) => {
+      if (el.id === "dealer-register-submit" || el.closest("#register-loading-state")) return;
+      el.disabled = isLoading;
+    });
+    if (submitBtn) {
+      submitBtn.disabled = isLoading;
+      if (isLoading) submitBtn.textContent = "Checking account...";
+      if (!isLoading) submitBtn.textContent = isProfileUpdateMode ? "Submit Change Request" : "Submit Application";
+    }
+  }
+
+  setRegisterLoading(true);
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -975,6 +996,7 @@
         submitBtn.textContent = 'Submit Change Request';
       }
     }
+    setRegisterLoading(false);
     applyUpdateModeUi();
   });
 

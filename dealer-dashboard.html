@@ -493,6 +493,26 @@
     });
   });
 
+  function setDashboardLoading(isLoading) {
+    document.querySelectorAll('.kpi .value').forEach((node) => {
+      node.classList.toggle('gb-skeleton-line', isLoading);
+      if (isLoading) node.textContent = '';
+    });
+    ['employee-list', 'car-list', 'preview-grid', 'sold-history-list'].forEach((id) => {
+      const root = document.getElementById(id);
+      if (!root) return;
+      root.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+      if (isLoading) {
+        root.innerHTML = '<div class="gb-loading-grid">' +
+          '<div class="gb-skeleton-card" aria-hidden="true"></div>' +
+          '<div class="gb-skeleton-card" aria-hidden="true"></div>' +
+        '</div>';
+      }
+    });
+  }
+
+  setDashboardLoading(true);
+
   await authReady;
 
   const fallbackDealerUid = localStorage.getItem('gb_dealer_uid');
@@ -838,7 +858,11 @@
     const root = document.getElementById('employee-list');
     root.innerHTML = '';
     if (!state.employees.length) {
-      root.innerHTML = '<p class="note">No employees added yet. Cars without assignment will automatically use owner contact.</p>';
+      root.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>No employees added yet</h3>' +
+          '<p>Cars without an assigned advisor automatically use the owner contact.</p>' +
+        '</div>';
       return;
     }
     state.employees.forEach((emp) => {
@@ -861,7 +885,11 @@
       return !query || haystack.includes(query);
     });
     if (!filteredCars.length) {
-      root.innerHTML = '<p class="note">' + (state.cars.length ? 'No cars match your inventory search.' : 'No cars added yet.') + '</p>';
+      root.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>' + (state.cars.length ? 'No matching cars' : 'No cars added yet') + '</h3>' +
+          '<p>' + (state.cars.length ? 'Try a different search term.' : 'Add your first car to publish dealer inventory.') + '</p>' +
+        '</div>';
       return;
     }
     filteredCars.forEach((car) => {
@@ -894,7 +922,11 @@
     if (!root) return;
     root.innerHTML = '';
     if (!state.soldHistory.length) {
-      root.innerHTML = '<p class="note">No sold cars recorded yet.</p>';
+      root.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>No sold cars recorded yet</h3>' +
+          '<p>When you mark a listing sold, it will appear here for your dealership history.</p>' +
+        '</div>';
       return;
     }
     const sorted = state.soldHistory.slice().sort((a, b) => {
@@ -923,7 +955,11 @@
       return !query || haystack.includes(query);
     });
     if (!filteredCars.length) {
-      root.innerHTML = '<p class="note">No preview cards match your inventory search.</p>';
+      root.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>No preview cards yet</h3>' +
+          '<p>Add or search inventory to preview how buyer-facing cards will look.</p>' +
+        '</div>';
       return;
     }
     filteredCars.forEach((car) => {
@@ -961,6 +997,7 @@
   }
 
   function renderAll() {
+    setDashboardLoading(false);
     renderAssigneeOptions();
     renderEmployees();
     renderCars();

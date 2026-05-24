@@ -4,6 +4,16 @@
 function attachConsoleCollector(page, options) {
   const allowSubstrings = (options && options.allowSubstrings) || [];
   const messages = [];
+  let sawAppCheckExchange403 = false;
+
+  page.on("response", (response) => {
+    if (
+      response.status() === 403 &&
+      response.url().includes("content-firebaseappcheck.googleapis.com")
+    ) {
+      sawAppCheckExchange403 = true;
+    }
+  });
 
   page.on("console", (msg) => {
     if (msg.type() === "error") messages.push("[console.error] " + msg.text());
@@ -13,9 +23,15 @@ function attachConsoleCollector(page, options) {
   });
 
   return async function assertNoUnhandledConsoleErrors() {
-    const banned = messages.filter((line) =>
-      allowSubstrings.every((substr) => !line.includes(substr))
-    );
+    const banned = messages.filter((line) => {
+      if (
+        sawAppCheckExchange403 &&
+        line.includes("Failed to load resource: the server responded with a status of 403")
+      ) {
+        return false;
+      }
+      return allowSubstrings.every((substr) => !line.includes(substr));
+    });
     await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
     await page.waitForTimeout(800);
     if (banned.length) {

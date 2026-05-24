@@ -155,6 +155,7 @@
           <input id="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required>
         </div>
         <button class="btn" type="submit">Create account</button>
+        <div id="buyer-signup-msg" class="gb-form-message" role="alert" aria-live="polite"></div>
       </form>
       <p class="muted-note">
         Create your account, then complete buyer profile (name, phone, city) before continuing.
@@ -171,6 +172,14 @@
   import { createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { auth, ensureUserRecord, upsertBuyerProfile } from "./firebase-client.js";
   const form = document.getElementById('buyer-signup-form');
+  const submitButton = form && form.querySelector('button[type="submit"]');
+  const messageBox = document.getElementById('buyer-signup-msg');
+
+  function showSignupMessage(message, isError) {
+    if (!messageBox) return;
+    messageBox.textContent = message;
+    messageBox.className = 'gb-form-message show ' + (isError ? 'is-error' : 'is-success');
+  }
 
   function isValidPakistanMobile(phone) {
     return /^03\d{2}[-\s]?\d{7}$/.test(phone);
@@ -184,15 +193,19 @@
     const password = document.getElementById('password').value;
 
     if (!name || !phone || !email || !password) {
-      alert('Please fill all required fields.');
+      showSignupMessage('Please fill all required fields.', true);
       return;
     }
     if (!isValidPakistanMobile(phone)) {
-      alert('Phone must be in format 03xx-xxxxxxx.');
+      showSignupMessage('Phone must be in format 03xx-xxxxxxx.', true);
       return;
     }
 
     try {
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Creating account...';
+      }
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       await ensureUserRecord(credential.user.uid, credential.user.email, "buyer");
       localStorage.setItem('gb_last_signed_in_uid', credential.user.uid);
@@ -211,13 +224,18 @@
     } catch (error) {
       const code = error && error.code ? error.code : '';
       if (code === 'auth/email-already-in-use') {
-        alert('This email already has an account. Please sign in.');
+        showSignupMessage('This email already has an account. Please sign in.', true);
       } else if (code === 'auth/weak-password') {
-        alert('Password should be at least 6 characters.');
+        showSignupMessage('Password should be at least 6 characters.', true);
       } else if (code === 'auth/invalid-email') {
-        alert('Please enter a valid email address.');
+        showSignupMessage('Please enter a valid email address.', true);
       } else {
-        alert('Could not create account right now. Please try again.');
+        showSignupMessage('Could not create account right now. Please try again.', true);
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Create account';
       }
     }
   });

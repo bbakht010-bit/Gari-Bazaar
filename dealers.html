@@ -177,7 +177,16 @@
     return digits;
   }
 
+  function skeletonCards(count) {
+    return Array.from({ length: count || 6 }, () => '<div class="gb-skeleton-card" aria-hidden="true"></div>').join("");
+  }
+
   async function renderLiveDealers() {
+    if (allDealersGrid) {
+      allDealersGrid.classList.add("gb-loading-region", "gb-loading-grid");
+      allDealersGrid.setAttribute("aria-busy", "true");
+      allDealersGrid.innerHTML = skeletonCards(6);
+    }
     const [dealerSnap, listingSnap] = await Promise.all([
       getDocs(collection(db, "dealerProfiles")),
       getDocs(collection(db, "listings"))
@@ -232,9 +241,11 @@
       );
     });
 
+    allDealersGrid.classList.remove("gb-loading-grid");
+    allDealersGrid.setAttribute("aria-busy", "false");
     allDealersGrid.innerHTML = cards.join("");
     if (!cards.length && dealerEmptyState) {
-      dealerEmptyState.textContent = "No verified dealers are available yet. Approve dealers from admin panel.";
+      dealerEmptyState.textContent = "No verified dealers are live yet. Please check back soon as more dealerships join Gari Bazaar.";
       dealerEmptyState.classList.add("show");
     } else if (dealerEmptyState) {
       dealerEmptyState.classList.remove("show");
@@ -267,6 +278,11 @@
 
   renderLiveDealers().catch((error) => {
     console.error("Failed to load dealers:", error);
+    if (allDealersGrid) {
+      allDealersGrid.classList.remove("gb-loading-grid");
+      allDealersGrid.setAttribute("aria-busy", "false");
+      allDealersGrid.innerHTML = "";
+    }
     if (dealerEmptyState) {
       dealerEmptyState.textContent = "Could not load live dealers right now.";
       dealerEmptyState.classList.add("show");

@@ -149,6 +149,9 @@
         <span>Current status:</span>
         <span id="applicationStatusBadge" class="status-badge">Pending</span>
       </div>
+      <div id="applicationLoadingState" class="gb-form-message show">
+        Checking your latest application status…
+      </div>
       <div class="btn-row">
         <a class="btn btn-home" href="index.html">Home</a>
         <button id="logoutBtn" class="btn btn-logout" type="button">Log Out</button>
@@ -165,9 +168,16 @@
 
     const logoutBtn = document.getElementById("logoutBtn");
     const statusBadge = document.getElementById("applicationStatusBadge");
+    const loadingState = document.getElementById("applicationLoadingState");
     let stopProfileListener = null;
 
+    function setLoadingState(isLoading) {
+      if (loadingState) loadingState.style.display = isLoading ? "block" : "none";
+      if (statusBadge) statusBadge.classList.toggle("gb-skeleton-line", isLoading);
+    }
+
     function setStatusBadge(status) {
+      setLoadingState(false);
       if (!statusBadge) return;
       const value = String(status || "pending").toLowerCase();
       statusBadge.classList.remove("approved", "rejected");
@@ -190,6 +200,7 @@
     }
 
     onAuthStateChanged(auth, async (user) => {
+      setLoadingState(true);
       if (typeof stopProfileListener === "function") {
         stopProfileListener();
         stopProfileListener = null;

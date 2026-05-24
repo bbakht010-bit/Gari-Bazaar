@@ -123,6 +123,7 @@
     <div class="card-body">
       <p>Sending to:</p>
       <div id="verify-email-display" class="email-box">—</div>
+      <div id="verify-loading-state" class="gb-form-message show">Checking your verification status…</div>
       <p class="hint">Open the email from Firebase / GariBazaar and tap <strong>Verify</strong>. Then click the button below (or refresh this page).</p>
       <button id="verify-check-btn" class="btn" type="button">I've verified — continue</button>
       <button id="verify-resend-btn" class="btn btn-outline" type="button">Resend verification email</button>
@@ -150,8 +151,10 @@
   const resendBtn = document.getElementById("verify-resend-btn");
   const signOutBtn = document.getElementById("verify-signout-btn");
   const msgEl = document.getElementById("verify-msg");
+  const loadingState = document.getElementById("verify-loading-state");
 
   function showMsg(text, isError) {
+    if (loadingState) loadingState.style.display = "none";
     msgEl.textContent = text;
     msgEl.className = "msg show " + (isError ? "err" : "ok");
   }
@@ -191,11 +194,13 @@
     }
     if (emailDisplay) emailDisplay.textContent = user.email || "(no email)";
     await continueAfterVerification();
+    if (loadingState) loadingState.style.display = "none";
   });
 
   checkBtn.addEventListener("click", async () => {
     clearMsg();
     checkBtn.disabled = true;
+    checkBtn.textContent = "Checking...";
     try {
       const ok = await continueAfterVerification();
       if (!ok) {
@@ -203,12 +208,14 @@
       }
     } finally {
       checkBtn.disabled = false;
+      checkBtn.textContent = "I've verified — continue";
     }
   });
 
   resendBtn.addEventListener("click", async () => {
     clearMsg();
     resendBtn.disabled = true;
+    resendBtn.textContent = "Sending...";
     try {
       await sendVerificationEmailToCurrentUser();
       showMsg("Verification email sent again. Check your inbox.", false);
@@ -221,6 +228,7 @@
       }
     } finally {
       resendBtn.disabled = false;
+      resendBtn.textContent = "Resend verification email";
     }
   });
 

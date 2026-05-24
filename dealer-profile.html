@@ -252,6 +252,22 @@
     return String(status || "").toLowerCase();
   }
 
+  function setDealerProfileLoading(isLoading) {
+    document.querySelectorAll(".hero-title h1, .hero p, main .card .line, .rating, .stats .stat h3").forEach((node) => {
+      node.classList.toggle("gb-skeleton-line", isLoading);
+      if (isLoading) node.textContent = "";
+    });
+    if (dealerCarsGrid) {
+      dealerCarsGrid.classList.toggle("gb-loading-grid", isLoading);
+      dealerCarsGrid.setAttribute("aria-busy", isLoading ? "true" : "false");
+      if (isLoading) {
+        dealerCarsGrid.innerHTML = Array.from({ length: 3 }, () => '<div class="gb-skeleton-card" aria-hidden="true"></div>').join("");
+      }
+    }
+  }
+
+  setDealerProfileLoading(true);
+
   function formatJoinedDate(value) {
     if (!value) return "Not available";
     if (typeof value === "string") {
@@ -283,6 +299,7 @@
   }
 
   function renderDealerNotFound(message) {
+    setDealerProfileLoading(false);
     const heroTitle = document.querySelector(".hero-title h1");
     const heroDesc = document.querySelector(".hero p");
     const heroLogo = document.querySelector(".hero-logo");
@@ -301,9 +318,9 @@
     disableContactActions("Contact details are hidden because this dealer profile is unavailable.");
     if (dealerCarsGrid) {
       dealerCarsGrid.innerHTML =
-        '<div class="card" style="border-style:dashed;background:#f9fafb;">' +
-          '<h3 style="font-size:18px;margin-bottom:8px;">Dealer profile unavailable</h3>' +
-          '<p class="line" style="margin-bottom:12px;">' + esc(message) + '</p>' +
+        '<div class="gb-empty-state">' +
+          '<h3>Dealer profile unavailable</h3>' +
+          '<p style="margin-bottom:12px;">' + esc(message) + '</p>' +
           '<a class="details-btn" href="dealers.html">Browse verified dealers</a>' +
         '</div>';
     }
@@ -346,6 +363,7 @@
       renderDealerNotFound("This dealer link is no longer valid or the profile has not been published yet.");
       return;
     }
+    setDealerProfileLoading(false);
 
     const heroTitle = document.querySelector(".hero-title h1");
     const heroDesc = document.querySelector(".hero p");
@@ -426,7 +444,11 @@
     // Render this dealer's active inventory cards with stable detail links.
     if (dealerCarsGrid) {
       if (!activeListings.length) {
-        dealerCarsGrid.innerHTML = '<p class="line">No active listings for this dealer right now.</p>';
+        dealerCarsGrid.innerHTML =
+          '<div class="gb-empty-state">' +
+            '<h3>No active listings yet</h3>' +
+            '<p>This dealer does not have live inventory right now. You can still contact them from the profile card.</p>' +
+          '</div>';
       } else {
         dealerCarsGrid.innerHTML = activeListings.map((listing) => {
           const carName = clean(listing.carName || listing.name || "Untitled Listing");

@@ -1937,6 +1937,27 @@
 
   let liveDealers = [];
   let liveListings = [];
+  let dealersLoaded = false;
+  let listingsLoaded = false;
+
+  function skeletonCards(count) {
+    return Array.from({ length: count || 4 }, () => '<div class="gb-skeleton-card" aria-hidden="true"></div>').join("");
+  }
+
+  function setHeroStatsLoading(isLoading) {
+    [heroVerifiedDealers, heroCarsListed, heroBuyersCount, heroCitiesCount].forEach((node) => {
+      if (!node) return;
+      node.classList.toggle("gb-skeleton", isLoading);
+      if (isLoading) node.textContent = "";
+    });
+  }
+
+  setHeroStatsLoading(true);
+  if (featuredCarsGrid) {
+    featuredCarsGrid.classList.add("gb-loading-region", "gb-loading-grid");
+    featuredCarsGrid.setAttribute("aria-busy", "true");
+    featuredCarsGrid.innerHTML = skeletonCards(4);
+  }
 
   function esc(value) {
     return String(value || "")
@@ -2019,6 +2040,8 @@
   }
 
   function renderHeroStats() {
+    if (!dealersLoaded || !listingsLoaded) return;
+    setHeroStatsLoading(false);
     const verifiedDealers = liveDealers.filter((d) => {
       const status = String(d.verificationStatus || "").toLowerCase();
       return (status === "verified" || status === "approved") && !d.suspended;
@@ -2042,6 +2065,13 @@
 
   function renderFeaturedCars() {
     if (!featuredCarsGrid) return;
+    if (!dealersLoaded || !listingsLoaded) {
+      featuredCarsGrid.setAttribute("aria-busy", "true");
+      featuredCarsGrid.innerHTML = skeletonCards(4);
+      return;
+    }
+    featuredCarsGrid.classList.remove("gb-loading-grid");
+    featuredCarsGrid.setAttribute("aria-busy", "false");
     const verifiedDealerIds = new Set(
       liveDealers
         .filter((d) => {
@@ -2057,7 +2087,11 @@
     });
 
     if (!liveCars.length) {
-      featuredCarsGrid.innerHTML = '<p class="note">No live featured cars available right now.</p>';
+      featuredCarsGrid.innerHTML =
+        '<div class="gb-empty-state">' +
+          '<h3>Fresh dealer listings are coming soon</h3>' +
+          '<p>Verified dealers are being reviewed. Please check back shortly or browse dealers to connect directly.</p>' +
+        '</div>';
       return;
     }
 
@@ -2146,12 +2180,14 @@
 
   onSnapshot(collection(db, "dealerProfiles"), (snap) => {
     liveDealers = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    dealersLoaded = true;
     renderHeroStats();
     renderFeaturedCars();
     renderHomeSearchSuggestions();
   });
   onSnapshot(collection(db, "listings"), (snap) => {
     liveListings = snap.docs.map((d) => ({ id: d.id, ...(d.data() || {}) }));
+    listingsLoaded = true;
     renderHeroStats();
     renderFeaturedCars();
     renderHomeSearchSuggestions();
